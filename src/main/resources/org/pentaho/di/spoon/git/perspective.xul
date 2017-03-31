@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<window id="git-perspective"
+    title="Git"
+    orient="vertical"
+    height="600" width="800"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    xmlns:pen="http://www.pentaho.org/2008/xul" >
+
+    <tabbox flex="1" id="tabbox" pen:closable="true">
+      <tabs id="tabs">
+        <tab id="browse-tab" label="Git Repositories" />
+      </tabs>
+      <tabpanels id="tabpanels">
+        <tabpanel id="browse-tab" />
+      </tabpanels>
+   </tabbox>
+</window>

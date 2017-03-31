@@ -12,8 +12,10 @@ import org.pentaho.ui.xul.XulException;
 @SpoonPluginCategories( { "spoon" } )
 public class GitSpoonPlugin implements SpoonPluginInterface, SpoonLifecycleListener {
 
-  public GitSpoonPlugin() {
-    // TODO Auto-generated constructor stub
+  private GitPerspective perspective;
+
+  public GitSpoonPlugin() throws XulException {
+    this.perspective = new GitPerspective();
   }
 
   @Override
@@ -34,8 +36,7 @@ public class GitSpoonPlugin implements SpoonPluginInterface, SpoonLifecycleListe
 
   @Override
   public SpoonPerspective getPerspective() {
-    // TODO Auto-generated method stub
-    return null;
+    return perspective;
   }
 
 }
