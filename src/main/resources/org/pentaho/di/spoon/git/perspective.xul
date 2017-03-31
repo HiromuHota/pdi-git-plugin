@@ -1,17 +1,97 @@
 <?xml version="1.0"?>
-<window id="git-perspective"
-    title="Git"
-    orient="vertical"
-    height="600" width="800"
-    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-    xmlns:pen="http://www.pentaho.org/2008/xul" >
-
-    <tabbox flex="1" id="tabbox" pen:closable="true">
-      <tabs id="tabs">
-        <tab id="browse-tab" label="Git Repositories" />
-      </tabs>
-      <tabpanels id="tabpanels">
-        <tabpanel id="browse-tab" />
-      </tabpanels>
-   </tabbox>
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:pen="http://www.pentaho.org/2008/xul" id="git-perspective" title="Git" orient="vertical" height="600" width="800">
+  <splitter flex="1" orient="HORIZONTAL">
+    <vbox flex="1">
+      <tree flex="1" id="folder-tree" istree="true" context="folderContextMenu" pen:drageffect="move" pen:preserveexpandedstate="true" pen:preserveselection="true">
+        <treecols>
+          <treecol flex="1" label="" primary="true" pen:binding="name" pen:childrenbinding="children" pen:imagebinding="image" expandedbinding="expanded"/>
+        </treecols>
+        <treechildren>
+          <treeitem container="true" open="true">
+            <treerow>
+              <treecell label="repo1"/>
+            </treerow>
+            <treechildren>
+              <treeitem container="true" open="true">
+                <treerow>
+                  <treecell label="Branches"/>
+                </treerow>
+                <treechildren>
+                  <treeitem>
+                    <treerow>
+                      <treecell label="master"/>
+                    </treerow>
+                  </treeitem>
+                  <treeitem>
+                    <treerow>
+                      <treecell label="develop"/>
+                    </treerow>
+                  </treeitem>
+                </treechildren>
+              </treeitem>
+            </treechildren>
+          </treeitem>
+        </treechildren>
+      </tree>
+    </vbox>
+    <vbox flex="4">
+      <tabbox flex="1" id="tabbox" pen:closable="true">
+        <tabs id="tabs">
+          <tab id="history-tab" label="History"/>
+          <tab id="staging-tab" label="Git Staging"/>
+        </tabs>
+        <tabpanels id="tabpanels">
+          <tabpanel id="history-tab">
+            <vbox id="history-box" flex="1">
+              <tree id="revision-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="revisionContextMenu" treeLines="false">
+                <treecols>
+                  <treecol id="revision-label-col" flex="1" label="Id" pen:binding="name" pen:childrenbinding="children" context="revisionContextMenu"/>
+                  <treecol id="revision-date-mod-col" flex="1" label="Date" pen:binding="formatCreationDate" context="revisionContextMenu"/>
+                  <treecol id="revision-comment-col" flex="1" label="Message" pen:binding="comment"/>
+                  <treecol id="revision-user-col" flex="1" label="Author" pen:binding="login"/>
+                </treecols>
+                <treechildren/>
+              </tree>
+            </vbox>
+          </tabpanel>
+          <tabpanel id="staging-tab">
+            <splitter flex="1" orient="HORIZONTAL">
+              <vbox id="staging-box" flex="1">
+                <splitter flex="1" orient="VERTICAL">
+                  <hbox flex="1">
+                    <tree id="unstaged-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="unstagedContextMenu" treeLines="false">
+                      <treecols>
+                        <treecol id="name-col" flex="1" label="Unstaged changes and Untracked files" pen:binding="name" pen:childrenbinding="children" pen:imagebinding="image" pen:comparatorbinding="comparator"/>
+                      </treecols>
+                      <treechildren/>
+                    </tree>
+                  </hbox>
+                  <hbox flex="1">
+                    <tree id="staged-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="stagedContextMenu" treeLines="false">
+                      <treecols>
+                        <treecol id="name-col" flex="1" label="Staged changes" pen:binding="name" pen:childrenbinding="children" pen:imagebinding="image" pen:comparatorbinding="comparator"/>
+                      </treecols>
+                      <treechildren/>
+                    </tree>
+                  </hbox>
+                </splitter>
+              </vbox>
+              <vbox id="commit-box" flex="1">
+                <label id="commit-message-label" value="Commit Message:"/>
+                <textbox id="commit-message" multiline="true" rows="5" value="" flex="1"/>
+                <hbox>
+                  <label id="author-name-label" value="Author:"/>
+                  <textbox id="author-name" value="" flex="1"/>
+                </hbox>
+                <hbox>
+                  <button id="commit-and-push" label="Commit and Push"/>
+                  <button id="commit" label="Commit" onclick="gitController.commit()"/>
+                </hbox>
+              </vbox>
+            </splitter>
+          </tabpanel>
+        </tabpanels>
+      </tabbox>
+    </vbox>
+  </splitter>
 </window>
