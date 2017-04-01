@@ -18,6 +18,8 @@ import org.pentaho.ui.xul.swt.SwtXulLoader;
 
 public class GitPerspective implements SpoonPerspectiveImageProvider {
 
+  private static Class<?> PKG = GitPerspective.class;
+
   final String PERSPECTIVE_ID = "010-git"; //$NON-NLS-1$
   final String PERSPECTIVE_NAME = "gitPerspective"; //$NON-NLS-1$
 
@@ -48,7 +50,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
 
   @Override
   public String getDisplayName(Locale l) {
-    return "Git";
+    return BaseMessages.getString( PKG, "Git.Perspective.perspectiveName" );
   }
 
   @Override
