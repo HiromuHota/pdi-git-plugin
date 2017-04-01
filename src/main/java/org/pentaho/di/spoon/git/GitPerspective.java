@@ -16,18 +16,20 @@ import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.impl.XulEventHandler;
 import org.pentaho.ui.xul.swt.SwtXulLoader;
 
-public class GitPerspective extends AbstractXulEventHandler implements SpoonPerspectiveImageProvider {
+public class GitPerspective implements SpoonPerspectiveImageProvider {
 
   final String PERSPECTIVE_ID = "010-git"; //$NON-NLS-1$
   final String PERSPECTIVE_NAME = "gitPerspective"; //$NON-NLS-1$
 
   XulDomContainer container;
+  XulEventHandler controller;
 
   public GitPerspective() throws XulException {
+    controller = new GitController();
     SwtXulLoader loader = new SwtXulLoader();
     loader.registerClassLoader( getClass().getClassLoader() );
     container = loader.loadXul( "org/pentaho/di/spoon/git/perspective.xul" );
-    setXulDomContainer( container );
+    controller.setXulDomContainer( container );
   }
 
   @Override
@@ -35,7 +37,6 @@ public class GitPerspective extends AbstractXulEventHandler implements SpoonPers
     return PERSPECTIVE_ID;
   }
 
-  @Override
   public String getName() {
     return PERSPECTIVE_NAME;
   }
