@@ -9,13 +9,8 @@
         <treechildren>
           <treeitem container="true" open="true">
             <treerow>
-              <treecell label="repo1"/>
+              <treecell label="Local"/>
             </treerow>
-            <treechildren>
-              <treeitem container="true" open="true">
-                <treerow>
-                  <treecell label="Branches"/>
-                </treerow>
                 <treechildren>
                   <treeitem>
                     <treerow>
@@ -28,20 +23,48 @@
                     </treerow>
                   </treeitem>
                 </treechildren>
-              </treeitem>
-            </treechildren>
+          </treeitem>
+          <treeitem container="true" open="true">
+            <treerow>
+              <treecell label="Remote"/>
+            </treerow>
+                <treechildren>
+                  <treeitem>
+                    <treerow>
+                      <treecell label="master"/>
+                    </treerow>
+                  </treeitem>
+                  <treeitem>
+                    <treerow>
+                      <treecell label="develop"/>
+                    </treerow>
+                  </treeitem>
+                </treechildren>
+          </treeitem>
+          <treeitem container="true" open="true">
+            <treerow>
+              <treecell label="Tags"/>
+            </treerow>
+                <treechildren>
+                  <treeitem>
+                    <treerow>
+                      <treecell label="v1"/>
+                    </treerow>
+                  </treeitem>
+                  <treeitem>
+                    <treerow>
+                      <treecell label="v2"/>
+                    </treerow>
+                  </treeitem>
+                </treechildren>
           </treeitem>
         </treechildren>
       </tree>
     </vbox>
     <vbox flex="4">
-      <tabbox flex="1" id="tabbox" pen:closable="true">
-        <tabs id="tabs">
-          <tab id="history-tab" label="History"/>
-          <tab id="staging-tab" label="Git Staging"/>
-        </tabs>
-        <tabpanels id="tabpanels">
-          <tabpanel id="history-tab">
+    <label value="Directory path for .git: " />
+    <textbox value="/Users/user/my-wonderful-project" />
+    <splitter flex="1" orient="VERTICAL">
             <vbox id="history-box" flex="1">
               <tree id="revision-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="revisionContextMenu" treeLines="false">
                 <treecols>
@@ -53,8 +76,6 @@
                 <treechildren/>
               </tree>
             </vbox>
-          </tabpanel>
-          <tabpanel id="staging-tab">
             <splitter flex="1" orient="HORIZONTAL">
               <vbox id="staging-box" flex="1">
                 <splitter flex="1" orient="VERTICAL">
@@ -89,9 +110,7 @@
                 </hbox>
               </vbox>
             </splitter>
-          </tabpanel>
-        </tabpanels>
-      </tabbox>
+    </splitter>
     </vbox>
   </splitter>
 </window>
