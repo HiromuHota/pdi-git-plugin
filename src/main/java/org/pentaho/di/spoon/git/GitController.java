@@ -5,7 +5,9 @@ import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 public class GitController extends AbstractXulEventHandler {
 
   public GitController() {
-    // TODO Auto-generated constructor stub
+    setName( "gitController" );
   }
 
+  public void commit() {
+  }
 }
