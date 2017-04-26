@@ -12,8 +12,10 @@ import org.pentaho.di.ui.spoon.SpoonPerspectiveListener;
 import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.XulOverlay;
+import org.pentaho.ui.xul.XulRunner;
 import org.pentaho.ui.xul.impl.XulEventHandler;
 import org.pentaho.ui.xul.swt.SwtXulLoader;
+import org.pentaho.ui.xul.swt.SwtXulRunner;
 
 public class GitPerspective implements SpoonPerspectiveImageProvider {
 
@@ -34,6 +36,10 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     // Adding Event Handlers
     controller = new GitController();
     container.addEventHandler( controller );
+
+    final XulRunner runner = new SwtXulRunner();
+    runner.addContainer( container );
+    runner.initialize(); //calls any onload events
 
     controller.setXulDomContainer( container );
   }

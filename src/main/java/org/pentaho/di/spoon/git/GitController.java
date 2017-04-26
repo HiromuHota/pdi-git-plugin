@@ -8,6 +8,9 @@ public class GitController extends AbstractXulEventHandler {
     setName( "gitController" );
   }
 
+  public void init() {
+  }
+
   public void commit() {
   }
 }
