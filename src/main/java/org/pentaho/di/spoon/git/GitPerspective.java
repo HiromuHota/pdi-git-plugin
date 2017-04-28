@@ -36,12 +36,11 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     // Adding Event Handlers
     controller = new GitController();
     container.addEventHandler( controller );
+    controller.setXulDomContainer( container );
 
     final XulRunner runner = new SwtXulRunner();
     runner.addContainer( container );
     runner.initialize(); //calls any onload events
-
-    controller.setXulDomContainer( container );
   }
 
   @Override

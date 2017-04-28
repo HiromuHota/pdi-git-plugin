@@ -63,7 +63,7 @@
     </vbox>
     <vbox flex="4">
     <label value="Directory path for .git: " />
-    <textbox value="/Users/user/my-wonderful-project" />
+    <textbox id="path-text" multiline="false" />
     <splitter flex="1" orient="VERTICAL">
             <vbox id="history-box" flex="1">
               <tree id="revision-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="revisionContextMenu" treeLines="false">
