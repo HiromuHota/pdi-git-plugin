@@ -3,6 +3,7 @@ package org.pentaho.di.spoon.git;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
+import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryContent;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
@@ -198,5 +200,23 @@ public class GitController extends AbstractXulEventHandler {
       pathBinding.destroyBindings();
       revisionBinding.destroyBindings();
     }
+  }
+
+  public void addToIndex() throws Exception {
+    Collection<UIRepositoryContent> contents = unstagedTable.getSelectedItems();
+    for ( UIRepositoryContent content : contents ) {
+      git.add().addFilepattern( content.getName() ).call();
+    }
+    unstagedBinding.fireSourceChanged();
+    stagedBinding.fireSourceChanged();
+  }
+
+  public void removeFromIndex() throws Exception {
+    Collection<UIRepositoryContent> contents = stagedTable.getSelectedItems();
+    for ( UIRepositoryContent content : contents ) {
+      git.reset().addPath( content.getName() ).call();
+    }
+    unstagedBinding.fireSourceChanged();
+    stagedBinding.fireSourceChanged();
   }
 }
