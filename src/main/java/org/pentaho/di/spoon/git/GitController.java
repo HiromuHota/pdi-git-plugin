@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -91,10 +90,13 @@ public class GitController extends AbstractXulEventHandler {
       revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
 
       List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
-      SpoonPerspective mainSpoonPerspective = perspectives.stream()
-        .filter( perspective -> perspective.getId().equals( "001-spoon-jobs" ) )
-        .collect( Collectors.toList() )
-        .get( 0 );
+      SpoonPerspective mainSpoonPerspective = null;
+      for (SpoonPerspective perspective : perspectives ) {
+        if ( perspective.getId().equals( "001-spoon-jobs" ) ) {
+          mainSpoonPerspective = perspective;
+          break;
+        }
+      }
       EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
       if ( meta == null ) {
         return;
