@@ -25,7 +25,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
   final String PERSPECTIVE_NAME = "gitPerspective"; //$NON-NLS-1$
 
   XulDomContainer container;
-  XulEventHandler controller;
+  GitController controller;
 
   public GitPerspective() throws XulException {
     // Loading Xul Document
@@ -69,9 +69,8 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
   }
 
   @Override
-  public void setActive(boolean active) {
-    // TODO Auto-generated method stub
-
+  public void setActive( boolean active ) {
+    controller.setActive( active );
   }
 
   @Override
