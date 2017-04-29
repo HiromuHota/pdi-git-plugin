@@ -42,17 +42,18 @@ import org.pentaho.ui.xul.swt.SwtBindingFactory;
 public class GitController extends AbstractXulEventHandler {
 
   protected Git git;
-  XulTextbox pathText;
-  XulTree revisionTable;
-  XulTree unstagedTable;
-  XulTree stagedTable;
-  BindingFactory bf = new SwtBindingFactory();
-  Binding pathBinding;
-  Binding revisionBinding;
-  Binding unstagedBinding;
-  Binding stagedBinding;
-  String path;
-  protected UIRepositoryObjectRevisions revisions;
+  protected String path;
+
+  protected XulTextbox pathText;
+  protected XulTree revisionTable;
+  protected XulTree unstagedTable;
+  protected XulTree stagedTable;
+
+  protected BindingFactory bf = new SwtBindingFactory();
+  protected Binding pathBinding;
+  protected Binding revisionBinding;
+  protected Binding unstagedBinding;
+  protected Binding stagedBinding;
 
   public GitController() {
     setName( "gitController" );
@@ -76,7 +77,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public UIRepositoryObjectRevisions getRevisionObjects() {
-    revisions = new UIRepositoryObjectRevisions();
+    UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     if ( git == null ) {
       return revisions;
     }
