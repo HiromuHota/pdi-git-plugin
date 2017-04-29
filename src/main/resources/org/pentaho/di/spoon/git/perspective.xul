@@ -113,4 +113,10 @@
     </splitter>
     </vbox>
   </splitter>
+  <menupopup id="unstagedContextMenu">
+    <menuitem label="Add to Index" command="gitController.addToIndex()"/>
+  </menupopup>
+  <menupopup id="stagedContextMenu">
+    <menuitem label="Remove from Index" command="gitController.removeFromIndex()"/>
+  </menupopup>
 </window>
