@@ -266,6 +266,8 @@ public class GitController extends AbstractXulEventHandler {
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
+      } catch ( IllegalArgumentException e ) { // No git repository found when scanning up to the root
+        return false;
       }
     }
     return true;
