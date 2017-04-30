@@ -1,67 +1,6 @@
 <?xml version="1.0"?>
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:pen="http://www.pentaho.org/2008/xul" id="git-perspective" title="Git" orient="vertical" height="600" width="800" onload="gitController.init()">
-  <splitter flex="1" orient="HORIZONTAL">
     <vbox flex="1">
-      <tree flex="1" id="folder-tree" istree="true" context="folderContextMenu" pen:drageffect="move" pen:preserveexpandedstate="true" pen:preserveselection="true">
-        <treecols>
-          <treecol flex="1" label="" primary="true" pen:binding="name" pen:childrenbinding="children" pen:imagebinding="image" expandedbinding="expanded"/>
-        </treecols>
-        <treechildren>
-          <treeitem container="true" open="true">
-            <treerow>
-              <treecell label="Local"/>
-            </treerow>
-                <treechildren>
-                  <treeitem>
-                    <treerow>
-                      <treecell label="master"/>
-                    </treerow>
-                  </treeitem>
-                  <treeitem>
-                    <treerow>
-                      <treecell label="develop"/>
-                    </treerow>
-                  </treeitem>
-                </treechildren>
-          </treeitem>
-          <treeitem container="true" open="true">
-            <treerow>
-              <treecell label="Remote"/>
-            </treerow>
-                <treechildren>
-                  <treeitem>
-                    <treerow>
-                      <treecell label="master"/>
-                    </treerow>
-                  </treeitem>
-                  <treeitem>
-                    <treerow>
-                      <treecell label="develop"/>
-                    </treerow>
-                  </treeitem>
-                </treechildren>
-          </treeitem>
-          <treeitem container="true" open="true">
-            <treerow>
-              <treecell label="Tags"/>
-            </treerow>
-                <treechildren>
-                  <treeitem>
-                    <treerow>
-                      <treecell label="v1"/>
-                    </treerow>
-                  </treeitem>
-                  <treeitem>
-                    <treerow>
-                      <treecell label="v2"/>
-                    </treerow>
-                  </treeitem>
-                </treechildren>
-          </treeitem>
-        </treechildren>
-      </tree>
-    </vbox>
-    <vbox flex="4">
     <label value="Directory path for .git: " />
     <textbox id="path-text" multiline="false" />
     <splitter flex="1" orient="VERTICAL">
@@ -112,7 +51,6 @@
             </splitter>
     </splitter>
     </vbox>
-  </splitter>
   <menupopup id="unstagedContextMenu">
     <menuitem label="Add to Index" command="gitController.addToIndex()"/>
   </menupopup>
