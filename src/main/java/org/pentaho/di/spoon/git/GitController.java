@@ -16,6 +16,7 @@ import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
+import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -27,6 +28,7 @@ import org.pentaho.di.repository.RepositoryElementMetaInterface;
 import org.pentaho.di.repository.RepositoryObject;
 import org.pentaho.di.repository.RepositoryObjectType;
 import org.pentaho.di.repository.StringObjectId;
+import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
@@ -37,16 +39,20 @@ import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
+import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
+import org.pentaho.ui.xul.XulComponent;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
+import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulTextbox;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
+import org.pentaho.ui.xul.util.XulDialogCallback;
 
 public class GitController extends AbstractXulEventHandler {
 
@@ -67,6 +73,7 @@ public class GitController extends AbstractXulEventHandler {
   protected Binding stagedBinding;
 
   protected XulMessageBox messageBox;
+  protected XulConfirmBox confirmBox;
 
   public GitController() {
     setName( "gitController" );
@@ -74,6 +81,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
     messageBox = (XulMessageBox) document.createElement( "messagebox" );
+    confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
     pathText = (XulTextbox) document.getElementById( "path-text" );
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
@@ -175,27 +183,71 @@ public class GitController extends AbstractXulEventHandler {
           break;
         }
       }
-      EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
-      if ( meta == null ) {
-        return;
+      if ( Spoon.getInstance().rep != null ) { // when connected to a repository
+        if ( Spoon.getInstance().rep.getClass() == KettleFileRepository.class ) {
+          final String baseDirectory = ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
+          path = baseDirectory;
+          try {
+            git = Git.open( new File( baseDirectory ) );
+          } catch ( RepositoryNotFoundException e ) {
+            confirmBox.setTitle( "Repository not found" );
+            confirmBox.setMessage( "Wanna create a new repository?" );
+            confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+            confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
+            confirmBox.addDialogCallback( new XulDialogCallback<Object>() {
+
+              public void onClose( XulComponent sender, Status returnCode, Object retVal ) {
+                if ( returnCode == Status.ACCEPT ) {
+                  try {
+                    Git.init().setDirectory( new File( baseDirectory ) ).call();
+                    git = Git.open( new File( baseDirectory ) );
+                  } catch ( Exception e ) {
+                    messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+                    messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+                    messageBox.setMessage( BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
+                    messageBox.open();
+                  }
+                }
+              }
+
+              public void onError( XulComponent sender, Throwable t ) {
+                throw new RuntimeException( t );
+              }
+            } );
+            confirmBox.open();
+          } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        } else { // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
+          return;
+        }
+      } else {
+        EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
+        if ( meta == null ) { // no file is opened.
+          return;
+        }
+        String fileName = meta.getFilename();
+        Repository repository;
+        try {
+          repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
+            .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
+            .build();
+          git = new Git( repository );
+          path = repository.getDirectory().getParent();
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
       }
-      String fileName = meta.getFilename();
       try {
-        Repository repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
-          .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
-          .build();
-        git = new Git( repository );
         XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
         authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
             + " <" + git.getRepository().getConfig().getString("user", null, "email") + ">" );
-        path = repository.getDirectory().getParent();
         pathBinding.fireSourceChanged();
         revisionBinding.fireSourceChanged();
         unstagedBinding.fireSourceChanged();
         stagedBinding.fireSourceChanged();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
       } catch (NoWorkTreeException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
