@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
@@ -18,6 +20,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.pentaho.di.core.EngineMetaInterface;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.RepositoryElementMetaInterface;
@@ -27,6 +30,7 @@ import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
+import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryContent;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
@@ -38,12 +42,15 @@ import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
+import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulTextbox;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
 
 public class GitController extends AbstractXulEventHandler {
+
+  private static final Class<?> PKG = RepositoryExplorer.class;
 
   protected Git git;
   protected String path;
@@ -59,17 +66,17 @@ public class GitController extends AbstractXulEventHandler {
   protected Binding unstagedBinding;
   protected Binding stagedBinding;
 
+  protected XulMessageBox messageBox;
+
   public GitController() {
     setName( "gitController" );
   }
 
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
+    messageBox = (XulMessageBox) document.createElement( "messagebox" );
     pathText = (XulTextbox) document.getElementById( "path-text" );
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
-  }
-
-  public void commit() {
   }
 
   public void setPath( String path ) {
@@ -224,5 +231,30 @@ public class GitController extends AbstractXulEventHandler {
     }
     unstagedBinding.fireSourceChanged();
     stagedBinding.fireSourceChanged();
+  }
+
+  public void commit() throws Exception {
+    if ( getStagedObjects().size() == 0 ) {
+      messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+      messageBox.setMessage( "There are no staged files" );
+      messageBox.open();
+      return;
+    }
+
+    XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
+    Matcher m = Pattern.compile( "(.*) <(.*@.*)>" ).matcher( authorName.getValue() );
+    if ( !m.matches() ) {
+      messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+      messageBox.setMessage( "Malformed author name" );
+      messageBox.open();
+      return;
+    }
+    XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );
+    git.commit().setAuthor( m.group(1), m.group(2) ).setMessage( commitMessage.getValue() ).call();
+    commitMessage.setValue( "" );
+    stagedBinding.fireSourceChanged();
+    revisionBinding.fireSourceChanged();
   }
 }
