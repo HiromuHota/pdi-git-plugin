@@ -12,6 +12,7 @@ import java.util.Set;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -94,7 +95,8 @@ public class GitController extends AbstractXulEventHandler {
           commit.getShortMessage());
         revisions.add( new UIRepositoryObjectRevision( (ObjectRevision)rev ) );
       }
-
+    } catch (NoHeadException e) {
+      // Do nothing
     } catch (GitAPIException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
