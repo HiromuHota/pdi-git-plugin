@@ -16,7 +16,7 @@
         <hbox flex="1">
           <pen:include src="org/pentaho/di/spoon/git/xul/git_staged-table.xul" ignoreroot="true" />
         </hbox>
-        <hbox flex="1" orient="VERTICAL">
+        <vbox flex="1">
           <label id="commit-message-label" value="Commit Message:"/>
           <textbox id="commit-message" multiline="true" rows="5" value="" flex="1"/>
           <hbox>
@@ -27,7 +27,7 @@
             <button id="commit-and-push" label="Commit and Push"/>
             <button id="commit" label="Commit" onclick="gitController.commit()"/>
           </hbox>
-        </hbox>
+        </vbox>
       </splitter>
     </vbox>
   </splitter>
