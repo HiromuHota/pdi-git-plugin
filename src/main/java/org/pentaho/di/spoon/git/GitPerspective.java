@@ -70,7 +70,11 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
 
   @Override
   public void setActive( boolean active ) {
-    controller.setActive( active );
+    if ( active) {
+      controller.setActive();
+    } else {
+      controller.setInactive();
+    }
   }
 
   @Override

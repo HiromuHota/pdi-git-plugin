@@ -162,109 +162,109 @@ public class GitController extends AbstractXulEventHandler {
     return objs;
   }
 
-  public void setActive( boolean active ) {
-    if ( active ) {
-      bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
-      pathBinding = bf.createBinding( this, "path", pathText, "value" );
+  public void setActive() {
+    bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
+    pathBinding = bf.createBinding( this, "path", pathText, "value" );
 
-      bf.setBindingType( Binding.Type.ONE_WAY );
-      revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
+    bf.setBindingType( Binding.Type.ONE_WAY );
+    revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
 
-      unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
-      stagedTable = (XulTree) document.getElementById( "staged-table" );
-      unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
-      stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
+    unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
+    stagedTable = (XulTree) document.getElementById( "staged-table" );
+    unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
+    stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
 
-      List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
-      SpoonPerspective mainSpoonPerspective = null;
-      for (SpoonPerspective perspective : perspectives ) {
-        if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
-          mainSpoonPerspective = perspective;
-          break;
-        }
+    List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
+    SpoonPerspective mainSpoonPerspective = null;
+    for (SpoonPerspective perspective : perspectives ) {
+      if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
+        mainSpoonPerspective = perspective;
+        break;
       }
-      if ( Spoon.getInstance().rep != null ) { // when connected to a repository
-        if ( Spoon.getInstance().rep.getClass() == KettleFileRepository.class ) {
-          final String baseDirectory = ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
-          path = baseDirectory;
-          try {
-            git = Git.open( new File( baseDirectory ) );
-          } catch ( RepositoryNotFoundException e ) {
-            confirmBox.setTitle( "Repository not found" );
-            confirmBox.setMessage( "Wanna create a new repository?" );
-            confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-            confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
-            confirmBox.addDialogCallback( new XulDialogCallback<Object>() {
+    }
+    if ( Spoon.getInstance().rep != null ) { // when connected to a repository
+      if ( Spoon.getInstance().rep.getClass() == KettleFileRepository.class ) {
+        final String baseDirectory = ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
+        path = baseDirectory;
+        try {
+          git = Git.open( new File( baseDirectory ) );
+        } catch ( RepositoryNotFoundException e ) {
+          confirmBox.setTitle( "Repository not found" );
+          confirmBox.setMessage( "Wanna create a new repository?" );
+          confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+          confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
+          confirmBox.addDialogCallback( new XulDialogCallback<Object>() {
 
-              public void onClose( XulComponent sender, Status returnCode, Object retVal ) {
-                if ( returnCode == Status.ACCEPT ) {
-                  try {
-                    Git.init().setDirectory( new File( baseDirectory ) ).call();
-                    git = Git.open( new File( baseDirectory ) );
-                  } catch ( Exception e ) {
-                    messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
-                    messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-                    messageBox.setMessage( BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
-                    messageBox.open();
-                  }
+            public void onClose( XulComponent sender, Status returnCode, Object retVal ) {
+              if ( returnCode == Status.ACCEPT ) {
+                try {
+                  Git.init().setDirectory( new File( baseDirectory ) ).call();
+                  git = Git.open( new File( baseDirectory ) );
+                } catch ( Exception e ) {
+                  messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+                  messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+                  messageBox.setMessage( BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
+                  messageBox.open();
                 }
               }
+            }
 
-              public void onError( XulComponent sender, Throwable t ) {
-                throw new RuntimeException( t );
-              }
-            } );
-            confirmBox.open();
-          } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-        } else { // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
-          return;
-        }
-      } else {
-        EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
-        if ( meta == null ) { // no file is opened.
-          return;
-        }
-        String fileName = meta.getFilename();
-        Repository repository;
-        try {
-          repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
-            .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
-            .build();
-          git = new Git( repository );
-          path = repository.getDirectory().getParent();
+            public void onError( XulComponent sender, Throwable t ) {
+              throw new RuntimeException( t );
+            }
+          } );
+          confirmBox.open();
         } catch (IOException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
         }
-      }
-      try {
-        XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
-        authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
-            + " <" + git.getRepository().getConfig().getString("user", null, "email") + ">" );
-        pathBinding.fireSourceChanged();
-        revisionBinding.fireSourceChanged();
-        unstagedBinding.fireSourceChanged();
-        stagedBinding.fireSourceChanged();
-      } catch (NoWorkTreeException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (IllegalArgumentException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (InvocationTargetException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (XulException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      } else { // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
+        return;
       }
     } else {
-      pathBinding.destroyBindings();
-      revisionBinding.destroyBindings();
+      EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
+      if ( meta == null ) { // no file is opened.
+        return;
+      }
+      String fileName = meta.getFilename();
+      Repository repository;
+      try {
+        repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
+          .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
+          .build();
+        git = new Git( repository );
+        path = repository.getDirectory().getParent();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
+    try {
+      XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
+      authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
+          + " <" + git.getRepository().getConfig().getString("user", null, "email") + ">" );
+      pathBinding.fireSourceChanged();
+      revisionBinding.fireSourceChanged();
+      unstagedBinding.fireSourceChanged();
+      stagedBinding.fireSourceChanged();
+    } catch (NoWorkTreeException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (XulException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  public void setInactive() {
+    pathBinding.destroyBindings();
+    revisionBinding.destroyBindings();
   }
 
   public void addToIndex() throws Exception {
