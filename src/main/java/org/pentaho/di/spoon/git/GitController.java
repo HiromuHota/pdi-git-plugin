@@ -174,14 +174,38 @@ public class GitController extends AbstractXulEventHandler {
     unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
 
-    List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
-    SpoonPerspective mainSpoonPerspective = null;
-    for (SpoonPerspective perspective : perspectives ) {
-      if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
-        mainSpoonPerspective = perspective;
-        break;
-      }
+    boolean isInitialized = initGit();
+    if ( !isInitialized ) return;
+
+    try {
+      XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
+      authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
+          + " <" + git.getRepository().getConfig().getString("user", null, "email") + ">" );
+      pathBinding.fireSourceChanged();
+      revisionBinding.fireSourceChanged();
+      unstagedBinding.fireSourceChanged();
+      stagedBinding.fireSourceChanged();
+    } catch (NoWorkTreeException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (XulException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
+  }
+
+  public void setInactive() {
+    pathBinding.destroyBindings();
+    revisionBinding.destroyBindings();
+  }
+
+  private boolean initGit() {
     if ( Spoon.getInstance().rep != null ) { // when connected to a repository
       if ( Spoon.getInstance().rep.getClass() == KettleFileRepository.class ) {
         final String baseDirectory = ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
@@ -219,12 +243,20 @@ public class GitController extends AbstractXulEventHandler {
           e.printStackTrace();
         }
       } else { // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
-        return;
+        return false;
       }
     } else {
+      List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
+      SpoonPerspective mainSpoonPerspective = null;
+      for (SpoonPerspective perspective : perspectives ) {
+        if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
+          mainSpoonPerspective = perspective;
+          break;
+        }
+      }
       EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
       if ( meta == null ) { // no file is opened.
-        return;
+        return false;
       }
       String fileName = meta.getFilename();
       Repository repository;
@@ -239,32 +271,7 @@ public class GitController extends AbstractXulEventHandler {
         e.printStackTrace();
       }
     }
-    try {
-      XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
-      authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
-          + " <" + git.getRepository().getConfig().getString("user", null, "email") + ">" );
-      pathBinding.fireSourceChanged();
-      revisionBinding.fireSourceChanged();
-      unstagedBinding.fireSourceChanged();
-      stagedBinding.fireSourceChanged();
-    } catch (NoWorkTreeException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (IllegalArgumentException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (XulException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-  }
-
-  public void setInactive() {
-    pathBinding.destroyBindings();
-    revisionBinding.destroyBindings();
+    return true;
   }
 
   public void addToIndex() throws Exception {
