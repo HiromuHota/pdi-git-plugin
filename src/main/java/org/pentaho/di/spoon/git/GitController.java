@@ -194,6 +194,8 @@ public class GitController extends AbstractXulEventHandler {
   public void setInactive() {
     pathBinding.destroyBindings();
     revisionBinding.destroyBindings();
+    unstagedBinding.destroyBindings();
+    stagedBinding.destroyBindings();
   }
 
   private boolean initGit() {
