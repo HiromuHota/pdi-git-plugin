@@ -200,7 +200,9 @@ public class GitController extends AbstractXulEventHandler {
 
   private boolean initGit() {
     if ( Spoon.getInstance().rep != null ) { // when connected to a repository
-      if ( Spoon.getInstance().rep.getClass() == KettleFileRepository.class ) {
+      if ( Spoon.getInstance().rep.getClass() != KettleFileRepository.class ) {
+        return false; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
+      } else {
         final String baseDirectory = ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
         path = baseDirectory;
         try {
@@ -235,10 +237,9 @@ public class GitController extends AbstractXulEventHandler {
           // TODO Auto-generated catch block
           e.printStackTrace();
         }
-      } else { // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
-        return false;
       }
-    } else {
+    } else { // when not connected to a repository
+      // Get the data integration perspective
       List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
       SpoonPerspective mainSpoonPerspective = null;
       for (SpoonPerspective perspective : perspectives ) {
@@ -247,14 +248,15 @@ public class GitController extends AbstractXulEventHandler {
           break;
         }
       }
+      // Get the active Kettle file
       EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
       if ( meta == null ) { // no file is opened.
         return false;
       }
+      // Find the git repository for this file
       String fileName = meta.getFilename();
-      Repository repository;
       try {
-        repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
+        Repository repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
           .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
           .build();
         git = new Git( repository );
