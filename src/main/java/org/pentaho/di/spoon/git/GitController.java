@@ -177,25 +177,16 @@ public class GitController extends AbstractXulEventHandler {
     boolean isInitialized = initGit();
     if ( !isInitialized ) return;
 
+    XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
+    authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
+        + " <" + git.getRepository().getConfig().getString("user", null, "email") + ">" );
+
     try {
-      XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
-      authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
-          + " <" + git.getRepository().getConfig().getString("user", null, "email") + ">" );
       pathBinding.fireSourceChanged();
       revisionBinding.fireSourceChanged();
       unstagedBinding.fireSourceChanged();
       stagedBinding.fireSourceChanged();
-    } catch (NoWorkTreeException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (IllegalArgumentException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (XulException e) {
-      // TODO Auto-generated catch block
+    } catch ( Exception e ) {
       e.printStackTrace();
     }
   }
