@@ -178,6 +178,9 @@ public class GitController extends AbstractXulEventHandler {
           .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
           .build();
         git = new Git( repository );
+        XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
+        authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
+            + " <" + git.getRepository().getConfig().getString("user", null, "email") + ">" );
         path = repository.getDirectory().getParent();
         pathBinding.fireSourceChanged();
         revisionBinding.fireSourceChanged();
