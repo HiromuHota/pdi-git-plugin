@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<window id="dummyRootElement" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:pen="http://www.pentaho.org/2008/xul">
+
+  <tree id="staged-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="stagedContextMenu" treeLines="false">
+    <treecols>
+      <treecol id="name-col" flex="1" label="Staged changes" pen:binding="name" pen:childrenbinding="children" pen:imagebinding="image" pen:comparatorbinding="comparator"/>
+    </treecols>
+    <treechildren/>
+  </tree>
+</window>

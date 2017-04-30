@@ -5,34 +5,16 @@
     <textbox id="path-text" multiline="false" />
     <splitter flex="1" orient="VERTICAL">
             <vbox id="history-box" flex="1">
-              <tree id="revision-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="revisionContextMenu" treeLines="false">
-                <treecols>
-                  <treecol id="revision-label-col" flex="1" label="Id" pen:binding="name" pen:childrenbinding="children" context="revisionContextMenu"/>
-                  <treecol id="revision-comment-col" flex="6" label="Message" pen:binding="comment"/>
-                  <treecol id="revision-user-col" flex="3" label="Author" pen:binding="login"/>
-                  <treecol id="revision-date-mod-col" flex="3" label="Date" pen:binding="formatCreationDate" context="revisionContextMenu"/>
-                </treecols>
-                <treechildren/>
-              </tree>
+              <pen:include src="org/pentaho/di/spoon/git/xul/git_revision-table.xul" ignoreroot="true" />
             </vbox>
             <splitter flex="1" orient="HORIZONTAL">
               <vbox id="staging-box" flex="1">
                 <splitter flex="1" orient="VERTICAL">
                   <hbox flex="1">
-                    <tree id="unstaged-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="unstagedContextMenu" treeLines="false">
-                      <treecols>
-                        <treecol id="name-col" flex="1" label="Unstaged changes and Untracked files" pen:binding="name" pen:childrenbinding="children" pen:imagebinding="image" pen:comparatorbinding="comparator"/>
-                      </treecols>
-                      <treechildren/>
-                    </tree>
+                    <pen:include src="org/pentaho/di/spoon/git/xul/git_unstaged-table.xul" ignoreroot="true" />
                   </hbox>
                   <hbox flex="1">
-                    <tree id="staged-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="stagedContextMenu" treeLines="false">
-                      <treecols>
-                        <treecol id="name-col" flex="1" label="Staged changes" pen:binding="name" pen:childrenbinding="children" pen:imagebinding="image" pen:comparatorbinding="comparator"/>
-                      </treecols>
-                      <treechildren/>
-                    </tree>
+                    <pen:include src="org/pentaho/di/spoon/git/xul/git_staged-table.xul" ignoreroot="true" />
                   </hbox>
                 </splitter>
               </vbox>
