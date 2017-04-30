@@ -1,38 +1,37 @@
 <?xml version="1.0"?>
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:pen="http://www.pentaho.org/2008/xul" id="git-perspective" title="Git" orient="vertical" height="600" width="800" onload="gitController.init()">
-    <vbox flex="1">
+  <splitter flex="1" orient="HORIZONTAL">
+    <vbox flex="2">
       <hbox>
-    <label value="Directory path for .git: " />
-    <textbox id="path-text" multiline="false" flex="1"/>
+        <label value="Directory path for .git: " />
+        <textbox id="path-text" multiline="false" flex="1"/>
       </hbox>
-    <splitter flex="1" orient="HORIZONTAL">
-            <vbox id="history-box" flex="1">
-              <pen:include src="org/pentaho/di/spoon/git/xul/git_revision-table.xul" ignoreroot="true" />
-            </vbox>
-            <vbox id="staging-box" flex="1">
-              <splitter flex="1" orient="VERTICAL">
-                  <hbox flex="1">
-                    <pen:include src="org/pentaho/di/spoon/git/xul/git_unstaged-table.xul" ignoreroot="true" />
-                  </hbox>
-                  <hbox flex="1">
-                    <pen:include src="org/pentaho/di/spoon/git/xul/git_staged-table.xul" ignoreroot="true" />
-                  </hbox>
-                  <hbox id="commit-box" flex="1" orient="VERTICAL">
-                <label id="commit-message-label" value="Commit Message:"/>
-                <textbox id="commit-message" multiline="true" rows="5" value="" flex="1"/>
-                <hbox>
-                  <label id="author-name-label" value="Author:"/>
-                  <textbox id="author-name" value="" flex="1"/>
-                </hbox>
-                <hbox>
-                  <button id="commit-and-push" label="Commit and Push"/>
-                  <button id="commit" label="Commit" onclick="gitController.commit()"/>
-                </hbox>
-                  </hbox>
-              </splitter>
-            </vbox>
-    </splitter>
+      <pen:include src="org/pentaho/di/spoon/git/xul/git_revision-table.xul" ignoreroot="true" />
     </vbox>
+    <vbox flex="1">
+      <splitter flex="1" orient="VERTICAL">
+        <hbox flex="1">
+          <pen:include src="org/pentaho/di/spoon/git/xul/git_unstaged-table.xul" ignoreroot="true" />
+        </hbox>
+        <hbox flex="1">
+          <pen:include src="org/pentaho/di/spoon/git/xul/git_staged-table.xul" ignoreroot="true" />
+        </hbox>
+        <hbox flex="1" orient="VERTICAL">
+          <label id="commit-message-label" value="Commit Message:"/>
+          <textbox id="commit-message" multiline="true" rows="5" value="" flex="1"/>
+          <hbox>
+            <label id="author-name-label" value="Author:"/>
+            <textbox id="author-name" value="" flex="1"/>
+          </hbox>
+          <hbox>
+            <button id="commit-and-push" label="Commit and Push"/>
+            <button id="commit" label="Commit" onclick="gitController.commit()"/>
+          </hbox>
+        </hbox>
+      </splitter>
+    </vbox>
+  </splitter>
+
   <menupopup id="unstagedContextMenu">
     <menuitem label="Add to Index" command="gitController.addToIndex()"/>
   </menupopup>
