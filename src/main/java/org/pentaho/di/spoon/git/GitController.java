@@ -252,6 +252,8 @@ public class GitController extends AbstractXulEventHandler {
       EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
       if ( meta == null ) { // no file is opened.
         return false;
+      } else if ( meta.getFilename() == null ) { // not saved yet
+        return false;
       }
       // Find the git repository for this file
       String fileName = meta.getFilename();
