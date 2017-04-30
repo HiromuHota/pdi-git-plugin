@@ -31,6 +31,7 @@ import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryContent
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
+import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
 import org.pentaho.ui.xul.XulException;
@@ -160,7 +161,7 @@ public class GitController extends AbstractXulEventHandler {
       List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
       SpoonPerspective mainSpoonPerspective = null;
       for (SpoonPerspective perspective : perspectives ) {
-        if ( perspective.getId().equals( "001-spoon-jobs" ) ) {
+        if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
           mainSpoonPerspective = perspective;
           break;
         }
