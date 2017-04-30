@@ -174,8 +174,8 @@ public class GitController extends AbstractXulEventHandler {
     unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
 
-    boolean isInitialized = initGit();
-    if ( !isInitialized ) return;
+    boolean isOpened = openGit();
+    if ( !isOpened ) return;
 
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
     authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
@@ -198,7 +198,7 @@ public class GitController extends AbstractXulEventHandler {
     stagedBinding.destroyBindings();
   }
 
-  private boolean initGit() {
+  private boolean openGit() {
     if ( Spoon.getInstance().rep != null ) { // when connected to a repository
       if ( Spoon.getInstance().rep.getClass() != KettleFileRepository.class ) {
         return false; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
