@@ -19,13 +19,23 @@ import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
 
 public class GitControllerTest extends RepositoryTestCase {
 
-  private GitController controller = new GitController();
+  private GitController controller;
   private Git git;
 
   @Before
   public void setUp() throws Exception {
     super.setUp();
     git = new Git( db );
+
+    controller = mock( GitController.class );
+    doCallRealMethod().when(controller).getPath();
+    doCallRealMethod().when(controller).commit();
+    doCallRealMethod().when(controller).getRevisionObjects();
+    doCallRealMethod().when(controller).getStagedObjects();
+    doCallRealMethod().when(controller).getUnstagedObjects();
+    doCallRealMethod().when(controller).setGit( (Git)any() );
+    when( controller.getAuthorName() ).thenReturn( "test <test@example.com>" );
+    when( controller.getCommitMessage() ).thenReturn( "test" );
     controller.setGit( git );
   }
 
@@ -74,14 +84,6 @@ public class GitControllerTest extends RepositoryTestCase {
 
   @Test
   public void testCommit() throws Exception {
-    controller = mock( GitController.class );
-    doCallRealMethod().when(controller).commit();
-    doCallRealMethod().when(controller).getStagedObjects();
-    doCallRealMethod().when(controller).setGit( (Git)any() );
-    when( controller.getAuthorName() ).thenReturn( "test <test@example.com>" );
-    when( controller.getCommitMessage() ).thenReturn( "test" );
-
-    controller.setGit( git );
     writeTrashFile( "a.ktr", "content" );
     git.add().addFilepattern( "." ).call();
     controller.commit();
