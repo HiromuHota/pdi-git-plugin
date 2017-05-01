@@ -85,6 +85,12 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.jgit</groupId>
+      <artifactId>org.eclipse.jgit.junit</artifactId>
+      <version>4.6.1.201703071140-r</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <properties>
     <dependency.pentaho-metadata.revision>7.0.0.0-25</dependency.pentaho-metadata.revision>
