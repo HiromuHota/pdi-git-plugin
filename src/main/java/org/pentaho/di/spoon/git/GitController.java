@@ -18,6 +18,7 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -344,6 +345,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void push() throws InvalidRemoteException, TransportException, GitAPIException {
-    git.push().setRemote( "origin" ).call();
+    git.push().call();
   }
 }
