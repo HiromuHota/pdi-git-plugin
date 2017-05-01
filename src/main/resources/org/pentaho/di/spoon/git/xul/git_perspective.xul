@@ -24,8 +24,8 @@
             <textbox id="author-name" value="" flex="1"/>
           </hbox>
           <hbox>
-            <button id="commit-and-push" label="Commit and Push"/>
             <button id="commit" label="Commit" onclick="gitController.commit()"/>
+            <button id="push" label="Push" onclick="gitController.push()"/>
           </hbox>
         </vbox>
       </splitter>

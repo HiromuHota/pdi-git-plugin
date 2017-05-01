@@ -319,4 +319,7 @@ public class GitController extends AbstractXulEventHandler {
     stagedBinding.fireSourceChanged();
     revisionBinding.fireSourceChanged();
   }
+
+  public void push() {
+  }
 }
