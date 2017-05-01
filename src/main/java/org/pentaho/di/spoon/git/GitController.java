@@ -277,6 +277,10 @@ public class GitController extends AbstractXulEventHandler {
     confirmBox.open();
   }
 
+  public void setGit( Git git ) {
+    this.git = git;
+  }
+
   public void addToIndex() throws Exception {
     Collection<UIRepositoryContent> contents = unstagedTable.getSelectedItems();
     for ( UIRepositoryContent content : contents ) {

@@ -2,14 +2,25 @@ package org.pentaho.di.spoon.git;
 
 import static org.junit.Assert.*;
 
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.junit.RepositoryTestCase;
+import org.junit.Before;
 import org.junit.Test;
 
 public class GitControllerTest extends RepositoryTestCase {
 
+  private GitController controller = new GitController();
+
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+    Git git = new Git( db );
+    controller.setGit( git );
+  }
+
   @Test
   public void testGetPath() {
-    fail("Not yet implemented");
+    assertEquals( db.getDirectory().getParent(), controller.getPath() );
   }
 
   @Test
