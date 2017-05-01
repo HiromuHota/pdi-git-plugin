@@ -47,6 +47,7 @@ import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
 import org.pentaho.ui.xul.components.XulConfirmBox;
+import org.pentaho.ui.xul.components.XulLabel;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulTextbox;
 import org.pentaho.ui.xul.containers.XulTree;
@@ -59,9 +60,8 @@ public class GitController extends AbstractXulEventHandler {
   private static final Class<?> PKG = RepositoryExplorer.class;
 
   protected Git git;
-  protected String path;
 
-  protected XulTextbox pathText;
+  protected XulLabel pathLabel;
   protected XulTree revisionTable;
   protected XulTree unstagedTable;
   protected XulTree stagedTable;
@@ -82,17 +82,13 @@ public class GitController extends AbstractXulEventHandler {
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
     messageBox = (XulMessageBox) document.createElement( "messagebox" );
     confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
-    pathText = (XulTextbox) document.getElementById( "path-text" );
+    pathLabel = (XulLabel) document.getElementById( "path" );
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
   }
 
-  public void setPath( String path ) {
-    this.path = path;
-  }
-
   public String getPath() {
-    return this.path;
+    return git.getRepository().getDirectory().getParent();
   }
 
   public UIRepositoryObjectRevisions getRevisionObjects() {
@@ -163,12 +159,11 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setActive() {
-    bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
-    pathBinding = bf.createBinding( this, "path", pathText, "value" );
     openGit();
     if ( git == null ) return;
 
     bf.setBindingType( Binding.Type.ONE_WAY );
+    pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
     revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
 
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
@@ -207,7 +202,6 @@ public class GitController extends AbstractXulEventHandler {
         return; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
       } else {
         final String baseDirectory = ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
-        path = baseDirectory;
         try {
           git = Git.open( new File( baseDirectory ) );
         } catch ( RepositoryNotFoundException e ) {
@@ -241,7 +235,6 @@ public class GitController extends AbstractXulEventHandler {
           .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
           .build();
         git = new Git( repository );
-        path = repository.getDirectory().getParent();
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();

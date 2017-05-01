@@ -3,8 +3,8 @@
   <splitter flex="1" orient="HORIZONTAL">
     <vbox flex="2">
       <hbox>
-        <label value="Directory path for .git: " />
-        <textbox id="path-text" multiline="false" flex="1"/>
+        <label value="Directory path for .git:" />
+        <label id="path" flex="1"/>
       </hbox>
       <pen:include src="org/pentaho/di/spoon/git/xul/git_revision-table.xul" ignoreroot="true" />
     </vbox>
