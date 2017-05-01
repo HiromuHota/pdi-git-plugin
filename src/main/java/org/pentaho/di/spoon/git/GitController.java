@@ -165,6 +165,8 @@ public class GitController extends AbstractXulEventHandler {
   public void setActive() {
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
     pathBinding = bf.createBinding( this, "path", pathText, "value" );
+    openGit();
+    if ( git == null ) return;
 
     bf.setBindingType( Binding.Type.ONE_WAY );
     revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
@@ -173,9 +175,6 @@ public class GitController extends AbstractXulEventHandler {
     stagedTable = (XulTree) document.getElementById( "staged-table" );
     unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
-
-    openGit();
-    if ( git == null ) return;
 
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
     authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
@@ -192,10 +191,10 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setInactive() {
-    if ( git != null ) {
-      git.close();
-      git = null;
-    }
+    if ( git == null ) return; // No thing to do
+
+    git.close();
+    git = null;
     pathBinding.destroyBindings();
     revisionBinding.destroyBindings();
     unstagedBinding.destroyBindings();
