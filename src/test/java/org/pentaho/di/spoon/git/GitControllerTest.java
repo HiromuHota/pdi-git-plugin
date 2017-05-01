@@ -9,7 +9,11 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.junit.RepositoryTestCase;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
@@ -30,6 +34,7 @@ public class GitControllerTest extends RepositoryTestCase {
     controller = mock( GitController.class );
     doCallRealMethod().when(controller).getPath();
     doCallRealMethod().when(controller).commit();
+    doCallRealMethod().when(controller).push();
     doCallRealMethod().when(controller).getRevisionObjects();
     doCallRealMethod().when(controller).getStagedObjects();
     doCallRealMethod().when(controller).getUnstagedObjects();
@@ -92,7 +97,27 @@ public class GitControllerTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testPush() {
+  public void testPush() throws Exception {
+    // create other repository
+    Repository db2 = createWorkRepository();
+
+    // setup the first repository
+    final StoredConfig config = db.getConfig();
+    RemoteConfig remoteConfig = new RemoteConfig( config, "origin" );
+    URIish uri = new URIish( db2.getDirectory().toURI().toURL() );
+    remoteConfig.addURI( uri );
+    remoteConfig.update( config );
+    config.save();
+
+    // commit a test file
+    writeTrashFile( "a.ktr", "content" );
+    git.add().addFilepattern( "." ).call();
+    RevCommit commit = git.commit().setAuthor( "test", "test@example.com" ).setMessage( "initial commit" ).call();
+
+    // push
+    controller.push();
+
+    assertEquals( commit.getId(), db2.resolve( commit.getId().getName() + "^{commit}" ) );
   }
 
 }

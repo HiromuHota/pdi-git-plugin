@@ -14,7 +14,9 @@ import java.util.regex.Pattern;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
@@ -338,6 +340,7 @@ public class GitController extends AbstractXulEventHandler {
     fireSourceChanged();
   }
 
-  public void push() {
+  public void push() throws InvalidRemoteException, TransportException, GitAPIException {
+    git.push().setRemote( "origin" ).call();
   }
 }
