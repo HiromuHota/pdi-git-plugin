@@ -1,5 +1,6 @@
 package org.pentaho.di.spoon.git;
 
+import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.junit.RepositoryTestCase;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
@@ -71,7 +73,20 @@ public class GitControllerTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testCommit() {
+  public void testCommit() throws Exception {
+    controller = mock( GitController.class );
+    doCallRealMethod().when(controller).commit();
+    doCallRealMethod().when(controller).getStagedObjects();
+    doCallRealMethod().when(controller).setGit( (Git)any() );
+    when( controller.getAuthorName() ).thenReturn( "test <test@example.com>" );
+    when( controller.getCommitMessage() ).thenReturn( "test" );
+
+    controller.setGit( git );
+    writeTrashFile( "a.ktr", "content" );
+    git.add().addFilepattern( "." ).call();
+    controller.commit();
+    RevCommit commit = git.log().call().iterator().next();
+    assertEquals( "test", commit.getShortMessage() );
   }
 
   @Test

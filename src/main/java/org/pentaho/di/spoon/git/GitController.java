@@ -176,10 +176,7 @@ public class GitController extends AbstractXulEventHandler {
         + " <" + git.getRepository().getConfig().getString("user", null, "email") + ">" );
 
     try {
-      pathBinding.fireSourceChanged();
-      revisionBinding.fireSourceChanged();
-      unstagedBinding.fireSourceChanged();
-      stagedBinding.fireSourceChanged();
+      fireSourceChanged();
     } catch ( Exception e ) {
       e.printStackTrace();
     }
@@ -281,13 +278,34 @@ public class GitController extends AbstractXulEventHandler {
     this.git = git;
   }
 
+  public String getAuthorName() {
+    XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
+    return authorName.getValue();
+  }
+
+  public String getCommitMessage() {
+    XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );
+    return commitMessage.getValue();
+  }
+
+  public void setCommitMessage( String message ) {
+    XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );
+    commitMessage.setValue( message );
+  }
+
+  protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
+    pathBinding.fireSourceChanged();
+    revisionBinding.fireSourceChanged();
+    unstagedBinding.fireSourceChanged();
+    stagedBinding.fireSourceChanged();
+  }
+
   public void addToIndex() throws Exception {
     Collection<UIRepositoryContent> contents = unstagedTable.getSelectedItems();
     for ( UIRepositoryContent content : contents ) {
       git.add().addFilepattern( content.getName() ).call();
     }
-    unstagedBinding.fireSourceChanged();
-    stagedBinding.fireSourceChanged();
+    fireSourceChanged();
   }
 
   public void removeFromIndex() throws Exception {
@@ -295,8 +313,7 @@ public class GitController extends AbstractXulEventHandler {
     for ( UIRepositoryContent content : contents ) {
       git.reset().addPath( content.getName() ).call();
     }
-    unstagedBinding.fireSourceChanged();
-    stagedBinding.fireSourceChanged();
+    fireSourceChanged();
   }
 
   public void commit() throws Exception {
@@ -308,8 +325,7 @@ public class GitController extends AbstractXulEventHandler {
       return;
     }
 
-    XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
-    Matcher m = Pattern.compile( "(.*) <(.*@.*)>" ).matcher( authorName.getValue() );
+    Matcher m = Pattern.compile( "(.*) <(.*@.*)>" ).matcher( getAuthorName() );
     if ( !m.matches() ) {
       messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
       messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
@@ -317,11 +333,9 @@ public class GitController extends AbstractXulEventHandler {
       messageBox.open();
       return;
     }
-    XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );
-    git.commit().setAuthor( m.group(1), m.group(2) ).setMessage( commitMessage.getValue() ).call();
-    commitMessage.setValue( "" );
-    stagedBinding.fireSourceChanged();
-    revisionBinding.fireSourceChanged();
+    git.commit().setAuthor( m.group(1), m.group(2) ).setMessage( getCommitMessage() ).call();
+    setCommitMessage( "" );
+    fireSourceChanged();
   }
 
   public void push() {
