@@ -208,31 +208,7 @@ public class GitController extends AbstractXulEventHandler {
         try {
           git = Git.open( new File( baseDirectory ) );
         } catch ( RepositoryNotFoundException e ) {
-          confirmBox.setTitle( "Repository not found" );
-          confirmBox.setMessage( "Wanna create a new repository?" );
-          confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-          confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
-          confirmBox.addDialogCallback( new XulDialogCallback<Object>() {
-
-            public void onClose( XulComponent sender, Status returnCode, Object retVal ) {
-              if ( returnCode == Status.ACCEPT ) {
-                try {
-                  Git.init().setDirectory( new File( baseDirectory ) ).call();
-                  git = Git.open( new File( baseDirectory ) );
-                } catch ( Exception e ) {
-                  messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
-                  messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-                  messageBox.setMessage( BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
-                  messageBox.open();
-                }
-              }
-            }
-
-            public void onError( XulComponent sender, Throwable t ) {
-              throw new RuntimeException( t );
-            }
-          } );
-          confirmBox.open();
+          initGit( baseDirectory );
         } catch (IOException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
@@ -267,10 +243,42 @@ public class GitController extends AbstractXulEventHandler {
         // TODO Auto-generated catch block
         e.printStackTrace();
       } catch ( IllegalArgumentException e ) { // No git repository found when scanning up to the root
-        return false;
+        initGit( new File( fileName ).getParentFile().getPath() );
       }
     }
     return true;
+  }
+
+  private void initGit( final String baseDirectory ) {
+    confirmBox.setTitle( "Repository not found" );
+    confirmBox.setMessage( "Create a new repository in the following path?\n" + baseDirectory );
+    confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+    confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
+    confirmBox.addDialogCallback( new XulDialogCallback<Object>() {
+
+      public void onClose( XulComponent sender, Status returnCode, Object retVal ) {
+        if ( returnCode == Status.ACCEPT ) {
+          try {
+            Git.init().setDirectory( new File( baseDirectory ) ).call();
+            git = Git.open( new File( baseDirectory ) );
+            messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
+            messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+            messageBox.setMessage( BaseMessages.getString( PKG, "Dialog.Success" ) );
+            messageBox.open();
+          } catch ( Exception e ) {
+            messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+            messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+            messageBox.setMessage( BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
+            messageBox.open();
+          }
+        }
+      }
+
+      public void onError( XulComponent sender, Throwable t ) {
+        throw new RuntimeException( t );
+      }
+    } );
+    confirmBox.open();
   }
 
   public void addToIndex() throws Exception {
