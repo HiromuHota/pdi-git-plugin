@@ -58,7 +58,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
   }
 
   @Override
-  public String getDisplayName(Locale l) {
+  public String getDisplayName( Locale l ) {
     return BaseMessages.getString( PKG, "Git.Perspective.perspectiveName" );
   }
 
@@ -70,7 +70,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
 
   @Override
   public void setActive( boolean active ) {
-    if ( active) {
+    if ( active ) {
       controller.setActive();
     } else {
       controller.setInactive();
@@ -90,7 +90,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
   }
 
   @Override
-  public void addPerspectiveListener(SpoonPerspectiveListener listener) {
+  public void addPerspectiveListener( SpoonPerspectiveListener listener ) {
     // TODO Auto-generated method stub
 
   }

@@ -32,13 +32,13 @@ public class GitControllerTest extends RepositoryTestCase {
     git = new Git( db );
 
     controller = mock( GitController.class );
-    doCallRealMethod().when(controller).getPath();
-    doCallRealMethod().when(controller).commit();
-    doCallRealMethod().when(controller).push();
-    doCallRealMethod().when(controller).getRevisionObjects();
-    doCallRealMethod().when(controller).getStagedObjects();
-    doCallRealMethod().when(controller).getUnstagedObjects();
-    doCallRealMethod().when(controller).setGit( (Git)any() );
+    doCallRealMethod().when( controller ).getPath();
+    doCallRealMethod().when( controller ).commit();
+    doCallRealMethod().when( controller ).push();
+    doCallRealMethod().when( controller ).getRevisionObjects();
+    doCallRealMethod().when( controller ).getStagedObjects();
+    doCallRealMethod().when( controller ).getUnstagedObjects();
+    doCallRealMethod().when( controller ).setGit( (Git) any() );
     when( controller.getAuthorName() ).thenReturn( "test <test@example.com>" );
     when( controller.getCommitMessage() ).thenReturn( "test" );
     controller.setGit( git );

@@ -19,15 +19,15 @@ public class GitSpoonPlugin implements SpoonPluginInterface, SpoonLifecycleListe
   }
 
   @Override
-  public void onEvent(SpoonLifeCycleEvent evt) {
+  public void onEvent( SpoonLifeCycleEvent evt ) {
     // TODO Auto-generated method stub
   }
 
   @Override
-  public void applyToContainer(String category, XulDomContainer container) throws XulException {
-    container.registerClassLoader(getClass().getClassLoader());
-    if(category.equals("spoon")){
-      container.loadOverlay("org/pentaho/di/spoon/git/xul/git_spoon_overlays.xul");
+  public void applyToContainer( String category, XulDomContainer container ) throws XulException {
+    container.registerClassLoader( getClass().getClassLoader() );
+    if ( category.equals( "spoon" ) ) {
+      container.loadOverlay( "org/pentaho/di/spoon/git/xul/git_spoon_overlays.xul" );
     }
   }
 

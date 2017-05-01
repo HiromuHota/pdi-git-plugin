@@ -17,7 +17,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -100,17 +99,17 @@ public class GitController extends AbstractXulEventHandler {
     }
     try {
       Iterable<RevCommit> iterable = git.log().call();
-      for( RevCommit commit : iterable ) {
+      for ( RevCommit commit : iterable ) {
         PurObjectRevision rev = new PurObjectRevision(
-          commit.getName().substring(0, 7),
+          commit.getName().substring( 0, 7 ),
           commit.getAuthorIdent().getName(),
           commit.getAuthorIdent().getWhen(),
-          commit.getShortMessage());
-        revisions.add( new UIRepositoryObjectRevision( (ObjectRevision)rev ) );
+          commit.getShortMessage() );
+        revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
       }
-    } catch (NoHeadException e) {
+    } catch ( NoHeadException e ) {
       // Do nothing
-    } catch (GitAPIException e) {
+    } catch ( GitAPIException e ) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -162,7 +161,9 @@ public class GitController extends AbstractXulEventHandler {
 
   public void setActive() {
     openGit();
-    if ( git == null ) return;
+    if ( git == null ) {
+      return;
+    }
 
     bf.setBindingType( Binding.Type.ONE_WAY );
     pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
@@ -174,8 +175,8 @@ public class GitController extends AbstractXulEventHandler {
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
 
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
-    authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
-        + " <" + git.getRepository().getConfig().getString("user", null, "email") + ">" );
+    authorName.setValue( git.getRepository().getConfig().getString( "user", null, "name" )
+        + " <" + git.getRepository().getConfig().getString( "user", null, "email" ) + ">" );
 
     try {
       fireSourceChanged();
@@ -185,7 +186,9 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setInactive() {
-    if ( git == null ) return; // No thing to do
+    if ( git == null ) {
+      return; // No thing to do
+    }
 
     git.close();
     git = null;
@@ -205,7 +208,7 @@ public class GitController extends AbstractXulEventHandler {
           git = Git.open( new File( baseDirectory ) );
         } catch ( RepositoryNotFoundException e ) {
           initGit( baseDirectory );
-        } catch (IOException e) {
+        } catch ( IOException e ) {
           // TODO Auto-generated catch block
           e.printStackTrace();
         }
@@ -214,7 +217,7 @@ public class GitController extends AbstractXulEventHandler {
       // Get the data integration perspective
       List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
       SpoonPerspective mainSpoonPerspective = null;
-      for (SpoonPerspective perspective : perspectives ) {
+      for ( SpoonPerspective perspective : perspectives ) {
         if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
           mainSpoonPerspective = perspective;
           break;
@@ -234,7 +237,7 @@ public class GitController extends AbstractXulEventHandler {
           .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
           .build();
         git = new Git( repository );
-      } catch (IOException e) {
+      } catch ( IOException e ) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       } catch ( IllegalArgumentException e ) { // No git repository found when scanning up to the root
@@ -335,7 +338,7 @@ public class GitController extends AbstractXulEventHandler {
       messageBox.open();
       return;
     }
-    git.commit().setAuthor( m.group(1), m.group(2) ).setMessage( getCommitMessage() ).call();
+    git.commit().setAuthor( m.group( 1 ), m.group( 2 ) ).setMessage( getCommitMessage() ).call();
     setCommitMessage( "" );
     fireSourceChanged();
   }
