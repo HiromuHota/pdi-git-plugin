@@ -174,8 +174,8 @@ public class GitController extends AbstractXulEventHandler {
     unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
 
-    boolean isOpened = openGit();
-    if ( !isOpened ) return;
+    openGit();
+    if ( git == null ) return;
 
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
     authorName.setValue( git.getRepository().getConfig().getString("user", null, "name")
@@ -192,16 +192,20 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setInactive() {
+    if ( git != null ) {
+      git.close();
+      git = null;
+    }
     pathBinding.destroyBindings();
     revisionBinding.destroyBindings();
     unstagedBinding.destroyBindings();
     stagedBinding.destroyBindings();
   }
 
-  private boolean openGit() {
+  private void openGit() {
     if ( Spoon.getInstance().rep != null ) { // when connected to a repository
       if ( Spoon.getInstance().rep.getClass() != KettleFileRepository.class ) {
-        return false; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
+        return; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
       } else {
         final String baseDirectory = ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
         path = baseDirectory;
@@ -227,9 +231,9 @@ public class GitController extends AbstractXulEventHandler {
       // Get the active Kettle file
       EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
       if ( meta == null ) { // no file is opened.
-        return false;
+        return;
       } else if ( meta.getFilename() == null ) { // not saved yet
-        return false;
+        return;
       }
       // Find the git repository for this file
       String fileName = meta.getFilename();
@@ -246,7 +250,7 @@ public class GitController extends AbstractXulEventHandler {
         initGit( new File( fileName ).getParentFile().getPath() );
       }
     }
-    return true;
+    return;
   }
 
   private void initGit( final String baseDirectory ) {
