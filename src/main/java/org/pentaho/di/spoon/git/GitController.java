@@ -90,6 +90,8 @@ public class GitController extends AbstractXulEventHandler {
 
   protected BindingFactory bf = new SwtBindingFactory();
   protected Binding pathBinding;
+  protected Binding branchBinding;
+  protected Binding remoteBinding;
   protected Binding revisionBinding;
   protected Binding unstagedBinding;
   protected Binding stagedBinding;
@@ -100,6 +102,8 @@ public class GitController extends AbstractXulEventHandler {
 
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
     XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
+    XulLabel branchLabel = (XulLabel) document.getElementById( "branch" );
+    XulLabel remoteLabel = (XulLabel) document.getElementById( "remote" );
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
     stagedTable = (XulTree) document.getElementById( "staged-table" );
@@ -116,6 +120,8 @@ public class GitController extends AbstractXulEventHandler {
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
     pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
+    branchBinding = bf.createBinding( this, "branch", branchLabel, "value" );
+    remoteBinding = bf.createBinding( this, "remote", remoteLabel, "value" );
     revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
@@ -241,6 +247,8 @@ public class GitController extends AbstractXulEventHandler {
 
   protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
     pathBinding.fireSourceChanged();
+    branchBinding.fireSourceChanged();
+    remoteBinding.fireSourceChanged();
     revisionBinding.fireSourceChanged();
     unstagedBinding.fireSourceChanged();
     stagedBinding.fireSourceChanged();
@@ -374,6 +382,24 @@ public class GitController extends AbstractXulEventHandler {
       return "";
     } else {
       return git.getRepository().getDirectory().getParent();
+    }
+  }
+
+  public String getBranch() throws IOException {
+    if ( git == null ) {
+      return "";
+    } else {
+      return git.getRepository().getBranch();
+    }
+  }
+
+  public String getRemote() throws URISyntaxException {
+    if ( git == null ) {
+      return "";
+    } else {
+      StoredConfig config = git.getRepository().getConfig();
+      RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
+      return remoteConfig.getURIs().iterator().next().toString();
     }
   }
 

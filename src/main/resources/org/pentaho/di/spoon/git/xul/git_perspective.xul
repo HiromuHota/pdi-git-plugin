@@ -6,6 +6,12 @@
         <label value="Directory path for .git:" />
         <label id="path" flex="1"/>
       </hbox>
+      <hbox>
+        <label value="Branch:" />
+        <label id="branch" flex="1"/>
+        <label value="Remote (origin):" />
+        <label id="remote" flex="1"/>
+      </hbox>
       <pen:include src="org/pentaho/di/spoon/git/xul/git_revision-table.xul" ignoreroot="true" />
     </vbox>
     <vbox flex="1">
