@@ -249,7 +249,7 @@ public class GitController extends AbstractXulEventHandler {
     confirmBox.open();
   }
 
-  private void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
+  protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
     pathBinding.fireSourceChanged();
     branchBinding.fireSourceChanged();
     remoteBinding.fireSourceChanged();
