@@ -79,6 +79,8 @@ public class GitController extends AbstractXulEventHandler {
   protected XulTree revisionTable;
   protected XulTree unstagedTable;
   protected XulTree stagedTable;
+  protected XulTextbox commitMessage;
+  protected XulTextbox authorName;
   protected XulButton commitButton;
   protected XulButton pullButton;
   protected XulButton pushButton;
@@ -102,6 +104,8 @@ public class GitController extends AbstractXulEventHandler {
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
     stagedTable = (XulTree) document.getElementById( "staged-table" );
+    authorName = (XulTextbox) document.getElementById( "author-name" );
+    commitMessage = (XulTextbox) document.getElementById( "commit-message" );
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
     pushButton = (XulButton) document.getElementById( "push" );
@@ -111,77 +115,11 @@ public class GitController extends AbstractXulEventHandler {
     waitBox = (XulWaitBox) document.createElement( "waitbox" );
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
-  }
-
-  public String getPath() {
-    return git.getRepository().getDirectory().getParent();
-  }
-
-  public UIRepositoryObjectRevisions getRevisionObjects() {
-    UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
-    if ( git == null ) {
-      return revisions;
-    }
-    try {
-      Iterable<RevCommit> iterable = git.log().call();
-      for ( RevCommit commit : iterable ) {
-        PurObjectRevision rev = new PurObjectRevision(
-          commit.getName().substring( 0, 7 ),
-          commit.getAuthorIdent().getName(),
-          commit.getAuthorIdent().getWhen(),
-          commit.getShortMessage() );
-        revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
-      }
-    } catch ( NoHeadException e ) {
-      // Do nothing
-    } catch ( GitAPIException e ) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    return revisions;
-  }
-
-  public UIRepositoryObjects getUnstagedObjects() throws Exception {
-    Set<String> files = new HashSet<String>();
-    if ( git == null ) {
-      return getObjects( files );
-    }
-    Status status = git.status().call();
-    files.addAll( status.getModified() );
-    files.addAll( status.getUntracked() );
-    return getObjects( files );
-  }
-
-  public UIRepositoryObjects getStagedObjects() throws Exception {
-    Set<String> files = new HashSet<String>();
-    if ( git == null ) {
-      return getObjects( files );
-    }
-    Status status = git.status().call();
-    files.addAll( status.getAdded() );
-    files.addAll( status.getChanged() );
-    return getObjects( files );
-  }
-
-  private UIRepositoryObjects getObjects( Set<String> files ) throws Exception {
-    UIRepositoryObjects objs = new UIRepositoryObjects();
-    for ( String file : files ) {
-      UIRepositoryObject obj;
-      Date date = new Date();
-      if ( file.endsWith( ".ktr" ) ) {
-        ObjectId id = new StringObjectId( file );
-        RepositoryElementMetaInterface rc =  new RepositoryObject(
-            id, file, null, "-", date, RepositoryObjectType.TRANSFORMATION, "", false );
-        obj = new UITransformation( rc, null, null );
-      } else {
-        ObjectId id = new StringObjectId( file );
-        RepositoryElementMetaInterface rc =  new RepositoryObject(
-            id, file, null, "-", date, RepositoryObjectType.JOB, "", false );
-        obj = new UIJob( rc, null, null );
-      }
-      objs.add( obj );
-    }
-    return objs;
+    bf.setBindingType( Binding.Type.ONE_WAY );
+    pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
+    revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
+    unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
+    stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
   }
 
   public void setActive() {
@@ -194,13 +132,7 @@ public class GitController extends AbstractXulEventHandler {
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
 
-    bf.setBindingType( Binding.Type.ONE_WAY );
-    pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
-    revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
-    unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
-    stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
-
-    XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
+    pathLabel.setValue( git.getRepository().getDirectory().getParent() );
     authorName.setValue( git.getRepository().getConfig().getString( "user", null, "name" )
         + " <" + git.getRepository().getConfig().getString( "user", null, "email" ) + ">" );
 
@@ -222,10 +154,6 @@ public class GitController extends AbstractXulEventHandler {
 
     git.close();
     git = null;
-    pathBinding.destroyBindings();
-    revisionBinding.destroyBindings();
-    unstagedBinding.destroyBindings();
-    stagedBinding.destroyBindings();
   }
 
   private void openGit() {
@@ -307,25 +235,6 @@ public class GitController extends AbstractXulEventHandler {
       }
     } );
     confirmBox.open();
-  }
-
-  public void setGit( Git git ) {
-    this.git = git;
-  }
-
-  public String getAuthorName() {
-    XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
-    return authorName.getValue();
-  }
-
-  public String getCommitMessage() {
-    XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );
-    return commitMessage.getValue();
-  }
-
-  public void setCommitMessage( String message ) {
-    XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );
-    commitMessage.setValue( message );
   }
 
   protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
@@ -450,5 +359,92 @@ public class GitController extends AbstractXulEventHandler {
       } );
       promptBox.open();
     }
+  }
+
+  public void setGit( Git git ) {
+    this.git = git;
+  }
+
+  public String getPath() {
+    return pathLabel.getValue();
+  }
+
+  public String getAuthorName() {
+    return authorName.getValue();
+  }
+
+  public String getCommitMessage() {
+    return commitMessage.getValue();
+  }
+
+  public void setCommitMessage( String message ) {
+    commitMessage.setValue( message );
+  }
+
+  public UIRepositoryObjectRevisions getRevisionObjects() {
+    UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
+    if ( git == null ) {
+      return revisions;
+    }
+    try {
+      Iterable<RevCommit> iterable = git.log().call();
+      for ( RevCommit commit : iterable ) {
+        PurObjectRevision rev = new PurObjectRevision(
+          commit.getName().substring( 0, 7 ),
+          commit.getAuthorIdent().getName(),
+          commit.getAuthorIdent().getWhen(),
+          commit.getShortMessage() );
+        revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
+      }
+    } catch ( NoHeadException e ) {
+      // Do nothing
+    } catch ( GitAPIException e ) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return revisions;
+  }
+
+  public UIRepositoryObjects getUnstagedObjects() throws Exception {
+    Set<String> files = new HashSet<String>();
+    if ( git == null ) {
+      return getObjects( files );
+    }
+    Status status = git.status().call();
+    files.addAll( status.getModified() );
+    files.addAll( status.getUntracked() );
+    return getObjects( files );
+  }
+
+  public UIRepositoryObjects getStagedObjects() throws Exception {
+    Set<String> files = new HashSet<String>();
+    if ( git == null ) {
+      return getObjects( files );
+    }
+    Status status = git.status().call();
+    files.addAll( status.getAdded() );
+    files.addAll( status.getChanged() );
+    return getObjects( files );
+  }
+
+  private UIRepositoryObjects getObjects( Set<String> files ) throws Exception {
+    UIRepositoryObjects objs = new UIRepositoryObjects();
+    for ( String file : files ) {
+      UIRepositoryObject obj;
+      Date date = new Date();
+      if ( file.endsWith( ".ktr" ) ) {
+        ObjectId id = new StringObjectId( file );
+        RepositoryElementMetaInterface rc =  new RepositoryObject(
+            id, file, null, "-", date, RepositoryObjectType.TRANSFORMATION, "", false );
+        obj = new UITransformation( rc, null, null );
+      } else {
+        ObjectId id = new StringObjectId( file );
+        RepositoryElementMetaInterface rc =  new RepositoryObject(
+            id, file, null, "-", date, RepositoryObjectType.JOB, "", false );
+        obj = new UIJob( rc, null, null );
+      }
+      objs.add( obj );
+    }
+    return objs;
   }
 }
