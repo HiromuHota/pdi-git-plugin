@@ -74,28 +74,28 @@ public class GitController extends AbstractXulEventHandler {
 
   private static final Class<?> PKG = RepositoryExplorer.class;
 
-  protected Git git;
-  protected UIGit uiGit = new UIGit();
+  private Git git;
+  private UIGit uiGit = new UIGit();
 
-  protected XulTree revisionTable;
-  protected XulTree unstagedTable;
-  protected XulTree stagedTable;
-  protected XulButton remoteButton;
-  protected XulButton commitButton;
-  protected XulButton pullButton;
-  protected XulButton pushButton;
-  protected XulMessageBox messageBox;
-  protected XulConfirmBox confirmBox;
-  protected XulPromptBox promptBox;
-  protected XulWaitBox waitBox;
+  private XulTree revisionTable;
+  private XulTree unstagedTable;
+  private XulTree stagedTable;
+  private XulButton remoteButton;
+  private XulButton commitButton;
+  private XulButton pullButton;
+  private XulButton pushButton;
+  private XulMessageBox messageBox;
+  private XulConfirmBox confirmBox;
+  private XulPromptBox promptBox;
+  private XulWaitBox waitBox;
 
-  protected BindingFactory bf = new SwtBindingFactory();
-  protected Binding pathBinding;
-  protected Binding branchBinding;
-  protected Binding remoteBinding;
-  protected Binding revisionBinding;
-  protected Binding unstagedBinding;
-  protected Binding stagedBinding;
+  private BindingFactory bf = new SwtBindingFactory();
+  private Binding pathBinding;
+  private Binding branchBinding;
+  private Binding remoteBinding;
+  private Binding revisionBinding;
+  private Binding unstagedBinding;
+  private Binding stagedBinding;
 
   public GitController() {
     setName( "gitController" );
@@ -249,7 +249,7 @@ public class GitController extends AbstractXulEventHandler {
     confirmBox.open();
   }
 
-  protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
+  private void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
     pathBinding.fireSourceChanged();
     branchBinding.fireSourceChanged();
     remoteBinding.fireSourceChanged();

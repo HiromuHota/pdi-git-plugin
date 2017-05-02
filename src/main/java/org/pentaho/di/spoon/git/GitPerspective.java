@@ -24,8 +24,8 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
   final String PERSPECTIVE_ID = "010-git"; //$NON-NLS-1$
   final String PERSPECTIVE_NAME = "gitPerspective"; //$NON-NLS-1$
 
-  protected XulDomContainer container;
-  protected GitController controller;
+  private XulDomContainer container;
+  private GitController controller;
 
   public GitPerspective() throws XulException {
     // Loading Xul Document
