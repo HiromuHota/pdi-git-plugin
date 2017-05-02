@@ -13,7 +13,7 @@ public class UIGit extends XulEventSourceAdapter {
 
   public void setAuthorName( String authorName ) {
     this.authorName = authorName;
-    firePropertyChange( "author-name", null, authorName );
+    firePropertyChange( "authorName", null, authorName );
   }
 
   public String getCommitMessage() {
@@ -22,6 +22,6 @@ public class UIGit extends XulEventSourceAdapter {
 
   public void setCommitMessage( String commitMessage ) {
     this.commitMessage = commitMessage;
-    firePropertyChange( "commit-message", null, commitMessage );
+    firePropertyChange( "commitMessage", null, commitMessage );
   }
 }
