@@ -442,15 +442,18 @@ public class GitController extends AbstractXulEventHandler {
     for ( String file : files ) {
       UIRepositoryObject obj;
       Date date = new Date();
+      ObjectId id = new StringObjectId( file );
       if ( file.endsWith( ".ktr" ) ) {
-        ObjectId id = new StringObjectId( file );
         RepositoryElementMetaInterface rc =  new RepositoryObject(
             id, file, null, "-", date, RepositoryObjectType.TRANSFORMATION, "", false );
         obj = new UITransformation( rc, null, null );
-      } else {
-        ObjectId id = new StringObjectId( file );
+      } else if ( file.endsWith( ".kjb" ) ) {
         RepositoryElementMetaInterface rc =  new RepositoryObject(
             id, file, null, "-", date, RepositoryObjectType.JOB, "", false );
+        obj = new UIJob( rc, null, null );
+      } else {
+        RepositoryElementMetaInterface rc =  new RepositoryObject(
+            id, file, null, "-", date, RepositoryObjectType.UNKNOWN, "", false );
         obj = new UIJob( rc, null, null );
       }
       objs.add( obj );
