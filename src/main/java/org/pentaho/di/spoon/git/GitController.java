@@ -80,6 +80,7 @@ public class GitController extends AbstractXulEventHandler {
   protected XulTree revisionTable;
   protected XulTree unstagedTable;
   protected XulTree stagedTable;
+  protected XulButton remoteButton;
   protected XulButton commitButton;
   protected XulButton pullButton;
   protected XulButton pushButton;
@@ -109,6 +110,7 @@ public class GitController extends AbstractXulEventHandler {
     stagedTable = (XulTree) document.getElementById( "staged-table" );
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
     XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );
+    remoteButton = (XulButton) document.getElementById( "remoteButton" );
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
     pushButton = (XulButton) document.getElementById( "push" );
@@ -137,6 +139,7 @@ public class GitController extends AbstractXulEventHandler {
       return;
     }
 
+    remoteButton.setDisabled( false );
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
@@ -156,6 +159,7 @@ public class GitController extends AbstractXulEventHandler {
       return; // No thing to do
     }
 
+    remoteButton.setDisabled( true );
     commitButton.setDisabled( true );
     pullButton.setDisabled( true );
     pushButton.setDisabled( true );
@@ -339,38 +343,37 @@ public class GitController extends AbstractXulEventHandler {
       } );
       waitBox.start();
     } else {
-      promptBox.setTitle( "Remote repository" );
-      promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
-      promptBox.setMessage( "URL/path (The remote name will be \"" + Constants.DEFAULT_REMOTE_NAME + "\")" );
-      promptBox.setValue( "" );
-      promptBox.addDialogCallback( new XulDialogCallback<String>() {
-        public void onClose( XulComponent component, Status status, String value ) {
-          if ( !status.equals( Status.CANCEL ) ) {
-            try {
-              RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
-              URIish uri = new URIish( value );
-              remoteConfig.addURI( uri );
-              remoteConfig.update( config );
-              config.save();
-              push();
-            } catch ( URISyntaxException e1 ) {
-              // TODO Auto-generated catch block
-              e1.printStackTrace();
-            } catch ( IOException e ) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            } catch ( GitAPIException e ) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
+      editRemote();
+      push();
+    }
+  }
+
+  public void editRemote() {
+    final StoredConfig config = git.getRepository().getConfig();
+    promptBox.setTitle( "Remote repository" );
+    promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
+    promptBox.setMessage( "URL/path (The remote name will be \"" + Constants.DEFAULT_REMOTE_NAME + "\")" );
+    promptBox.setValue( getRemote() );
+    promptBox.addDialogCallback( new XulDialogCallback<String>() {
+      public void onClose( XulComponent component, Status status, String value ) {
+        if ( !status.equals( Status.CANCEL ) ) {
+          try {
+            RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
+            URIish uri = new URIish( value );
+            remoteConfig.addURI( uri );
+            remoteConfig.update( config );
+            config.save();
+            remoteBinding.fireSourceChanged();
+          } catch ( Exception e ) {
+            e.printStackTrace();
           }
         }
-        public void onError( XulComponent component, Throwable err ) {
-          throw new RuntimeException( err );
-        }
-      } );
-      promptBox.open();
-    }
+      }
+      public void onError( XulComponent component, Throwable err ) {
+        throw new RuntimeException( err );
+      }
+    } );
+    promptBox.open();
   }
 
   public void setGit( Git git ) {
