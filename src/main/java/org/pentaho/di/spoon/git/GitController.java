@@ -359,7 +359,8 @@ public class GitController extends AbstractXulEventHandler {
     fireSourceChanged();
   }
 
-  public void push() throws InvalidRemoteException, TransportException, GitAPIException {
+  public void push() throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+    final String fullBranch = git.getRepository().getFullBranch();
     final StoredConfig config = git.getRepository().getConfig();
     Set<String> remotes = config.getSubsections( "remote" );
     if ( remotes.contains( Constants.DEFAULT_REMOTE_NAME ) ) {
@@ -379,7 +380,7 @@ public class GitController extends AbstractXulEventHandler {
               try {
                 PushResult result = git.push().call().iterator().next();
                 waitBox.stop();
-                RemoteRefUpdate update = result.getRemoteUpdate( Constants.R_HEADS + Constants.MASTER );
+                RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
                 if ( update.getStatus() != RemoteRefUpdate.Status.OK ) {
                   messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
                   messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
