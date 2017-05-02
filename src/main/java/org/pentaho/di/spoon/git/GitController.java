@@ -39,6 +39,7 @@ import org.pentaho.di.repository.RepositoryObjectType;
 import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.pur.PurObjectRevision;
+import org.pentaho.di.spoon.git.model.UIGit;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
@@ -74,6 +75,7 @@ public class GitController extends AbstractXulEventHandler {
   private static final Class<?> PKG = RepositoryExplorer.class;
 
   protected Git git;
+  protected UIGit uiGit = new UIGit();
 
   protected XulLabel pathLabel;
   protected XulTree revisionTable;
@@ -117,6 +119,8 @@ public class GitController extends AbstractXulEventHandler {
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
     pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
+    bf.createBinding( uiGit, "authorName", authorName, "value" );
+    bf.createBinding( uiGit, "commitMessage", commitMessage, "value" );
     revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
@@ -132,7 +136,6 @@ public class GitController extends AbstractXulEventHandler {
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
 
-    pathLabel.setValue( git.getRepository().getDirectory().getParent() );
     authorName.setValue( git.getRepository().getConfig().getString( "user", null, "name" )
         + " <" + git.getRepository().getConfig().getString( "user", null, "email" ) + ">" );
 
@@ -366,19 +369,23 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public String getPath() {
-    return pathLabel.getValue();
+    if ( git == null ) {
+      return "";
+    } else {
+      return git.getRepository().getDirectory().getParent();
+    }
   }
 
   public String getAuthorName() {
-    return authorName.getValue();
+    return uiGit.getAuthorName();
   }
 
   public String getCommitMessage() {
-    return commitMessage.getValue();
+    return uiGit.getCommitMessage();
   }
 
   public void setCommitMessage( String message ) {
-    commitMessage.setValue( message );
+    uiGit.setCommitMessage( message );
   }
 
   public UIRepositoryObjectRevisions getRevisionObjects() {
