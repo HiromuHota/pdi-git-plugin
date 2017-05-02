@@ -116,11 +116,13 @@ public class GitController extends AbstractXulEventHandler {
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
     pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
-    bf.createBinding( uiGit, "authorName", authorName, "value" );
-    bf.createBinding( uiGit, "commitMessage", commitMessage, "value" );
     revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
+
+    bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
+    bf.createBinding( uiGit, "authorName", authorName, "value" );
+    bf.createBinding( uiGit, "commitMessage", commitMessage, "value" );
   }
 
   public void setActive() {
@@ -133,7 +135,7 @@ public class GitController extends AbstractXulEventHandler {
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
 
-    uiGit.setAuthorName( git.getRepository().getConfig().getString( "user", null, "name" )
+    setAuthorName( git.getRepository().getConfig().getString( "user", null, "name" )
         + " <" + git.getRepository().getConfig().getString( "user", null, "email" ) + ">" );
 
     try {
@@ -375,6 +377,10 @@ public class GitController extends AbstractXulEventHandler {
 
   public String getAuthorName() {
     return uiGit.getAuthorName();
+  }
+
+  public void setAuthorName( String authorName ) {
+    uiGit.setAuthorName( authorName );
   }
 
   public String getCommitMessage() {
