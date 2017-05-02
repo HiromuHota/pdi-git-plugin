@@ -359,6 +359,9 @@ public class GitController extends AbstractXulEventHandler {
     fireSourceChanged();
   }
 
+  public void pull() {
+  }
+
   public void push() throws InvalidRemoteException, TransportException, GitAPIException, IOException {
     final String fullBranch = git.getRepository().getFullBranch();
     final StoredConfig config = git.getRepository().getConfig();
