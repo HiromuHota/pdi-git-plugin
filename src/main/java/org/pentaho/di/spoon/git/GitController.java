@@ -56,6 +56,7 @@ import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
 import org.pentaho.ui.xul.components.WaitBoxRunnable;
+import org.pentaho.ui.xul.components.XulButton;
 import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.components.XulLabel;
 import org.pentaho.ui.xul.components.XulMessageBox;
@@ -78,6 +79,9 @@ public class GitController extends AbstractXulEventHandler {
   protected XulTree revisionTable;
   protected XulTree unstagedTable;
   protected XulTree stagedTable;
+  protected XulButton commitButton;
+  protected XulButton pullButton;
+  protected XulButton pushButton;
 
   protected BindingFactory bf = new SwtBindingFactory();
   protected Binding pathBinding;
@@ -101,6 +105,9 @@ public class GitController extends AbstractXulEventHandler {
     waitBox = (XulWaitBox) document.createElement( "waitbox" );
     pathLabel = (XulLabel) document.getElementById( "path" );
     revisionTable = (XulTree) document.getElementById( "revision-table" );
+    commitButton = (XulButton) document.getElementById( "commit" );
+    pullButton = (XulButton) document.getElementById( "pull" );
+    pushButton = (XulButton) document.getElementById( "push" );
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
   }
 
@@ -181,6 +188,10 @@ public class GitController extends AbstractXulEventHandler {
       return;
     }
 
+    commitButton.setDisabled( false );
+    pullButton.setDisabled( false );
+    pushButton.setDisabled( false );
+
     bf.setBindingType( Binding.Type.ONE_WAY );
     pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
     revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
@@ -205,6 +216,10 @@ public class GitController extends AbstractXulEventHandler {
     if ( git == null ) {
       return; // No thing to do
     }
+
+    commitButton.setDisabled( true );
+    pullButton.setDisabled( true );
+    pushButton.setDisabled( true );
 
     git.close();
     git = null;
@@ -338,9 +353,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void commit() throws Exception {
-    if ( git == null ) {
-      return;
-    }
     if ( getStagedObjects().size() == 0 ) {
       messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
       messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
@@ -363,15 +375,9 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void pull() {
-    if ( git == null ) {
-      return;
-    }
   }
 
   public void push() throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-    if ( git == null ) {
-      return;
-    }
     final String fullBranch = git.getRepository().getFullBranch();
     final StoredConfig config = git.getRepository().getConfig();
     Set<String> remotes = config.getSubsections( "remote" );

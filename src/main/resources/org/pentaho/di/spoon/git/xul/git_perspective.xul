@@ -24,9 +24,9 @@
             <textbox id="author-name" value="" flex="1"/>
           </hbox>
           <hbox>
-            <button id="commit" label="Commit" onclick="gitController.commit()" flex="1"/>
-            <button id="pull" label="Pull" onclick="gitController.pull()" flex="1" image="org/pentaho/di/spoon/git/images/9x9_arrow_down.svg"/>
-            <button id="push" label="Push" onclick="gitController.push()" flex="1" image="org/pentaho/di/spoon/git/images/9x9_arrow_up.svg"/>
+            <button id="commit" label="Commit" onclick="gitController.commit()" flex="1" disabled="true"/>
+            <button id="pull" label="Pull" onclick="gitController.pull()" flex="1" image="org/pentaho/di/spoon/git/images/9x9_arrow_down.svg" disabled="true"/>
+            <button id="push" label="Push" onclick="gitController.push()" flex="1" image="org/pentaho/di/spoon/git/images/9x9_arrow_up.svg" disabled="true"/>
           </hbox>
         </vbox>
       </splitter>
