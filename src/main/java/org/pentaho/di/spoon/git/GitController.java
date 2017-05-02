@@ -82,6 +82,10 @@ public class GitController extends AbstractXulEventHandler {
   protected XulButton commitButton;
   protected XulButton pullButton;
   protected XulButton pushButton;
+  protected XulMessageBox messageBox;
+  protected XulConfirmBox confirmBox;
+  protected XulPromptBox promptBox;
+  protected XulWaitBox waitBox;
 
   protected BindingFactory bf = new SwtBindingFactory();
   protected Binding pathBinding;
@@ -89,25 +93,23 @@ public class GitController extends AbstractXulEventHandler {
   protected Binding unstagedBinding;
   protected Binding stagedBinding;
 
-  protected XulMessageBox messageBox;
-  protected XulConfirmBox confirmBox;
-  protected XulPromptBox promptBox;
-  protected XulWaitBox waitBox;
-
   public GitController() {
     setName( "gitController" );
   }
 
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
+    pathLabel = (XulLabel) document.getElementById( "path" );
+    revisionTable = (XulTree) document.getElementById( "revision-table" );
+    unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
+    stagedTable = (XulTree) document.getElementById( "staged-table" );
+    commitButton = (XulButton) document.getElementById( "commit" );
+    pullButton = (XulButton) document.getElementById( "pull" );
+    pushButton = (XulButton) document.getElementById( "push" );
     messageBox = (XulMessageBox) document.createElement( "messagebox" );
     confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
     promptBox = (XulPromptBox) document.createElement( "promptbox" );
     waitBox = (XulWaitBox) document.createElement( "waitbox" );
-    pathLabel = (XulLabel) document.getElementById( "path" );
-    revisionTable = (XulTree) document.getElementById( "revision-table" );
-    commitButton = (XulButton) document.getElementById( "commit" );
-    pullButton = (XulButton) document.getElementById( "pull" );
-    pushButton = (XulButton) document.getElementById( "push" );
+
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
   }
 
@@ -195,9 +197,6 @@ public class GitController extends AbstractXulEventHandler {
     bf.setBindingType( Binding.Type.ONE_WAY );
     pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
     revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
-
-    unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
-    stagedTable = (XulTree) document.getElementById( "staged-table" );
     unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
 
