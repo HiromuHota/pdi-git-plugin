@@ -77,12 +77,9 @@ public class GitController extends AbstractXulEventHandler {
   protected Git git;
   protected UIGit uiGit = new UIGit();
 
-  protected XulLabel pathLabel;
   protected XulTree revisionTable;
   protected XulTree unstagedTable;
   protected XulTree stagedTable;
-  protected XulTextbox commitMessage;
-  protected XulTextbox authorName;
   protected XulButton commitButton;
   protected XulButton pullButton;
   protected XulButton pushButton;
@@ -102,12 +99,12 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
-    pathLabel = (XulLabel) document.getElementById( "path" );
+    XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
     stagedTable = (XulTree) document.getElementById( "staged-table" );
-    authorName = (XulTextbox) document.getElementById( "author-name" );
-    commitMessage = (XulTextbox) document.getElementById( "commit-message" );
+    XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
+    XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
     pushButton = (XulButton) document.getElementById( "push" );
@@ -136,7 +133,7 @@ public class GitController extends AbstractXulEventHandler {
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
 
-    authorName.setValue( git.getRepository().getConfig().getString( "user", null, "name" )
+    uiGit.setAuthorName( git.getRepository().getConfig().getString( "user", null, "name" )
         + " <" + git.getRepository().getConfig().getString( "user", null, "email" ) + ">" );
 
     try {
