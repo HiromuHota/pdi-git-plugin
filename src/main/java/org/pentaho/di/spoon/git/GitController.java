@@ -52,11 +52,13 @@ import org.pentaho.ui.xul.XulComponent;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
+import org.pentaho.ui.xul.components.WaitBoxRunnable;
 import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.components.XulLabel;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
+import org.pentaho.ui.xul.components.XulWaitBox;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
@@ -83,6 +85,7 @@ public class GitController extends AbstractXulEventHandler {
   protected XulMessageBox messageBox;
   protected XulConfirmBox confirmBox;
   protected XulPromptBox promptBox;
+  protected XulWaitBox waitBox;
 
   public GitController() {
     setName( "gitController" );
@@ -92,6 +95,7 @@ public class GitController extends AbstractXulEventHandler {
     messageBox = (XulMessageBox) document.createElement( "messagebox" );
     confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
     promptBox = (XulPromptBox) document.createElement( "promptbox" );
+    waitBox = (XulWaitBox) document.createElement( "waitbox" );
     pathLabel = (XulLabel) document.getElementById( "path" );
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
@@ -356,7 +360,27 @@ public class GitController extends AbstractXulEventHandler {
     final StoredConfig config = git.getRepository().getConfig();
     Set<String> remotes = config.getSubsections( "remote" );
     if ( remotes.contains( Constants.DEFAULT_REMOTE_NAME ) ) {
-      git.push().call();
+      waitBox.setIndeterminate( true );
+      waitBox.setCanCancel( false );
+      waitBox.setTitle( "Please Wait..." );
+      waitBox.setMessage( "Pushing to the remote repository. Please Wait." );
+      waitBox.setRunnable( new WaitBoxRunnable( waitBox ) {
+        @Override
+        public void run() {
+          try {
+            git.push().call();
+            waitBox.stop();
+          } catch ( GitAPIException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+        @Override
+        public void cancel() {
+          // TODO Auto-generated method stub
+        }
+      } );
+      waitBox.start();
     } else {
       promptBox.setTitle( "Remote repository" );
       promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );

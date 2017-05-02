@@ -16,6 +16,8 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
@@ -34,7 +36,13 @@ public class GitControllerTest extends RepositoryTestCase {
     controller = mock( GitController.class );
     doCallRealMethod().when( controller ).getPath();
     doCallRealMethod().when( controller ).commit();
-    doCallRealMethod().when( controller ).push();
+    doAnswer( new Answer<Void>() {
+      @Override
+      public Void answer( InvocationOnMock invocation ) throws Throwable {
+        git.push().call();
+        return null;
+      }
+    } ).when( controller ).push();
     doCallRealMethod().when( controller ).getRevisionObjects();
     doCallRealMethod().when( controller ).getStagedObjects();
     doCallRealMethod().when( controller ).getUnstagedObjects();
