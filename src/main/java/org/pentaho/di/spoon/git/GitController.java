@@ -309,12 +309,14 @@ public class GitController extends AbstractXulEventHandler {
                 PushResult result = git.push().call().iterator().next();
                 waitBox.stop();
                 RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
-                if ( update.getStatus() != RemoteRefUpdate.Status.OK ) {
+                if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
+                  messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
+                } else {
                   messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
-                  messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-                  messageBox.setMessage( update.getStatus().toString() );
-                  messageBox.open();
                 }
+                messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+                messageBox.setMessage( update.getStatus().toString() );
+                messageBox.open();
               } catch ( GitAPIException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
