@@ -1,4 +1,4 @@
-package org.pentaho.di.spoon.git;
+package org.pentaho.di.ui.spoon.git;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +39,6 @@ import org.pentaho.di.repository.RepositoryObjectType;
 import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.pur.PurObjectRevision;
-import org.pentaho.di.spoon.git.model.UIGit;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
@@ -52,6 +51,7 @@ import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
+import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulComponent;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;

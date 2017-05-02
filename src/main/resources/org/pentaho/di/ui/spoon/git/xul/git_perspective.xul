@@ -11,17 +11,17 @@
         <label id="branch" flex="1"/>
         <label value="Remote (origin):" />
         <label id="remote" flex="1"/>
-        <button id="remoteButton" onclick="gitController.editRemote()" image="org/pentaho/di/spoon/git/images/Edit.svg" disabled="true"/>
+        <button id="remoteButton" onclick="gitController.editRemote()" image="org/pentaho/di/ui/spoon/git/images/Edit.svg" disabled="true"/>
       </hbox>
-      <pen:include src="org/pentaho/di/spoon/git/xul/git_revision-table.xul" ignoreroot="true" />
+      <pen:include src="org/pentaho/di/ui/spoon/git/xul/git_revision-table.xul" ignoreroot="true" />
     </vbox>
     <vbox flex="1">
       <splitter flex="1" orient="VERTICAL">
         <hbox flex="1">
-          <pen:include src="org/pentaho/di/spoon/git/xul/git_unstaged-table.xul" ignoreroot="true" />
+          <pen:include src="org/pentaho/di/ui/spoon/git/xul/git_unstaged-table.xul" ignoreroot="true" />
         </hbox>
         <hbox flex="1">
-          <pen:include src="org/pentaho/di/spoon/git/xul/git_staged-table.xul" ignoreroot="true" />
+          <pen:include src="org/pentaho/di/ui/spoon/git/xul/git_staged-table.xul" ignoreroot="true" />
         </hbox>
         <vbox flex="1">
           <label id="commit-message-label" value="Commit Message:"/>
@@ -32,8 +32,8 @@
           </hbox>
           <hbox>
             <button id="commit" label="Commit" onclick="gitController.commit()" flex="1" disabled="true"/>
-            <button id="pull" label="Pull" onclick="gitController.pull()" flex="1" image="org/pentaho/di/spoon/git/images/9x9_arrow_down.svg" disabled="true"/>
-            <button id="push" label="Push" onclick="gitController.push()" flex="1" image="org/pentaho/di/spoon/git/images/9x9_arrow_up.svg" disabled="true"/>
+            <button id="pull" label="Pull" onclick="gitController.pull()" flex="1" image="org/pentaho/di/ui/spoon/git/images/9x9_arrow_down.svg" disabled="true"/>
+            <button id="push" label="Push" onclick="gitController.push()" flex="1" image="org/pentaho/di/ui/spoon/git/images/9x9_arrow_up.svg" disabled="true"/>
           </hbox>
         </vbox>
       </splitter>

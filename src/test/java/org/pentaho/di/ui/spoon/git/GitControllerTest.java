@@ -1,4 +1,4 @@
-package org.pentaho.di.spoon.git;
+package org.pentaho.di.ui.spoon.git;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;

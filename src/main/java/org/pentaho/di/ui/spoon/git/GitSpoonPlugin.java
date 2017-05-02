@@ -1,4 +1,4 @@
-package org.pentaho.di.spoon.git;
+package org.pentaho.di.ui.spoon.git;
 
 import org.pentaho.di.ui.spoon.SpoonLifecycleListener;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
@@ -27,7 +27,7 @@ public class GitSpoonPlugin implements SpoonPluginInterface, SpoonLifecycleListe
   public void applyToContainer( String category, XulDomContainer container ) throws XulException {
     container.registerClassLoader( getClass().getClassLoader() );
     if ( category.equals( "spoon" ) ) {
-      container.loadOverlay( "org/pentaho/di/spoon/git/xul/git_spoon_overlays.xul" );
+      container.loadOverlay( "org/pentaho/di/ui/spoon/git/xul/git_spoon_overlays.xul" );
     }
   }
 
