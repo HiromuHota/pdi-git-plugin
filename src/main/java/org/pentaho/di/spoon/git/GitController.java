@@ -378,28 +378,28 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public String getPath() {
-    if ( git == null ) {
-      return "";
-    } else {
+    try {
       return git.getRepository().getDirectory().getParent();
+    } catch ( Exception e ) {
+      return "";
     }
   }
 
-  public String getBranch() throws IOException {
-    if ( git == null ) {
-      return "";
-    } else {
+  public String getBranch() {
+    try {
       return git.getRepository().getBranch();
+    } catch ( Exception e ) {
+      return "";
     }
   }
 
-  public String getRemote() throws URISyntaxException {
-    if ( git == null ) {
-      return "";
-    } else {
+  public String getRemote() {
+    try {
       StoredConfig config = git.getRepository().getConfig();
       RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
       return remoteConfig.getURIs().iterator().next().toString();
+    } catch ( Exception e ) {
+      return "";
     }
   }
 
@@ -421,9 +421,6 @@ public class GitController extends AbstractXulEventHandler {
 
   public UIRepositoryObjectRevisions getRevisionObjects() {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
-    if ( git == null ) {
-      return revisions;
-    }
     try {
       Iterable<RevCommit> iterable = git.log().call();
       for ( RevCommit commit : iterable ) {
@@ -434,34 +431,31 @@ public class GitController extends AbstractXulEventHandler {
           commit.getShortMessage() );
         revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
       }
-    } catch ( NoHeadException e ) {
-      // Do nothing
-    } catch ( GitAPIException e ) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    } catch ( Exception e ) {
+
     }
     return revisions;
   }
 
   public UIRepositoryObjects getUnstagedObjects() throws Exception {
     Set<String> files = new HashSet<String>();
-    if ( git == null ) {
-      return getObjects( files );
+    try {
+      Status status = git.status().call();
+      files.addAll( status.getModified() );
+      files.addAll( status.getUntracked() );
+    } catch ( Exception e ) {
     }
-    Status status = git.status().call();
-    files.addAll( status.getModified() );
-    files.addAll( status.getUntracked() );
     return getObjects( files );
   }
 
   public UIRepositoryObjects getStagedObjects() throws Exception {
     Set<String> files = new HashSet<String>();
-    if ( git == null ) {
-      return getObjects( files );
+    try {
+      Status status = git.status().call();
+      files.addAll( status.getAdded() );
+      files.addAll( status.getChanged() );
+    } catch ( Exception e ) {
     }
-    Status status = git.status().call();
-    files.addAll( status.getAdded() );
-    files.addAll( status.getChanged() );
     return getObjects( files );
   }
 
