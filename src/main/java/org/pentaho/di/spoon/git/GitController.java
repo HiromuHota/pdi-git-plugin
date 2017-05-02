@@ -24,8 +24,11 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectId;
@@ -360,20 +363,35 @@ public class GitController extends AbstractXulEventHandler {
     final StoredConfig config = git.getRepository().getConfig();
     Set<String> remotes = config.getSubsections( "remote" );
     if ( remotes.contains( Constants.DEFAULT_REMOTE_NAME ) ) {
+      final Shell shell = Spoon.getInstance().getShell();
       waitBox.setIndeterminate( true );
       waitBox.setCanCancel( false );
       waitBox.setTitle( "Please Wait..." );
       waitBox.setMessage( "Pushing to the remote repository. Please Wait." );
+      waitBox.setDialogParent( shell );
       waitBox.setRunnable( new WaitBoxRunnable( waitBox ) {
         @Override
         public void run() {
-          try {
-            git.push().call();
-            waitBox.stop();
-          } catch ( GitAPIException e ) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
+
+          shell.getDisplay().syncExec( new Runnable() {
+            @Override
+            public void run() {
+              try {
+                PushResult result = git.push().call().iterator().next();
+                waitBox.stop();
+                RemoteRefUpdate update = result.getRemoteUpdate( Constants.R_HEADS + Constants.MASTER );
+                if ( update.getStatus() != RemoteRefUpdate.Status.OK ) {
+                  messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+                  messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+                  messageBox.setMessage( update.getStatus().toString() );
+                  messageBox.open();
+                }
+              } catch ( GitAPIException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+              }
+            }
+          } );
         }
         @Override
         public void cancel() {
