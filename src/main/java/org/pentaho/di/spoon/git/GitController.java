@@ -3,6 +3,7 @@ package org.pentaho.di.spoon.git;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -18,10 +19,13 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
-import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectId;
@@ -51,10 +55,12 @@ import org.pentaho.ui.xul.binding.BindingFactory;
 import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.components.XulLabel;
 import org.pentaho.ui.xul.components.XulMessageBox;
+import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
+import org.pentaho.ui.xul.swt.custom.DialogConstant;
 import org.pentaho.ui.xul.util.XulDialogCallback;
 
 public class GitController extends AbstractXulEventHandler {
@@ -76,6 +82,7 @@ public class GitController extends AbstractXulEventHandler {
 
   protected XulMessageBox messageBox;
   protected XulConfirmBox confirmBox;
+  protected XulPromptBox promptBox;
 
   public GitController() {
     setName( "gitController" );
@@ -84,6 +91,7 @@ public class GitController extends AbstractXulEventHandler {
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
     messageBox = (XulMessageBox) document.createElement( "messagebox" );
     confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
+    promptBox = (XulPromptBox) document.createElement( "promptbox" );
     pathLabel = (XulLabel) document.getElementById( "path" );
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
@@ -345,6 +353,42 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void push() throws InvalidRemoteException, TransportException, GitAPIException {
-    git.push().call();
+    final StoredConfig config = git.getRepository().getConfig();
+    Set<String> remotes = config.getSubsections( "remote" );
+    if ( remotes.contains( Constants.DEFAULT_REMOTE_NAME ) ) {
+      git.push().call();
+    } else {
+      promptBox.setTitle( "Remote repository" );
+      promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
+      promptBox.setMessage( "URL/path (The remote name will be \"" + Constants.DEFAULT_REMOTE_NAME + "\")" );
+      promptBox.setValue( "" );
+      promptBox.addDialogCallback( new XulDialogCallback<String>() {
+        public void onClose( XulComponent component, Status status, String value ) {
+          if ( !status.equals( Status.CANCEL ) ) {
+            try {
+              RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
+              URIish uri = new URIish( value );
+              remoteConfig.addURI( uri );
+              remoteConfig.update( config );
+              config.save();
+              push();
+            } catch ( URISyntaxException e1 ) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+            } catch ( IOException e ) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            } catch ( GitAPIException e ) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+          }
+        }
+        public void onError( XulComponent component, Throwable err ) {
+          throw new RuntimeException( err );
+        }
+      } );
+      promptBox.open();
+    }
   }
 }
