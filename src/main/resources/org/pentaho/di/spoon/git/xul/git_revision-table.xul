@@ -2,12 +2,12 @@
 <window id="dummyRootElement" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   xmlns:pen="http://www.pentaho.org/2008/xul">
 
-  <tree id="revision-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="revisionContextMenu" treeLines="false">
+  <tree id="revision-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" treeLines="false">
     <treecols>
-      <treecol id="revision-label-col" flex="1" label="Id" pen:binding="name" pen:childrenbinding="children" context="revisionContextMenu"/>
+      <treecol id="revision-label-col" flex="1" label="Id" pen:binding="name" pen:childrenbinding="children"/>
       <treecol id="revision-comment-col" flex="6" label="Message" pen:binding="comment"/>
       <treecol id="revision-user-col" flex="3" label="Author" pen:binding="login"/>
-      <treecol id="revision-date-mod-col" flex="3" label="Date" pen:binding="formatCreationDate" context="revisionContextMenu"/>
+      <treecol id="revision-date-mod-col" flex="3" label="Date" pen:binding="formatCreationDate"/>
     </treecols>
     <treechildren/>
   </tree>
