@@ -338,6 +338,9 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void commit() throws Exception {
+    if ( git == null ) {
+      return;
+    }
     if ( getStagedObjects().size() == 0 ) {
       messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
       messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
@@ -360,9 +363,15 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void pull() {
+    if ( git == null ) {
+      return;
+    }
   }
 
   public void push() throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+    if ( git == null ) {
+      return;
+    }
     final String fullBranch = git.getRepository().getFullBranch();
     final StoredConfig config = git.getRepository().getConfig();
     Set<String> remotes = config.getSubsections( "remote" );
