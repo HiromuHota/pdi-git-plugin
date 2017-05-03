@@ -13,6 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeResult.MergeStatus;
+import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
@@ -297,6 +299,17 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void pull() {
+    try {
+      PullResult result = git.pull().call();
+      revisionBinding.fireSourceChanged();
+    } catch ( GitAPIException e ) {
+      messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+      messageBox.setMessage( e.getMessage() );
+      messageBox.open();
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
   }
 
   public void push() throws InvalidRemoteException, TransportException, GitAPIException, IOException {
