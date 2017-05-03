@@ -168,6 +168,12 @@ public class GitController extends AbstractXulEventHandler {
 
     git.close();
     git = null;
+
+    try {
+      fireSourceChanged();
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
   }
 
   private void openGit() {
