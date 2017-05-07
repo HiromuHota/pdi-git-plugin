@@ -72,6 +72,8 @@ import org.pentaho.ui.xul.swt.SwtBindingFactory;
 import org.pentaho.ui.xul.swt.custom.DialogConstant;
 import org.pentaho.ui.xul.util.XulDialogCallback;
 
+import com.google.common.annotations.VisibleForTesting;
+
 public class GitController extends AbstractXulEventHandler {
 
   private static final Class<?> PKG = RepositoryExplorer.class;
@@ -395,7 +397,8 @@ public class GitController extends AbstractXulEventHandler {
     promptBox.open();
   }
 
-  public void setGit( Git git ) {
+  @VisibleForTesting
+  void setGit( Git git ) {
     this.git = git;
   }
 
