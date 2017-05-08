@@ -30,6 +30,8 @@ import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
@@ -86,6 +88,7 @@ public class GitController extends AbstractXulEventHandler {
   private XulTree revisionTable;
   private XulTree unstagedTable;
   private XulTree stagedTable;
+  private XulButton browseButton;
   private XulButton remoteButton;
   private XulButton commitButton;
   private XulButton pullButton;
@@ -116,6 +119,7 @@ public class GitController extends AbstractXulEventHandler {
     stagedTable = (XulTree) document.getElementById( "staged-table" );
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
     XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );
+    browseButton = (XulButton) document.getElementById( "browseButton" );
     remoteButton = (XulButton) document.getElementById( "remoteButton" );
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
@@ -149,6 +153,9 @@ public class GitController extends AbstractXulEventHandler {
       return;
     }
 
+    if ( Spoon.getInstance().rep == null ) { // when not connected to a repository
+      browseButton.setDisabled( false );
+    }
     remoteButton.setDisabled( false );
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
@@ -169,13 +176,13 @@ public class GitController extends AbstractXulEventHandler {
       return; // No thing to do
     }
 
+    browseButton.setDisabled( true );
     remoteButton.setDisabled( true );
     commitButton.setDisabled( true );
     pullButton.setDisabled( true );
     pushButton.setDisabled( true );
 
-    git.close();
-    git = null;
+    closeGit();
 
     try {
       fireSourceChanged();
@@ -185,54 +192,63 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   private void openGit() {
+    String baseDirectory = determineBaseDirectory();
+    try {
+      git = Git.open( new File( baseDirectory ) );
+      path = baseDirectory;
+    } catch ( RepositoryNotFoundException e ) {
+      initGit( baseDirectory );
+    } catch ( IOException e ) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  private String determineBaseDirectory() {
     if ( Spoon.getInstance().rep != null ) { // when connected to a repository
       if ( Spoon.getInstance().rep.getClass() != KettleFileRepository.class ) {
-        return; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
+        return null; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
       } else {
-        final String baseDirectory = ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
-        path = baseDirectory;
-        try {
-          git = Git.open( new File( baseDirectory ) );
-        } catch ( RepositoryNotFoundException e ) {
-          initGit( baseDirectory );
-        } catch ( IOException e ) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
+        return ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
       }
     } else { // when not connected to a repository
-      // Get the data integration perspective
-      List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
-      SpoonPerspective mainSpoonPerspective = null;
-      for ( SpoonPerspective perspective : perspectives ) {
-        if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
-          mainSpoonPerspective = perspective;
-          break;
+      if ( path != null ) { // when specified by the user
+        return path;
+      } else {
+        // Get the data integration perspective
+        List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
+        SpoonPerspective mainSpoonPerspective = null;
+        for ( SpoonPerspective perspective : perspectives ) {
+          if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
+            mainSpoonPerspective = perspective;
+            break;
+          }
+        }
+        // Get the active Kettle file
+        EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
+        if ( meta == null ) { // no file is opened.
+          return null;
+        } else if ( meta.getFilename() == null ) { // not saved yet
+          return null;
+        }
+        // Find the git repository for this file
+        String fileName = meta.getFilename();
+        try {
+          Repository repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
+            .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
+            .build();
+          return repository.getDirectory().getParent();
+        } catch ( IOException e ) {
+          return null;
         }
       }
-      // Get the active Kettle file
-      EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
-      if ( meta == null ) { // no file is opened.
-        return;
-      } else if ( meta.getFilename() == null ) { // not saved yet
-        return;
-      }
-      // Find the git repository for this file
-      String fileName = meta.getFilename();
-      try {
-        Repository repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
-          .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
-          .build();
-        git = new Git( repository );
-        path = repository.getDirectory().getParent();
-      } catch ( IOException e ) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch ( IllegalArgumentException e ) { // No git repository found when scanning up to the root
-        initGit( new File( fileName ).getParentFile().getPath() );
-      }
     }
-    return;
+  }
+
+  private void closeGit() {
+    path = null;
+    git.close();
+    git = null;
   }
 
   @VisibleForTesting
@@ -378,6 +394,17 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
+  public void editPath() throws IllegalArgumentException, InvocationTargetException, XulException {
+    Shell shell = Spoon.getInstance().getShell();
+    DirectoryDialog dialog = new DirectoryDialog( shell, SWT.OPEN );
+    if ( dialog.open() != null ) {
+      closeGit();
+      setPath( dialog.getFilterPath() );
+      openGit();
+      fireSourceChanged();
+    }
+  }
+
   public void editRemote() {
     final StoredConfig config = git.getRepository().getConfig();
     promptBox.setTitle( "Remote repository" );
@@ -417,7 +444,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setPath( String path ) {
-    this.path = path;
+    this.path = "".equals( path ) ? null : path;
   }
 
   public String getPath() {

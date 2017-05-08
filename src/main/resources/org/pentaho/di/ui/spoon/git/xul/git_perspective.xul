@@ -5,6 +5,7 @@
       <hbox>
         <label value="Directory path for .git: " />
         <textbox id="path-text" multiline="false" flex="1"/>
+        <button id="browseButton" label="Browse" onclick="gitController.editPath()" disabled="true"/>
       </hbox>
       <hbox>
         <label value="Branch:" />
