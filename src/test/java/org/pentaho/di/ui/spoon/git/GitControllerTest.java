@@ -11,10 +11,13 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.junit.RepositoryTestCase;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.util.FS;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -87,7 +90,9 @@ public class GitControllerTest extends RepositoryTestCase {
 
     File directory = createTempDirectory( "testInitRepository" );
     controller.initGit( directory.getPath() );
-    assertNotNull( controller.getGit() );
+    ( new FileRepositoryBuilder() ).setGitDir( directory ).build();
+    File gitDirectory = new File( directory.getPath() + File.separator + ".git" );
+    assertTrue( RepositoryCache.FileKey.isGitRepository( gitDirectory, FS.DETECTED ) );
   }
 
   @Test
@@ -100,7 +105,9 @@ public class GitControllerTest extends RepositoryTestCase {
 
     File directory = createTempDirectory( "testInitRepository" );
     controller.initGit( directory.getPath() );
-    assertNull( controller.getGit() );
+    ( new FileRepositoryBuilder() ).setGitDir( directory ).build();
+    File gitDirectory = new File( directory.getPath() + File.separator + ".git" );
+    assertFalse( RepositoryCache.FileKey.isGitRepository( gitDirectory, FS.DETECTED ) );
   }
 
   @Test

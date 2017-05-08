@@ -200,6 +200,7 @@ public class GitController extends AbstractXulEventHandler {
       path = baseDirectory;
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
+      openGit();
     } catch ( IOException e ) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -267,7 +268,7 @@ public class GitController extends AbstractXulEventHandler {
         if ( returnCode == Status.ACCEPT ) {
           try {
             Git.init().setDirectory( new File( baseDirectory ) ).call();
-            git = Git.open( new File( baseDirectory ) );
+            path = baseDirectory;
             messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
             messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
             messageBox.setMessage( BaseMessages.getString( PKG, "Dialog.Success" ) );
