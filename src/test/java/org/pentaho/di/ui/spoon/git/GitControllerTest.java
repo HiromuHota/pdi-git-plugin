@@ -48,26 +48,7 @@ public class GitControllerTest extends RepositoryTestCase {
   public void setUp() throws Exception {
     super.setUp();
     git = new Git( db );
-
-    controller = mock( GitController.class );
-    doCallRealMethod().when( controller ).getPath();
-    doCallRealMethod().when( controller ).commit();
-    doAnswer( new Answer<Void>() {
-      @Override
-      public Void answer( InvocationOnMock invocation ) throws Throwable {
-        git.push().call();
-        return null;
-      }
-    } ).when( controller ).push();
-    doCallRealMethod().when( controller ).getRevisionObjects();
-    doCallRealMethod().when( controller ).getStagedObjects();
-    doCallRealMethod().when( controller ).getUnstagedObjects();
-    doCallRealMethod().when( controller ).getGit();
-    doCallRealMethod().when( controller ).setGit( (Git) any() );
-    doCallRealMethod().when( controller ).setXulDomContainer( (XulDomContainer) any() );
-    doCallRealMethod().when( controller ).initGit( anyString() );
-    when( controller.getAuthorName() ).thenReturn( "test <test@example.com>" );
-    when( controller.getCommitMessage() ).thenReturn( "test" );
+    controller = new GitController();
     controller.setGit( git );
 
     DocumentFactory.registerElementClass( ElementDom4J.class );
@@ -147,9 +128,14 @@ public class GitControllerTest extends RepositoryTestCase {
 
   @Test
   public void testCommit() throws Exception {
+    GitController spyController = spy( controller );
+    doReturn( "test <test@example.com>" ).when( spyController ).getAuthorName();
+    doReturn( "test" ).when( spyController ).getCommitMessage();
+    doNothing().when( spyController ).fireSourceChanged();
+
     writeTrashFile( "a.ktr", "content" );
     git.add().addFilepattern( "." ).call();
-    controller.commit();
+    spyController.commit();
     RevCommit commit = git.log().call().iterator().next();
     assertEquals( "test", commit.getShortMessage() );
   }
