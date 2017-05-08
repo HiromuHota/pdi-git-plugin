@@ -37,7 +37,6 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     controller = new GitController();
     container.addEventHandler( controller );
     controller.setXulDomContainer( container );
-    controller.initMessageBox();
 
     final XulRunner runner = new SwtXulRunner();
     runner.addContainer( container );

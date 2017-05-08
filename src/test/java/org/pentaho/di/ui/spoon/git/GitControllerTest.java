@@ -59,7 +59,6 @@ public class GitControllerTest extends RepositoryTestCase {
         return null;
       }
     } ).when( controller ).push();
-    doCallRealMethod().when( controller ).initMessageBox();
     doCallRealMethod().when( controller ).getRevisionObjects();
     doCallRealMethod().when( controller ).getStagedObjects();
     doCallRealMethod().when( controller ).getUnstagedObjects();
@@ -81,11 +80,10 @@ public class GitControllerTest extends RepositoryTestCase {
   @Test
   public void shouldInitializeGitOnAccept() throws IOException, XulException {
     XulConfirmBox prompt = new XulConfirmBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.createElement( CONFIRMBOX ) ).thenReturn( prompt );
+    when( document.getElementById( CONFIRMBOX ) ).thenReturn( prompt );
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
+    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
 
-    controller.initMessageBox();
     controller.setGit( null );
 
     File directory = createTempDirectory( "testInitRepository" );
@@ -98,9 +96,8 @@ public class GitControllerTest extends RepositoryTestCase {
   @Test
   public void shouldNotInitializeGitOnCencel() throws IOException, XulException {
     XulConfirmBox prompt = new XulConfirmBoxMock( XulDialogCallback.Status.CANCEL );
-    when( document.createElement( CONFIRMBOX ) ).thenReturn( prompt );
+    when( document.getElementById( CONFIRMBOX ) ).thenReturn( prompt );
 
-    controller.initMessageBox();
     controller.setGit( null );
 
     File directory = createTempDirectory( "testInitRepository" );

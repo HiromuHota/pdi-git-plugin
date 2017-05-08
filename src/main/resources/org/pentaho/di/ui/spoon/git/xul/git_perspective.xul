@@ -47,4 +47,9 @@
   <menupopup id="stagedContextMenu">
     <menuitem label="Remove from Index" command="gitController.removeFromIndex()"/>
   </menupopup>
+
+  <messagebox id="messagebox"/>
+  <confirmbox id="confirmbox"/>
+  <promptbox id="promptbox"/>
+  <waitbox id="waitbox"/>
 </window>

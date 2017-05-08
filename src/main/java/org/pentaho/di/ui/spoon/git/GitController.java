@@ -124,6 +124,10 @@ public class GitController extends AbstractXulEventHandler {
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
     pushButton = (XulButton) document.getElementById( "push" );
+    messageBox = (XulMessageBox) document.getElementById( "messagebox" );
+    confirmBox = (XulConfirmBox) document.getElementById( "confirmbox" );
+    promptBox = (XulPromptBox) document.getElementById( "promptbox" );
+    waitBox = (XulWaitBox) document.getElementById( "waitbox" );
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
@@ -137,14 +141,6 @@ public class GitController extends AbstractXulEventHandler {
     pathBinding = bf.createBinding( this, "path", pathText, "value" );
     bf.createBinding( uiGit, "authorName", authorName, "value" );
     bf.createBinding( uiGit, "commitMessage", commitMessage, "value" );
-  }
-
-  @VisibleForTesting
-  void initMessageBox() throws XulException {
-    messageBox = (XulMessageBox) document.createElement( "messagebox" );
-    confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
-    promptBox = (XulPromptBox) document.createElement( "promptbox" );
-    waitBox = (XulWaitBox) document.createElement( "waitbox" );
   }
 
   public void setActive() {
@@ -258,6 +254,7 @@ public class GitController extends AbstractXulEventHandler {
 
   @VisibleForTesting
   void initGit( final String baseDirectory ) {
+    confirmBox = (XulConfirmBox) document.getElementById( "confirmbox" );
     confirmBox.setTitle( "Repository not found" );
     confirmBox.setMessage( "Create a new repository in the following path?\n" + baseDirectory );
     confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
@@ -265,6 +262,7 @@ public class GitController extends AbstractXulEventHandler {
     confirmBox.addDialogCallback( new XulDialogCallback<Object>() {
 
       public void onClose( XulComponent sender, Status returnCode, Object retVal ) {
+        messageBox = (XulMessageBox) document.getElementById( "messagebox" );
         if ( returnCode == Status.ACCEPT ) {
           try {
             Git.init().setDirectory( new File( baseDirectory ) ).call();
