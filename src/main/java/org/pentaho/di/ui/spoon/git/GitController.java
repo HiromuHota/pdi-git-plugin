@@ -118,10 +118,7 @@ public class GitController extends AbstractXulEventHandler {
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
     pushButton = (XulButton) document.getElementById( "push" );
-    messageBox = (XulMessageBox) document.createElement( "messagebox" );
-    confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
-    promptBox = (XulPromptBox) document.createElement( "promptbox" );
-    waitBox = (XulWaitBox) document.createElement( "waitbox" );
+    initMessageBox();
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
@@ -135,6 +132,14 @@ public class GitController extends AbstractXulEventHandler {
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
     bf.createBinding( uiGit, "authorName", authorName, "value" );
     bf.createBinding( uiGit, "commitMessage", commitMessage, "value" );
+  }
+
+  @VisibleForTesting
+  void initMessageBox() throws XulException {
+    messageBox = (XulMessageBox) document.createElement( "messagebox" );
+    confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
+    promptBox = (XulPromptBox) document.createElement( "promptbox" );
+    waitBox = (XulWaitBox) document.createElement( "waitbox" );
   }
 
   public void setActive() {
@@ -227,7 +232,8 @@ public class GitController extends AbstractXulEventHandler {
     return;
   }
 
-  private void initGit( final String baseDirectory ) {
+  @VisibleForTesting
+  void initGit( final String baseDirectory ) {
     confirmBox.setTitle( "Repository not found" );
     confirmBox.setMessage( "Create a new repository in the following path?\n" + baseDirectory );
     confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );

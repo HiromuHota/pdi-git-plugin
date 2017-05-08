@@ -3,6 +3,7 @@ package org.pentaho.di.ui.spoon.git;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.jgit.api.Git;
@@ -22,9 +23,21 @@ import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObj
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
+import org.pentaho.ui.xul.XulDomContainer;
+import org.pentaho.ui.xul.XulException;
+import org.pentaho.ui.xul.components.XulConfirmBox;
+import org.pentaho.ui.xul.components.XulMessageBox;
+import org.pentaho.ui.xul.dom.Document;
+import org.pentaho.ui.xul.dom.DocumentFactory;
+import org.pentaho.ui.xul.dom.dom4j.ElementDom4J;
+import org.pentaho.ui.xul.swt.custom.MessageDialogBase;
+import org.pentaho.ui.xul.util.XulDialogCallback;
 
 public class GitControllerTest extends RepositoryTestCase {
 
+  private static final String CONFIRMBOX = "confirmbox";
+  private static final String MESSAGEBOX = "messagebox";
+  private Document document;
   private GitController controller;
   private Git git;
 
@@ -43,18 +56,55 @@ public class GitControllerTest extends RepositoryTestCase {
         return null;
       }
     } ).when( controller ).push();
+    doCallRealMethod().when( controller ).initMessageBox();
     doCallRealMethod().when( controller ).getRevisionObjects();
     doCallRealMethod().when( controller ).getStagedObjects();
     doCallRealMethod().when( controller ).getUnstagedObjects();
     doCallRealMethod().when( controller ).setGit( (Git) any() );
+    doCallRealMethod().when( controller ).setXulDomContainer( (XulDomContainer) any() );
+    doCallRealMethod().when( controller ).initGit( anyString() );
     when( controller.getAuthorName() ).thenReturn( "test <test@example.com>" );
     when( controller.getCommitMessage() ).thenReturn( "test" );
     controller.setGit( git );
+
+    DocumentFactory.registerElementClass( ElementDom4J.class );
+    document = mock( Document.class );
+    XulDomContainer xulDomContainer = mock( XulDomContainer.class );
+    when( xulDomContainer.getDocumentRoot() ).thenReturn( document );
+    controller.setXulDomContainer( xulDomContainer );
   }
 
   @Test
   public void testGetPath() {
     assertEquals( db.getDirectory().getParent(), controller.getPath() );
+  }
+
+  @Test
+  public void shouldInitializeGitOnAccept() throws IOException, XulException {
+    XulConfirmBox prompt = new XulConfirmBoxMock( XulDialogCallback.Status.ACCEPT );
+    when( document.createElement( CONFIRMBOX ) ).thenReturn( prompt );
+    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
+    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
+
+    controller.initMessageBox();
+    controller.setGit( null );
+
+    File directory = createTempDirectory( "testInitRepository" );
+    controller.initGit( directory.getPath() );
+    assertNotEquals( controller.getPath(), "" );
+  }
+
+  @Test
+  public void shouldNotInitializeGitOnCencel() throws IOException, XulException {
+    XulConfirmBox prompt = new XulConfirmBoxMock( XulDialogCallback.Status.CANCEL );
+    when( document.createElement( CONFIRMBOX ) ).thenReturn( prompt );
+
+    controller.initMessageBox();
+    controller.setGit( null );
+
+    File directory = createTempDirectory( "testInitRepository" );
+    controller.initGit( directory.getPath() );
+    assertEquals( controller.getPath(), "" );
   }
 
   @Test
@@ -128,4 +178,37 @@ public class GitControllerTest extends RepositoryTestCase {
     assertEquals( commit.getId(), db2.resolve( commit.getId().getName() + "^{commit}" ) );
   }
 
+  private static class XulConfirmBoxMock extends MessageDialogBase implements XulConfirmBox {
+    private final XulDialogCallback.Status status;
+
+    public XulConfirmBoxMock( XulDialogCallback.Status status ) {
+      super( CONFIRMBOX );
+      this.status = status;
+    }
+
+    @Override
+    public int open() {
+      for ( XulDialogCallback<String> callback : callbacks ) {
+        callback.onClose( null, status, null );
+      }
+      return 0;
+    }
+  }
+
+  private static class XulMessageBoxMock extends MessageDialogBase implements XulMessageBox {
+    private final XulDialogCallback.Status status;
+
+    public XulMessageBoxMock( XulDialogCallback.Status status ) {
+      super( MESSAGEBOX );
+      this.status = status;
+    }
+
+    @Override
+    public int open() {
+      for ( XulDialogCallback<String> callback : callbacks ) {
+        callback.onClose( null, status, null );
+      }
+      return 0;
+    }
+  }
 }
