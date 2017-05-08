@@ -201,6 +201,8 @@ public class GitController extends AbstractXulEventHandler {
     } catch ( IOException e ) {
       // TODO Auto-generated catch block
       e.printStackTrace();
+    } catch ( NullPointerException e ) {
+      return;
     }
   }
 
