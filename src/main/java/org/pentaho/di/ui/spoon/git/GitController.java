@@ -154,6 +154,7 @@ public class GitController extends AbstractXulEventHandler {
     }
 
     if ( Spoon.getInstance().rep == null ) { // when not connected to a repository
+      pathText.setDisabled( false );
       browseButton.setDisabled( false );
     }
     remoteButton.setDisabled( false );
@@ -176,6 +177,7 @@ public class GitController extends AbstractXulEventHandler {
       return; // No thing to do
     }
 
+    pathText.setDisabled( true );
     browseButton.setDisabled( true );
     remoteButton.setDisabled( true );
     commitButton.setDisabled( true );

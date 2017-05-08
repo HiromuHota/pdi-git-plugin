@@ -4,7 +4,7 @@
     <vbox flex="2">
       <hbox>
         <label value="Directory path for .git: " />
-        <textbox id="path-text" multiline="false" flex="1"/>
+        <textbox id="path-text" multiline="false" flex="1" disabled="true"/>
         <button id="browseButton" label="Browse" onclick="gitController.editPath()" disabled="true"/>
       </hbox>
       <hbox>
