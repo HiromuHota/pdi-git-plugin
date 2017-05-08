@@ -79,8 +79,10 @@ public class GitController extends AbstractXulEventHandler {
   private static final Class<?> PKG = RepositoryExplorer.class;
 
   private Git git;
+  private String path;
   private UIGit uiGit = new UIGit();
 
+  private XulTextbox pathText;
   private XulTree revisionTable;
   private XulTree unstagedTable;
   private XulTree stagedTable;
@@ -106,7 +108,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
-    XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
+    pathText = (XulTextbox) document.getElementById( "path-text" );
     XulLabel branchLabel = (XulLabel) document.getElementById( "branch" );
     XulLabel remoteLabel = (XulLabel) document.getElementById( "remote" );
     revisionTable = (XulTree) document.getElementById( "revision-table" );
@@ -121,7 +123,6 @@ public class GitController extends AbstractXulEventHandler {
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
-    pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
     branchBinding = bf.createBinding( this, "branch", branchLabel, "value" );
     remoteBinding = bf.createBinding( this, "remote", remoteLabel, "value" );
     revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
@@ -129,6 +130,7 @@ public class GitController extends AbstractXulEventHandler {
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
 
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
+    pathBinding = bf.createBinding( this, "path", pathText, "value" );
     bf.createBinding( uiGit, "authorName", authorName, "value" );
     bf.createBinding( uiGit, "commitMessage", commitMessage, "value" );
   }
@@ -188,6 +190,7 @@ public class GitController extends AbstractXulEventHandler {
         return; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
       } else {
         final String baseDirectory = ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
+        path = baseDirectory;
         try {
           git = Git.open( new File( baseDirectory ) );
         } catch ( RepositoryNotFoundException e ) {
@@ -221,6 +224,7 @@ public class GitController extends AbstractXulEventHandler {
           .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
           .build();
         git = new Git( repository );
+        path = repository.getDirectory().getParent();
       } catch ( IOException e ) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -403,16 +407,21 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   @VisibleForTesting
+  Git getGit() {
+    return this.git;
+  }
+
+  @VisibleForTesting
   void setGit( Git git ) {
     this.git = git;
   }
 
+  public void setPath( String path ) {
+    this.path = path;
+  }
+
   public String getPath() {
-    try {
-      return git.getRepository().getDirectory().getParent();
-    } catch ( Exception e ) {
-      return "";
-    }
+    return this.path;
   }
 
   public String getBranch() {

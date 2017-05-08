@@ -60,6 +60,7 @@ public class GitControllerTest extends RepositoryTestCase {
     doCallRealMethod().when( controller ).getRevisionObjects();
     doCallRealMethod().when( controller ).getStagedObjects();
     doCallRealMethod().when( controller ).getUnstagedObjects();
+    doCallRealMethod().when( controller ).getGit();
     doCallRealMethod().when( controller ).setGit( (Git) any() );
     doCallRealMethod().when( controller ).setXulDomContainer( (XulDomContainer) any() );
     doCallRealMethod().when( controller ).initGit( anyString() );
@@ -75,11 +76,6 @@ public class GitControllerTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testGetPath() {
-    assertEquals( db.getDirectory().getParent(), controller.getPath() );
-  }
-
-  @Test
   public void shouldInitializeGitOnAccept() throws IOException, XulException {
     XulConfirmBox prompt = new XulConfirmBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.createElement( CONFIRMBOX ) ).thenReturn( prompt );
@@ -91,7 +87,7 @@ public class GitControllerTest extends RepositoryTestCase {
 
     File directory = createTempDirectory( "testInitRepository" );
     controller.initGit( directory.getPath() );
-    assertNotEquals( controller.getPath(), "" );
+    assertNotNull( controller.getGit() );
   }
 
   @Test
@@ -104,7 +100,7 @@ public class GitControllerTest extends RepositoryTestCase {
 
     File directory = createTempDirectory( "testInitRepository" );
     controller.initGit( directory.getPath() );
-    assertEquals( controller.getPath(), "" );
+    assertNull( controller.getGit() );
   }
 
   @Test
