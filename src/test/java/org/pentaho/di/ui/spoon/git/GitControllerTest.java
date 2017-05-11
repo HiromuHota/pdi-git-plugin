@@ -48,7 +48,7 @@ public class GitControllerTest extends RepositoryTestCase {
   public void setUp() throws Exception {
     super.setUp();
     git = new Git( db );
-    controller = new GitController();
+    controller = spy( new GitController() );
     controller.setGit( git );
 
     DocumentFactory.registerElementClass( ElementDom4J.class );
@@ -128,14 +128,13 @@ public class GitControllerTest extends RepositoryTestCase {
 
   @Test
   public void testCommit() throws Exception {
-    GitController spyController = spy( controller );
-    doReturn( "test <test@example.com>" ).when( spyController ).getAuthorName();
-    doReturn( "test" ).when( spyController ).getCommitMessage();
-    doNothing().when( spyController ).fireSourceChanged();
+    doReturn( "test <test@example.com>" ).when( controller ).getAuthorName();
+    doReturn( "test" ).when( controller ).getCommitMessage();
+    doNothing().when( controller ).fireSourceChanged();
 
     writeTrashFile( "a.ktr", "content" );
     git.add().addFilepattern( "." ).call();
-    spyController.commit();
+    controller.commit();
     RevCommit commit = git.log().call().iterator().next();
     assertEquals( "test", commit.getShortMessage() );
   }
