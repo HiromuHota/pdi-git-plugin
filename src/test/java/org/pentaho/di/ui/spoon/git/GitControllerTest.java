@@ -20,8 +20,6 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.util.FS;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
@@ -141,6 +139,8 @@ public class GitControllerTest extends RepositoryTestCase {
 
   @Test
   public void testPush() throws Exception {
+    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
+    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
     // create other repository
     Repository db2 = createWorkRepository();
 

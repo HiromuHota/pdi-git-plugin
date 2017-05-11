@@ -60,14 +60,12 @@ import org.pentaho.ui.xul.XulComponent;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
-import org.pentaho.ui.xul.components.WaitBoxRunnable;
 import org.pentaho.ui.xul.components.XulButton;
 import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.components.XulLabel;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
-import org.pentaho.ui.xul.components.XulWaitBox;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
@@ -96,7 +94,6 @@ public class GitController extends AbstractXulEventHandler {
   private XulMessageBox messageBox;
   private XulConfirmBox confirmBox;
   private XulPromptBox promptBox;
-  private XulWaitBox waitBox;
 
   private BindingFactory bf = new SwtBindingFactory();
   private Binding pathBinding;
@@ -127,7 +124,6 @@ public class GitController extends AbstractXulEventHandler {
     messageBox = (XulMessageBox) document.getElementById( "messagebox" );
     confirmBox = (XulConfirmBox) document.getElementById( "confirmbox" );
     promptBox = (XulPromptBox) document.getElementById( "promptbox" );
-    waitBox = (XulWaitBox) document.getElementById( "waitbox" );
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
@@ -353,44 +349,17 @@ public class GitController extends AbstractXulEventHandler {
     final StoredConfig config = git.getRepository().getConfig();
     Set<String> remotes = config.getSubsections( "remote" );
     if ( remotes.contains( Constants.DEFAULT_REMOTE_NAME ) ) {
-      final Shell shell = Spoon.getInstance().getShell();
-      waitBox.setIndeterminate( true );
-      waitBox.setCanCancel( false );
-      waitBox.setTitle( "Please Wait..." );
-      waitBox.setMessage( "Pushing to the remote repository. Please Wait." );
-      waitBox.setDialogParent( shell );
-      waitBox.setRunnable( new WaitBoxRunnable( waitBox ) {
-        @Override
-        public void run() {
-
-          shell.getDisplay().syncExec( new Runnable() {
-            @Override
-            public void run() {
-              try {
-                PushResult result = git.push().call().iterator().next();
-                waitBox.stop();
-                RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
-                if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
-                  messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
-                } else {
-                  messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
-                }
-                messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-                messageBox.setMessage( update.getStatus().toString() );
-                messageBox.open();
-              } catch ( GitAPIException e ) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-              }
-            }
-          } );
-        }
-        @Override
-        public void cancel() {
-          // TODO Auto-generated method stub
-        }
-      } );
-      waitBox.start();
+      PushResult result = git.push().call().iterator().next();
+      RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
+      messageBox = (XulMessageBox) document.getElementById( "messagebox" );
+      if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
+        messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
+      } else {
+        messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+      }
+      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+      messageBox.setMessage( update.getStatus().toString() );
+      messageBox.open();
     } else {
       editRemote();
       push();

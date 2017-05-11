@@ -51,5 +51,4 @@
   <messagebox id="messagebox"/>
   <confirmbox id="confirmbox"/>
   <promptbox id="promptbox"/>
-  <waitbox id="waitbox"/>
 </window>
