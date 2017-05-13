@@ -67,6 +67,7 @@ import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
 import org.pentaho.ui.xul.containers.XulTree;
+import org.pentaho.ui.xul.dnd.DropEvent;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
 import org.pentaho.ui.xul.swt.custom.DialogConstant;
@@ -298,6 +299,12 @@ public class GitController extends AbstractXulEventHandler {
       git.add().addFilepattern( content.getName() ).call();
     }
     fireSourceChanged();
+  }
+
+  public void onDrop( DropEvent event ) {
+  }
+
+  public void onDrag( DropEvent event ) {
   }
 
   public void removeFromIndex() throws Exception {
