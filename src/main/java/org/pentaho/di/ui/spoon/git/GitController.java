@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.RemoteSetUrlCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
@@ -400,7 +401,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void editRemote() {
-    final StoredConfig config = git.getRepository().getConfig();
     promptBox.setTitle( "Remote repository" );
     promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
     promptBox.setMessage( "URL/path (The remote name will be \"" + Constants.DEFAULT_REMOTE_NAME + "\")" );
@@ -409,11 +409,17 @@ public class GitController extends AbstractXulEventHandler {
       public void onClose( XulComponent component, Status status, String value ) {
         if ( !status.equals( Status.CANCEL ) ) {
           try {
-            RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
+            RemoteSetUrlCommand cmd = git.remoteSetUrl();
+            cmd.setName( Constants.DEFAULT_REMOTE_NAME );
             URIish uri = new URIish( value );
-            remoteConfig.addURI( uri );
-            remoteConfig.update( config );
-            config.save();
+            cmd.setUri( uri );
+            // execute the command to change the fetch url
+            cmd.setPush( false );
+            cmd.call();
+            // execute the command to change the push url
+            cmd.setPush( true );
+            cmd.call();
+
             remoteBinding.fireSourceChanged();
           } catch ( Exception e ) {
             e.printStackTrace();
