@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.RemoteSetUrlCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -421,6 +422,17 @@ public class GitController extends AbstractXulEventHandler {
             cmd.call();
 
             remoteBinding.fireSourceChanged();
+          } catch ( URISyntaxException e ) {
+            if ( value.equals( "" ) ) {
+              try {
+                deleteRemote();
+                remoteBinding.fireSourceChanged();
+              } catch ( Exception e1 ) {
+                e1.printStackTrace();
+              }
+            } else {
+              editRemote();
+            }
           } catch ( Exception e ) {
             e.printStackTrace();
           }
@@ -431,6 +443,12 @@ public class GitController extends AbstractXulEventHandler {
       }
     } );
     promptBox.open();
+  }
+
+  void deleteRemote() throws GitAPIException {
+    RemoteRemoveCommand cmd = git.remoteRemove();
+    cmd.setName( Constants.DEFAULT_REMOTE_NAME );
+    cmd.call();
   }
 
   @VisibleForTesting
