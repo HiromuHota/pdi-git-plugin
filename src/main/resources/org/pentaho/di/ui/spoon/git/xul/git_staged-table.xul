@@ -2,7 +2,7 @@
 <window id="dummyRootElement" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   xmlns:pen="http://www.pentaho.org/2008/xul">
 
-  <tree id="staged-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="stagedContextMenu" treeLines="false" sortable="true" ondrop="gitController.onDrop()" ondrag="gitController.onDrag()" pen:drageffect="move">
+  <tree id="staged-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="stagedContextMenu" treeLines="false" sortable="true" ondrop="gitController.onDropToStaged()" ondrag="gitController.onDrag()" pen:drageffect="move">
     <treecols>
       <treecol id="name-col" flex="1" label="Staged changes" pen:binding="name" pen:childrenbinding="children" pen:imagebinding="image" sortActive="true" sortDirection="ASCENDING"/>
     </treecols>

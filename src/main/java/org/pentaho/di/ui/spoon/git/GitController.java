@@ -301,7 +301,22 @@ public class GitController extends AbstractXulEventHandler {
     fireSourceChanged();
   }
 
-  public void onDrop( DropEvent event ) {
+  public void onDropToStaged( DropEvent event ) throws Exception {
+    for ( Object o : event.getDataTransfer().getData() ) {
+      if ( o instanceof UIRepositoryObject ) {
+        UIRepositoryContent content = (UIRepositoryContent) o;
+        git.add().addFilepattern( content.getName() ).call();
+      }
+    }
+  }
+
+  public void onDropToUnstaged( DropEvent event ) throws Exception {
+    for ( Object o : event.getDataTransfer().getData() ) {
+      if ( o instanceof UIRepositoryObject ) {
+        UIRepositoryContent content = (UIRepositoryContent) o;
+        git.reset().addPath( content.getName() ).call();
+      }
+    }
   }
 
   public void onDrag( DropEvent event ) {
