@@ -30,11 +30,11 @@ public class UIGitTest extends RepositoryTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    git = new Git( db );
     uiGit = new UIGit();
-    uiGit.setGit( git );
+    uiGit.openGit( db.getDirectory().getPath() );
     uiGit.setAuthorName( "test <test@example.com>" );
     uiGit.setCommitMessage( "test" );
+    git = uiGit.getGit();
   }
 
   @Test

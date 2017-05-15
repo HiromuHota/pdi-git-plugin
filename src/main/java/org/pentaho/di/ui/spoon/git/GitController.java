@@ -227,8 +227,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private void closeGit() {
     path = null;
-    uiGit.getGit().close();
-    uiGit.setGit( null );
+    uiGit.closeGit();
   }
 
   @VisibleForTesting

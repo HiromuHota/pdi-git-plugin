@@ -147,12 +147,17 @@ public class UIGit extends XulEventSourceAdapter {
     return objs;
   }
 
-  public Git initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {
-    return Git.init().setDirectory( new File( baseDirectory ) ).call();
+  public void initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {
+    git = Git.init().setDirectory( new File( baseDirectory ) ).call();
   }
 
-  public Git openGit( String baseDirectory ) throws IOException {
-    return Git.open( new File( baseDirectory ) );
+  public void openGit( String baseDirectory ) throws IOException {
+    git = Git.open( new File( baseDirectory ) );
+  }
+
+  public void closeGit() {
+    git.close();
+    git = null;
   }
 
   public PullResult pull() throws Exception {
