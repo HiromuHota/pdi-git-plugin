@@ -1,7 +1,10 @@
 package org.pentaho.di.ui.spoon.git.model;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.RemoteConfig;
 import org.pentaho.ui.xul.XulEventSourceAdapter;
 
 public class UIGit extends XulEventSourceAdapter {
@@ -34,6 +37,24 @@ public class UIGit extends XulEventSourceAdapter {
   public void setCommitMessage( String commitMessage ) {
     this.commitMessage = commitMessage;
     firePropertyChange( "commitMessage", null, commitMessage );
+  }
+
+  public String getBranch() {
+    try {
+      return git.getRepository().getBranch();
+    } catch ( Exception e ) {
+      return "";
+    }
+  }
+
+  public String getRemote() {
+    try {
+      StoredConfig config = git.getRepository().getConfig();
+      RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
+      return remoteConfig.getURIs().iterator().next().toString();
+    } catch ( Exception e ) {
+      return "";
+    }
   }
 
   public RevCommit commit( String name, String email, String message ) throws Exception {

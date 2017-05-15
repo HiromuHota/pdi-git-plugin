@@ -129,8 +129,8 @@ public class GitController extends AbstractXulEventHandler {
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
-    branchBinding = bf.createBinding( this, "branch", branchLabel, "value" );
-    remoteBinding = bf.createBinding( this, "remote", remoteLabel, "value" );
+    branchBinding = bf.createBinding( uiGit, "branch", branchLabel, "value" );
+    remoteBinding = bf.createBinding( uiGit, "remote", remoteLabel, "value" );
     revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
@@ -404,7 +404,7 @@ public class GitController extends AbstractXulEventHandler {
     promptBox.setTitle( "Remote repository" );
     promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
     promptBox.setMessage( "URL/path (The remote name will be \"" + Constants.DEFAULT_REMOTE_NAME + "\")" );
-    promptBox.setValue( getRemote() );
+    promptBox.setValue( uiGit.getRemote() );
     promptBox.addDialogCallback( new XulDialogCallback<String>() {
       public void onClose( XulComponent component, Status status, String value ) {
         if ( !status.equals( Status.CANCEL ) ) {
@@ -467,24 +467,6 @@ public class GitController extends AbstractXulEventHandler {
 
   public String getPath() {
     return this.path;
-  }
-
-  public String getBranch() {
-    try {
-      return uiGit.getGit().getRepository().getBranch();
-    } catch ( Exception e ) {
-      return "";
-    }
-  }
-
-  public String getRemote() {
-    try {
-      StoredConfig config = uiGit.getGit().getRepository().getConfig();
-      RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
-      return remoteConfig.getURIs().iterator().next().toString();
-    } catch ( Exception e ) {
-      return "";
-    }
   }
 
   public String getAuthorName() {
