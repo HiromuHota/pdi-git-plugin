@@ -445,10 +445,11 @@ public class GitController extends AbstractXulEventHandler {
     promptBox.open();
   }
 
-  void deleteRemote() throws GitAPIException {
+  @VisibleForTesting
+  RemoteConfig deleteRemote() throws GitAPIException {
     RemoteRemoveCommand cmd = git.remoteRemove();
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
-    cmd.call();
+    return cmd.call();
   }
 
   @VisibleForTesting

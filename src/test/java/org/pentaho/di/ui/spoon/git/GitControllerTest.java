@@ -5,16 +5,19 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.junit.RepositoryTestCase;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.util.FS;
@@ -161,6 +164,49 @@ public class GitControllerTest extends RepositoryTestCase {
     controller.push();
 
     assertEquals( commit.getId(), db2.resolve( commit.getId().getName() + "^{commit}" ) );
+  }
+
+  @Test
+  public void testDeleteRemote() throws Exception {
+    RemoteConfig remoteConfig = setupRemote();
+
+    RemoteConfig remote = controller.deleteRemote();
+
+    // assert that the removed remote is the initial remote
+    assertRemoteConfigEquals( remoteConfig, remote );
+    // assert that there are no remotes left
+    assertTrue( RemoteConfig.getAllRemoteConfigs( db.getConfig() ).isEmpty() );
+  }
+
+  private RemoteConfig setupRemote() throws IOException, URISyntaxException {
+     // create another repository
+    Repository remoteRepository = createWorkRepository();
+
+    // set it up as a remote to this repository
+    final StoredConfig config = db.getConfig();
+    RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
+
+    RefSpec refSpec = new RefSpec();
+    refSpec = refSpec.setForceUpdate( true );
+    refSpec = refSpec.setSourceDestination( Constants.R_HEADS + "*",
+                  Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME + "/*" );
+    remoteConfig.addFetchRefSpec( refSpec );
+
+    URIish uri = new URIish( remoteRepository.getDirectory().toURI().toURL() );
+    remoteConfig.addURI( uri );
+
+    remoteConfig.update( config );
+    config.save();
+
+    return remoteConfig;
+  }
+
+  private void assertRemoteConfigEquals( RemoteConfig expected, RemoteConfig actual ) {
+    assertEquals( expected.getName(), actual.getName() );
+    assertEquals( expected.getURIs(), actual.getURIs() );
+    assertEquals( expected.getPushURIs(), actual.getPushURIs() );
+    assertEquals( expected.getFetchRefSpecs(), actual.getFetchRefSpecs() );
+    assertEquals( expected.getPushRefSpecs(), actual.getPushRefSpecs() );
   }
 
   private static class XulConfirmBoxMock extends MessageDialogBase implements XulConfirmBox {
