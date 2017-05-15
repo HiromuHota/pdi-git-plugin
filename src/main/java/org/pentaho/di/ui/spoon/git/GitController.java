@@ -336,7 +336,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void pull() {
     try {
-      PullResult result = uiGit.getGit().pull().call();
+      PullResult result = uiGit.pull();
       revisionBinding.fireSourceChanged();
     } catch ( GitAPIException e ) {
       messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );

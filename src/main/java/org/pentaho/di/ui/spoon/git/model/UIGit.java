@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
@@ -152,5 +153,9 @@ public class UIGit extends XulEventSourceAdapter {
 
   public Git openGit( String baseDirectory ) throws IOException {
     return Git.open( new File( baseDirectory ) );
+  }
+
+  public PullResult pull() throws Exception {
+    return git.pull().call();
   }
 }
