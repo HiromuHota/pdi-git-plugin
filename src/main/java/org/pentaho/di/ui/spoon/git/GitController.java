@@ -81,7 +81,6 @@ public class GitController extends AbstractXulEventHandler {
 
   private static final Class<?> PKG = RepositoryExplorer.class;
 
-  private Git git;
   private String path;
   private UIGit uiGit = new UIGit();
 
@@ -144,7 +143,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void setActive() {
     openGit();
-    if ( git == null ) {
+    if ( uiGit.getGit() == null ) {
       return;
     }
 
@@ -157,8 +156,8 @@ public class GitController extends AbstractXulEventHandler {
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
 
-    setAuthorName( git.getRepository().getConfig().getString( "user", null, "name" )
-        + " <" + git.getRepository().getConfig().getString( "user", null, "email" ) + ">" );
+    setAuthorName( uiGit.getGit().getRepository().getConfig().getString( "user", null, "name" )
+        + " <" + uiGit.getGit().getRepository().getConfig().getString( "user", null, "email" ) + ">" );
 
     try {
       fireSourceChanged();
@@ -168,7 +167,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setInactive() {
-    if ( git == null ) {
+    if ( uiGit.getGit() == null ) {
       return; // No thing to do
     }
 
@@ -191,7 +190,7 @@ public class GitController extends AbstractXulEventHandler {
   private void openGit() {
     String baseDirectory = determineBaseDirectory();
     try {
-      git = Git.open( new File( baseDirectory ) );
+      uiGit.setGit( Git.open( new File( baseDirectory ) ) );
       path = baseDirectory;
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
@@ -247,8 +246,8 @@ public class GitController extends AbstractXulEventHandler {
 
   private void closeGit() {
     path = null;
-    git.close();
-    git = null;
+    uiGit.getGit().close();
+    uiGit.setGit( null );
   }
 
   @VisibleForTesting
@@ -298,7 +297,7 @@ public class GitController extends AbstractXulEventHandler {
   public void addToIndex() throws Exception {
     Collection<UIRepositoryContent> contents = unstagedTable.getSelectedItems();
     for ( UIRepositoryContent content : contents ) {
-      git.add().addFilepattern( content.getName() ).call();
+      uiGit.getGit().add().addFilepattern( content.getName() ).call();
     }
     fireSourceChanged();
   }
@@ -307,7 +306,7 @@ public class GitController extends AbstractXulEventHandler {
     for ( Object o : event.getDataTransfer().getData() ) {
       if ( o instanceof UIRepositoryObject ) {
         UIRepositoryContent content = (UIRepositoryContent) o;
-        git.add().addFilepattern( content.getName() ).call();
+        uiGit.getGit().add().addFilepattern( content.getName() ).call();
       }
     }
   }
@@ -316,7 +315,7 @@ public class GitController extends AbstractXulEventHandler {
     for ( Object o : event.getDataTransfer().getData() ) {
       if ( o instanceof UIRepositoryObject ) {
         UIRepositoryContent content = (UIRepositoryContent) o;
-        git.reset().addPath( content.getName() ).call();
+        uiGit.getGit().reset().addPath( content.getName() ).call();
       }
     }
   }
@@ -327,7 +326,7 @@ public class GitController extends AbstractXulEventHandler {
   public void removeFromIndex() throws Exception {
     Collection<UIRepositoryContent> contents = stagedTable.getSelectedItems();
     for ( UIRepositoryContent content : contents ) {
-      git.reset().addPath( content.getName() ).call();
+      uiGit.getGit().reset().addPath( content.getName() ).call();
     }
     fireSourceChanged();
   }
@@ -349,14 +348,14 @@ public class GitController extends AbstractXulEventHandler {
       messageBox.open();
       return;
     }
-    git.commit().setAuthor( m.group( 1 ), m.group( 2 ) ).setMessage( getCommitMessage() ).call();
+    uiGit.getGit().commit().setAuthor( m.group( 1 ), m.group( 2 ) ).setMessage( getCommitMessage() ).call();
     setCommitMessage( "" );
     fireSourceChanged();
   }
 
   public void pull() {
     try {
-      PullResult result = git.pull().call();
+      PullResult result = uiGit.getGit().pull().call();
       revisionBinding.fireSourceChanged();
     } catch ( GitAPIException e ) {
       messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
@@ -369,11 +368,11 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void push() throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-    final String fullBranch = git.getRepository().getFullBranch();
-    final StoredConfig config = git.getRepository().getConfig();
+    final String fullBranch = uiGit.getGit().getRepository().getFullBranch();
+    final StoredConfig config = uiGit.getGit().getRepository().getConfig();
     Set<String> remotes = config.getSubsections( "remote" );
     if ( remotes.contains( Constants.DEFAULT_REMOTE_NAME ) ) {
-      PushResult result = git.push().call().iterator().next();
+      PushResult result = uiGit.getGit().push().call().iterator().next();
       RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
       messageBox = (XulMessageBox) document.getElementById( "messagebox" );
       if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
@@ -410,7 +409,7 @@ public class GitController extends AbstractXulEventHandler {
       public void onClose( XulComponent component, Status status, String value ) {
         if ( !status.equals( Status.CANCEL ) ) {
           try {
-            RemoteSetUrlCommand cmd = git.remoteSetUrl();
+            RemoteSetUrlCommand cmd = uiGit.getGit().remoteSetUrl();
             cmd.setName( Constants.DEFAULT_REMOTE_NAME );
             URIish uri = new URIish( value );
             cmd.setUri( uri );
@@ -447,19 +446,19 @@ public class GitController extends AbstractXulEventHandler {
 
   @VisibleForTesting
   RemoteConfig deleteRemote() throws GitAPIException {
-    RemoteRemoveCommand cmd = git.remoteRemove();
+    RemoteRemoveCommand cmd = uiGit.getGit().remoteRemove();
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
     return cmd.call();
   }
 
   @VisibleForTesting
   Git getGit() {
-    return this.git;
+    return uiGit.getGit();
   }
 
   @VisibleForTesting
   void setGit( Git git ) {
-    this.git = git;
+    uiGit.setGit( git );
   }
 
   public void setPath( String path ) {
@@ -472,7 +471,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public String getBranch() {
     try {
-      return git.getRepository().getBranch();
+      return uiGit.getGit().getRepository().getBranch();
     } catch ( Exception e ) {
       return "";
     }
@@ -480,7 +479,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public String getRemote() {
     try {
-      StoredConfig config = git.getRepository().getConfig();
+      StoredConfig config = uiGit.getGit().getRepository().getConfig();
       RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
       return remoteConfig.getURIs().iterator().next().toString();
     } catch ( Exception e ) {
@@ -507,7 +506,7 @@ public class GitController extends AbstractXulEventHandler {
   public UIRepositoryObjectRevisions getRevisionObjects() {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     try {
-      Iterable<RevCommit> iterable = git.log().call();
+      Iterable<RevCommit> iterable = uiGit.getGit().log().call();
       for ( RevCommit commit : iterable ) {
         PurObjectRevision rev = new PurObjectRevision(
           commit.getName().substring( 0, 7 ),
@@ -525,7 +524,7 @@ public class GitController extends AbstractXulEventHandler {
   public UIRepositoryObjects getUnstagedObjects() throws Exception {
     Set<String> files = new HashSet<String>();
     try {
-      Status status = git.status().call();
+      Status status = uiGit.getGit().status().call();
       files.addAll( status.getModified() );
       files.addAll( status.getUntracked() );
     } catch ( Exception e ) {
@@ -536,7 +535,7 @@ public class GitController extends AbstractXulEventHandler {
   public UIRepositoryObjects getStagedObjects() throws Exception {
     Set<String> files = new HashSet<String>();
     try {
-      Status status = git.status().call();
+      Status status = uiGit.getGit().status().call();
       files.addAll( status.getAdded() );
       files.addAll( status.getChanged() );
     } catch ( Exception e ) {
