@@ -3,7 +3,6 @@ package org.pentaho.di.ui.spoon.git;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -11,19 +10,15 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.junit.RepositoryTestCase;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
-import org.eclipse.jgit.util.FS;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulDomContainer;
-import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.dom.Document;
@@ -46,7 +41,7 @@ public class GitControllerTest extends RepositoryTestCase {
     super.setUp();
     git = new Git( db );
     controller = spy( new GitController() );
-    uiGit = new UIGit();
+    uiGit = mock( UIGit.class );
     uiGit.setAuthorName( "test <test@example.com>" );
     uiGit.setCommitMessage( "test" );
     uiGit.setGit( git );
@@ -60,33 +55,25 @@ public class GitControllerTest extends RepositoryTestCase {
   }
 
   @Test
-  public void shouldInitializeGitOnAccept() throws IOException, XulException {
+  public void shouldInitializeGitOnAccept() throws Exception {
     XulConfirmBox prompt = new XulConfirmBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( CONFIRMBOX ) ).thenReturn( prompt );
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
 
-    uiGit.setGit( null );
+    controller.initGit( "random-path" );
 
-    File directory = createTempDirectory( "testInitRepository" );
-    controller.initGit( directory.getPath() );
-    ( new FileRepositoryBuilder() ).setGitDir( directory ).build();
-    File gitDirectory = new File( directory.getPath() + File.separator + ".git" );
-    assertTrue( RepositoryCache.FileKey.isGitRepository( gitDirectory, FS.DETECTED ) );
+    verify( uiGit ).initGit( anyString() );
   }
 
   @Test
-  public void shouldNotInitializeGitOnCencel() throws IOException, XulException {
+  public void shouldNotInitializeGitOnCencel() throws Exception {
     XulConfirmBox prompt = new XulConfirmBoxMock( XulDialogCallback.Status.CANCEL );
     when( document.getElementById( CONFIRMBOX ) ).thenReturn( prompt );
 
-    uiGit.setGit( null );
+    controller.initGit( "random-path" );
 
-    File directory = createTempDirectory( "testInitRepository" );
-    controller.initGit( directory.getPath() );
-    ( new FileRepositoryBuilder() ).setGitDir( directory ).build();
-    File gitDirectory = new File( directory.getPath() + File.separator + ".git" );
-    assertFalse( RepositoryCache.FileKey.isGitRepository( gitDirectory, FS.DETECTED ) );
+    verify( uiGit, never() ).initGit( anyString() );
   }
 
   @Test
