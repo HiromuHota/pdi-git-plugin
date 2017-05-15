@@ -1,11 +1,14 @@
 package org.pentaho.di.ui.spoon.git.model;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -141,5 +144,13 @@ public class UIGit extends XulEventSourceAdapter {
       objs.add( obj );
     }
     return objs;
+  }
+
+  public Git initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {
+    return Git.init().setDirectory( new File( baseDirectory ) ).call();
+  }
+
+  public Git openGit( String baseDirectory ) throws IOException {
+    return Git.open( new File( baseDirectory ) );
   }
 }

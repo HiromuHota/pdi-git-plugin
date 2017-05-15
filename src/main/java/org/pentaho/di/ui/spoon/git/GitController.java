@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.RemoteSetUrlCommand;
@@ -172,7 +171,7 @@ public class GitController extends AbstractXulEventHandler {
   private void openGit() {
     String baseDirectory = determineBaseDirectory();
     try {
-      uiGit.setGit( Git.open( new File( baseDirectory ) ) );
+      uiGit.openGit( baseDirectory );
       path = baseDirectory;
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
@@ -245,7 +244,7 @@ public class GitController extends AbstractXulEventHandler {
         messageBox = (XulMessageBox) document.getElementById( "messagebox" );
         if ( returnCode == Status.ACCEPT ) {
           try {
-            Git.init().setDirectory( new File( baseDirectory ) ).call();
+            uiGit.initGit( baseDirectory );
             path = baseDirectory;
             messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
             messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
