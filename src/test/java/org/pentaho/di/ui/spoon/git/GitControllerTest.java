@@ -27,6 +27,7 @@ import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObj
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
+import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.components.XulConfirmBox;
@@ -50,6 +51,10 @@ public class GitControllerTest extends RepositoryTestCase {
     super.setUp();
     git = new Git( db );
     controller = spy( new GitController() );
+    UIGit uiGit = new UIGit();
+    uiGit.setAuthorName( "test <test@example.com>" );
+    uiGit.setCommitMessage( "test" );
+    controller.setUIGit( uiGit );
     controller.setGit( git );
 
     DocumentFactory.registerElementClass( ElementDom4J.class );
@@ -129,8 +134,6 @@ public class GitControllerTest extends RepositoryTestCase {
 
   @Test
   public void testCommit() throws Exception {
-    doReturn( "test <test@example.com>" ).when( controller ).getAuthorName();
-    doReturn( "test" ).when( controller ).getCommitMessage();
     doNothing().when( controller ).fireSourceChanged();
 
     writeTrashFile( "a.ktr", "content" );

@@ -156,7 +156,7 @@ public class GitController extends AbstractXulEventHandler {
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
 
-    setAuthorName( uiGit.getGit().getRepository().getConfig().getString( "user", null, "name" )
+    uiGit.setAuthorName( uiGit.getGit().getRepository().getConfig().getString( "user", null, "name" )
         + " <" + uiGit.getGit().getRepository().getConfig().getString( "user", null, "email" ) + ">" );
 
     try {
@@ -340,7 +340,7 @@ public class GitController extends AbstractXulEventHandler {
       return;
     }
 
-    Matcher m = Pattern.compile( "(.*) <(.*@.*)>" ).matcher( getAuthorName() );
+    Matcher m = Pattern.compile( "(.*) <(.*@.*)>" ).matcher( uiGit.getAuthorName() );
     if ( !m.matches() ) {
       messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
       messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
@@ -348,8 +348,8 @@ public class GitController extends AbstractXulEventHandler {
       messageBox.open();
       return;
     }
-    uiGit.commit( m.group( 1 ), m.group( 2 ), getCommitMessage() );
-    setCommitMessage( "" );
+    uiGit.commit( m.group( 1 ), m.group( 2 ), uiGit.getCommitMessage() );
+    uiGit.setCommitMessage( "" );
     fireSourceChanged();
   }
 
@@ -461,28 +461,17 @@ public class GitController extends AbstractXulEventHandler {
     uiGit.setGit( git );
   }
 
+  @VisibleForTesting
+  void setUIGit( UIGit uiGit ) {
+    this.uiGit = uiGit;
+  }
+
   public void setPath( String path ) {
     this.path = "".equals( path ) ? null : path;
   }
 
   public String getPath() {
     return this.path;
-  }
-
-  public String getAuthorName() {
-    return uiGit.getAuthorName();
-  }
-
-  public void setAuthorName( String authorName ) {
-    uiGit.setAuthorName( authorName );
-  }
-
-  public String getCommitMessage() {
-    return uiGit.getCommitMessage();
-  }
-
-  public void setCommitMessage( String message ) {
-    uiGit.setCommitMessage( message );
   }
 
   public UIRepositoryObjectRevisions getRevisionObjects() {
