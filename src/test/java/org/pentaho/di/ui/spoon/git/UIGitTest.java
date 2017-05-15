@@ -53,7 +53,7 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testGetRemote() throws IOException, URISyntaxException {
+  public void testGetRemote() throws Exception {
     setupRemote();
 
     assertNotNull( uiGit.getRemote() );

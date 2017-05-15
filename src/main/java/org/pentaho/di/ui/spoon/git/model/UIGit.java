@@ -1,7 +1,5 @@
 package org.pentaho.di.ui.spoon.git.model;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -62,7 +60,7 @@ public class UIGit extends XulEventSourceAdapter {
   public String getBranch() {
     try {
       return git.getRepository().getBranch();
-    } catch ( IOException e ) {
+    } catch ( Exception e ) {
       return "";
     }
   }
@@ -72,7 +70,7 @@ public class UIGit extends XulEventSourceAdapter {
       StoredConfig config = git.getRepository().getConfig();
       RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
       return remoteConfig.getURIs().iterator().next().toString();
-    } catch ( URISyntaxException e ) {
+    } catch ( Exception e ) {
       return "";
     }
   }
