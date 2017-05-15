@@ -2,12 +2,29 @@ package org.pentaho.di.ui.spoon.git.model;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.RemoteConfig;
+import org.pentaho.di.repository.ObjectId;
+import org.pentaho.di.repository.ObjectRevision;
+import org.pentaho.di.repository.RepositoryElementMetaInterface;
+import org.pentaho.di.repository.RepositoryObject;
+import org.pentaho.di.repository.RepositoryObjectType;
+import org.pentaho.di.repository.StringObjectId;
+import org.pentaho.di.repository.pur.PurObjectRevision;
+import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
+import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
+import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
+import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
+import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
+import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
 import org.pentaho.ui.xul.XulEventSourceAdapter;
 
 public class UIGit extends XulEventSourceAdapter {
@@ -62,5 +79,69 @@ public class UIGit extends XulEventSourceAdapter {
 
   public RevCommit commit( String name, String email, String message ) throws Exception {
     return git.commit().setAuthor( name, email ).setMessage( message ).call();
+  }
+
+  public UIRepositoryObjectRevisions getRevisionObjects() {
+    UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
+    try {
+      Iterable<RevCommit> iterable = git.log().call();
+      for ( RevCommit commit : iterable ) {
+        PurObjectRevision rev = new PurObjectRevision(
+          commit.getName().substring( 0, 7 ),
+          commit.getAuthorIdent().getName(),
+          commit.getAuthorIdent().getWhen(),
+          commit.getShortMessage() );
+        revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
+      }
+    } catch ( Exception e ) {
+
+    }
+    return revisions;
+  }
+
+  public UIRepositoryObjects getUnstagedObjects() throws Exception {
+    Set<String> files = new HashSet<String>();
+    try {
+      Status status = git.status().call();
+      files.addAll( status.getModified() );
+      files.addAll( status.getUntracked() );
+    } catch ( Exception e ) {
+    }
+    return getObjects( files );
+  }
+
+  public UIRepositoryObjects getStagedObjects() throws Exception {
+    Set<String> files = new HashSet<String>();
+    try {
+      Status status = git.status().call();
+      files.addAll( status.getAdded() );
+      files.addAll( status.getChanged() );
+    } catch ( Exception e ) {
+    }
+    return getObjects( files );
+  }
+
+  private UIRepositoryObjects getObjects( Set<String> files ) throws Exception {
+    UIRepositoryObjects objs = new UIRepositoryObjects();
+    for ( String file : files ) {
+      UIRepositoryObject obj;
+      Date date = new Date();
+      ObjectId id = new StringObjectId( file );
+      if ( file.endsWith( ".ktr" ) ) {
+        RepositoryElementMetaInterface rc =  new RepositoryObject(
+            id, file, null, "-", date, RepositoryObjectType.TRANSFORMATION, "", false );
+        obj = new UITransformation( rc, null, null );
+      } else if ( file.endsWith( ".kjb" ) ) {
+        RepositoryElementMetaInterface rc =  new RepositoryObject(
+            id, file, null, "-", date, RepositoryObjectType.JOB, "", false );
+        obj = new UIJob( rc, null, null );
+      } else {
+        RepositoryElementMetaInterface rc =  new RepositoryObject(
+            id, file, null, "-", date, RepositoryObjectType.UNKNOWN, "", false );
+        obj = new UIJob( rc, null, null );
+      }
+      objs.add( obj );
+    }
+    return objs;
   }
 }

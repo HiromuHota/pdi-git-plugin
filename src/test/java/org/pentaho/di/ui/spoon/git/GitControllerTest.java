@@ -96,36 +96,6 @@ public class GitControllerTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testGetRevisionObjects() throws IOException, NoFilepatternException, GitAPIException {
-    writeTrashFile( "Test.txt", "Hello world" );
-    git.add().addFilepattern( "Test.txt" ).call();
-    git.commit().setMessage( "initial commit" ).call();
-    UIRepositoryObjectRevisions revisions = controller.getRevisionObjects();
-    assertEquals( 1, revisions.size() );
-  }
-
-  @Test
-  public void testGetUnstagedObjects() throws Exception {
-    writeTrashFile( "a.ktr", "content" );
-    writeTrashFile( "b.kjb", "content" );
-    UIRepositoryObjects stagedObjects = controller.getUnstagedObjects();
-    assertEquals( 2, stagedObjects.size() );
-    assertEquals( UITransformation.class, stagedObjects.get( 0 ).getClass() );
-    assertEquals( UIJob.class, stagedObjects.get( 1 ).getClass() );
-  }
-
-  @Test
-  public void testGetStagedObjects() throws Exception {
-    writeTrashFile( "a.ktr", "content" );
-    writeTrashFile( "b.kjb", "content" );
-    git.add().addFilepattern( "." ).call();
-    UIRepositoryObjects stagedObjects = controller.getStagedObjects();
-    assertEquals( 2, stagedObjects.size() );
-    assertEquals( UITransformation.class, stagedObjects.get( 0 ).getClass() );
-    assertEquals( UIJob.class, stagedObjects.get( 1 ).getClass() );
-  }
-
-  @Test
   public void testAddToIndex() {
   }
 

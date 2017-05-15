@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -17,7 +15,6 @@ import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.RemoteSetUrlCommand;
-import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoHeadException;
@@ -26,7 +23,6 @@ import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
@@ -37,22 +33,10 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
-import org.pentaho.di.repository.ObjectId;
-import org.pentaho.di.repository.ObjectRevision;
-import org.pentaho.di.repository.RepositoryElementMetaInterface;
-import org.pentaho.di.repository.RepositoryObject;
-import org.pentaho.di.repository.RepositoryObjectType;
-import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
-import org.pentaho.di.repository.pur.PurObjectRevision;
-import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
-import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryContent;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
@@ -131,9 +115,9 @@ public class GitController extends AbstractXulEventHandler {
     bf.setBindingType( Binding.Type.ONE_WAY );
     branchBinding = bf.createBinding( uiGit, "branch", branchLabel, "value" );
     remoteBinding = bf.createBinding( uiGit, "remote", remoteLabel, "value" );
-    revisionBinding = bf.createBinding( this, "revisionObjects", revisionTable, "elements" );
-    unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
-    stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
+    revisionBinding = bf.createBinding( uiGit, "revisionObjects", revisionTable, "elements" );
+    unstagedBinding = bf.createBinding( uiGit, "unstagedObjects", unstagedTable, "elements" );
+    stagedBinding = bf.createBinding( uiGit, "stagedObjects", stagedTable, "elements" );
 
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
     pathBinding = bf.createBinding( this, "path", pathText, "value" );
@@ -332,7 +316,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void commit() throws Exception {
-    if ( getStagedObjects().size() == 0 ) {
+    if ( uiGit.getStagedObjects().size() == 0 ) {
       messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
       messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
       messageBox.setMessage( "There are no staged files" );
@@ -462,69 +446,5 @@ public class GitController extends AbstractXulEventHandler {
 
   public String getPath() {
     return this.path;
-  }
-
-  public UIRepositoryObjectRevisions getRevisionObjects() {
-    UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
-    try {
-      Iterable<RevCommit> iterable = uiGit.getGit().log().call();
-      for ( RevCommit commit : iterable ) {
-        PurObjectRevision rev = new PurObjectRevision(
-          commit.getName().substring( 0, 7 ),
-          commit.getAuthorIdent().getName(),
-          commit.getAuthorIdent().getWhen(),
-          commit.getShortMessage() );
-        revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
-      }
-    } catch ( Exception e ) {
-
-    }
-    return revisions;
-  }
-
-  public UIRepositoryObjects getUnstagedObjects() throws Exception {
-    Set<String> files = new HashSet<String>();
-    try {
-      Status status = uiGit.getGit().status().call();
-      files.addAll( status.getModified() );
-      files.addAll( status.getUntracked() );
-    } catch ( Exception e ) {
-    }
-    return getObjects( files );
-  }
-
-  public UIRepositoryObjects getStagedObjects() throws Exception {
-    Set<String> files = new HashSet<String>();
-    try {
-      Status status = uiGit.getGit().status().call();
-      files.addAll( status.getAdded() );
-      files.addAll( status.getChanged() );
-    } catch ( Exception e ) {
-    }
-    return getObjects( files );
-  }
-
-  private UIRepositoryObjects getObjects( Set<String> files ) throws Exception {
-    UIRepositoryObjects objs = new UIRepositoryObjects();
-    for ( String file : files ) {
-      UIRepositoryObject obj;
-      Date date = new Date();
-      ObjectId id = new StringObjectId( file );
-      if ( file.endsWith( ".ktr" ) ) {
-        RepositoryElementMetaInterface rc =  new RepositoryObject(
-            id, file, null, "-", date, RepositoryObjectType.TRANSFORMATION, "", false );
-        obj = new UITransformation( rc, null, null );
-      } else if ( file.endsWith( ".kjb" ) ) {
-        RepositoryElementMetaInterface rc =  new RepositoryObject(
-            id, file, null, "-", date, RepositoryObjectType.JOB, "", false );
-        obj = new UIJob( rc, null, null );
-      } else {
-        RepositoryElementMetaInterface rc =  new RepositoryObject(
-            id, file, null, "-", date, RepositoryObjectType.UNKNOWN, "", false );
-        obj = new UIJob( rc, null, null );
-      }
-      objs.add( obj );
-    }
-    return objs;
   }
 }
