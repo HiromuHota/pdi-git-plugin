@@ -348,7 +348,7 @@ public class GitController extends AbstractXulEventHandler {
       messageBox.open();
       return;
     }
-    uiGit.getGit().commit().setAuthor( m.group( 1 ), m.group( 2 ) ).setMessage( getCommitMessage() ).call();
+    uiGit.commit( m.group( 1 ), m.group( 2 ), getCommitMessage() );
     setCommitMessage( "" );
     fireSourceChanged();
   }

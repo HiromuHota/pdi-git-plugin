@@ -1,6 +1,7 @@
 package org.pentaho.di.ui.spoon.git.model;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.pentaho.ui.xul.XulEventSourceAdapter;
 
 public class UIGit extends XulEventSourceAdapter {
@@ -33,5 +34,9 @@ public class UIGit extends XulEventSourceAdapter {
   public void setCommitMessage( String commitMessage ) {
     this.commitMessage = commitMessage;
     firePropertyChange( "commitMessage", null, commitMessage );
+  }
+
+  public RevCommit commit( String name, String email, String message ) throws Exception {
+    return git.commit().setAuthor( name, email ).setMessage( message ).call();
   }
 }
