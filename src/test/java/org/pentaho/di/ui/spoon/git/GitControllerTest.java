@@ -42,10 +42,8 @@ public class GitControllerTest extends RepositoryTestCase {
     git = new Git( db );
     controller = spy( new GitController() );
     uiGit = mock( UIGit.class );
-    uiGit.setAuthorName( "test <test@example.com>" );
-    uiGit.setCommitMessage( "test" );
-    uiGit.setGit( git );
     controller.setUIGit( uiGit );
+    doNothing().when( controller ).fireSourceChanged();
 
     DocumentFactory.registerElementClass( ElementDom4J.class );
     document = mock( Document.class );
@@ -85,14 +83,39 @@ public class GitControllerTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testCommit() throws Exception {
-    doNothing().when( controller ).fireSourceChanged();
+  public void shouldNotCommitWhenNoStagedObjects() throws Exception {
+    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
+    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    doReturn( false ).when( uiGit ).hasStagedObjects();
 
-    writeTrashFile( "a.ktr", "content" );
-    git.add().addFilepattern( "." ).call();
     controller.commit();
-    RevCommit commit = git.log().call().iterator().next();
-    assertEquals( "test", commit.getShortMessage() );
+
+    verify( uiGit, never() ).commit( anyString(), anyString(), anyString() );
+  }
+
+  @Test
+  public void shouldNotCommitWhenAuthorNameMalformed() throws Exception {
+    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
+    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    doReturn( true ).when( uiGit ).hasStagedObjects();
+    doReturn( "random author" ).when( uiGit ).getAuthorName();
+
+    controller.commit();
+
+    verify( uiGit, never() ).commit( anyString(), anyString(), anyString() );
+  }
+
+  @Test
+  public void shouldCommit() throws Exception {
+    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
+    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    doReturn( true ).when( uiGit ).hasStagedObjects();
+    doReturn( "test <test@example.com>" ).when( uiGit ).getAuthorName();
+    doReturn( "test" ).when( uiGit ).getCommitMessage();
+
+    controller.commit();
+
+    verify( uiGit ).commit( anyString(), anyString(), anyString() );
   }
 
   @Test

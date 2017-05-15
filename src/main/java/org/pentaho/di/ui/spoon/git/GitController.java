@@ -312,7 +312,8 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void commit() throws Exception {
-    if ( uiGit.getStagedObjects().size() == 0 ) {
+    messageBox = (XulMessageBox) document.getElementById( "messagebox" );
+    if ( !uiGit.hasStagedObjects() ) {
       messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
       messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
       messageBox.setMessage( "There are no staged files" );

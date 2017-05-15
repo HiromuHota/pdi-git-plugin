@@ -123,6 +123,10 @@ public class UIGit extends XulEventSourceAdapter {
     return getObjects( files );
   }
 
+  public boolean hasStagedObjects() throws Exception {
+    return getStagedObjects().size() != 0;
+  }
+
   private UIRepositoryObjects getObjects( Set<String> files ) throws Exception {
     UIRepositoryObjects objs = new UIRepositoryObjects();
     for ( String file : files ) {
