@@ -452,16 +452,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   @VisibleForTesting
-  Git getGit() {
-    return uiGit.getGit();
-  }
-
-  @VisibleForTesting
-  void setGit( Git git ) {
-    uiGit.setGit( git );
-  }
-
-  @VisibleForTesting
   void setUIGit( UIGit uiGit ) {
     this.uiGit = uiGit;
   }

@@ -45,17 +45,18 @@ public class GitControllerTest extends RepositoryTestCase {
   private Document document;
   private GitController controller;
   private Git git;
+  private UIGit uiGit;
 
   @Before
   public void setUp() throws Exception {
     super.setUp();
     git = new Git( db );
     controller = spy( new GitController() );
-    UIGit uiGit = new UIGit();
+    uiGit = new UIGit();
     uiGit.setAuthorName( "test <test@example.com>" );
     uiGit.setCommitMessage( "test" );
+    uiGit.setGit( git );
     controller.setUIGit( uiGit );
-    controller.setGit( git );
 
     DocumentFactory.registerElementClass( ElementDom4J.class );
     document = mock( Document.class );
@@ -71,7 +72,7 @@ public class GitControllerTest extends RepositoryTestCase {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
 
-    controller.setGit( null );
+    uiGit.setGit( null );
 
     File directory = createTempDirectory( "testInitRepository" );
     controller.initGit( directory.getPath() );
@@ -85,7 +86,7 @@ public class GitControllerTest extends RepositoryTestCase {
     XulConfirmBox prompt = new XulConfirmBoxMock( XulDialogCallback.Status.CANCEL );
     when( document.getElementById( CONFIRMBOX ) ).thenReturn( prompt );
 
-    controller.setGit( null );
+    uiGit.setGit( null );
 
     File directory = createTempDirectory( "testInitRepository" );
     controller.initGit( directory.getPath() );
