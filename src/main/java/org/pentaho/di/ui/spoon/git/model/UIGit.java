@@ -1,5 +1,8 @@
 package org.pentaho.di.ui.spoon.git.model;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -42,7 +45,7 @@ public class UIGit extends XulEventSourceAdapter {
   public String getBranch() {
     try {
       return git.getRepository().getBranch();
-    } catch ( Exception e ) {
+    } catch ( IOException e ) {
       return "";
     }
   }
@@ -52,7 +55,7 @@ public class UIGit extends XulEventSourceAdapter {
       StoredConfig config = git.getRepository().getConfig();
       RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
       return remoteConfig.getURIs().iterator().next().toString();
-    } catch ( Exception e ) {
+    } catch ( URISyntaxException e ) {
       return "";
     }
   }
