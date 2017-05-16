@@ -169,7 +169,6 @@ public class GitController extends AbstractXulEventHandler {
       uiGit.openGit( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
-      openGit();
     } catch ( IOException e ) {
       // TODO Auto-generated catch block
       e.printStackTrace();
