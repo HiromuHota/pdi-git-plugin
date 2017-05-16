@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.RemoteSetUrlCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
@@ -15,6 +16,7 @@ import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.RepositoryElementMetaInterface;
@@ -82,6 +84,19 @@ public class UIGit extends XulEventSourceAdapter {
     } catch ( Exception e ) {
       return "";
     }
+  }
+
+  public void setRemote( String s ) throws Exception {
+    RemoteSetUrlCommand cmd = git.remoteSetUrl();
+    cmd.setName( Constants.DEFAULT_REMOTE_NAME );
+    URIish uri = new URIish( s );
+    cmd.setUri( uri );
+    // execute the command to change the fetch url
+    cmd.setPush( false );
+    cmd.call();
+    // execute the command to change the push url
+    cmd.setPush( true );
+    cmd.call();
   }
 
   public boolean hasRemote() throws IOException {

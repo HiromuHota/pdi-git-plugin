@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
-import org.eclipse.jgit.api.RemoteSetUrlCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
@@ -20,7 +19,6 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
-import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -387,17 +385,7 @@ public class GitController extends AbstractXulEventHandler {
       public void onClose( XulComponent component, Status status, String value ) {
         if ( !status.equals( Status.CANCEL ) ) {
           try {
-            RemoteSetUrlCommand cmd = uiGit.getGit().remoteSetUrl();
-            cmd.setName( Constants.DEFAULT_REMOTE_NAME );
-            URIish uri = new URIish( value );
-            cmd.setUri( uri );
-            // execute the command to change the fetch url
-            cmd.setPush( false );
-            cmd.call();
-            // execute the command to change the push url
-            cmd.setPush( true );
-            cmd.call();
-
+            uiGit.setRemote( value );
             remoteBinding.fireSourceChanged();
           } catch ( URISyntaxException e ) {
             if ( value.equals( "" ) ) {
