@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.errors.MissingObjectException;
@@ -26,6 +27,7 @@ import org.pentaho.di.ui.spoon.git.model.UIGit;
 public class UIGitTest extends RepositoryTestCase {
   private Git git;
   private UIGit uiGit;
+  Repository db2;
 
   @Before
   public void setUp() throws Exception {
@@ -35,6 +37,9 @@ public class UIGitTest extends RepositoryTestCase {
     uiGit.setAuthorName( "test <test@example.com>" );
     uiGit.setCommitMessage( "test" );
     git = uiGit.getGit();
+
+    // create another repository
+    db2 = createWorkRepository();
   }
 
   @Test
@@ -84,11 +89,12 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   private RemoteConfig setupRemote() throws Exception {
-    // create another repository
-    Repository remoteRepository = createWorkRepository();
     URIish uri = new URIish(
-        remoteRepository.getDirectory().toURI().toURL() );
-    return uiGit.addRemote( uri.toString() );
+        db2.getDirectory().toURI().toURL() );
+    RemoteAddCommand cmd = git.remoteAdd();
+    cmd.setName( Constants.DEFAULT_REMOTE_NAME );
+    cmd.setUri( uri );
+    return cmd.call();
   }
 
   @Test
@@ -123,8 +129,6 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testPush() throws Exception {
-    // create another repository
-    Repository db2 = createWorkRepository();
     URIish uri = new URIish(
       db2.getDirectory().toURI().toURL() );
     uiGit.addRemote( uri.toString() );
