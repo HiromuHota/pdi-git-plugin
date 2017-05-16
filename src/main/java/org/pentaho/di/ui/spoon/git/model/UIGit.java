@@ -42,7 +42,7 @@ public class UIGit extends XulEventSourceAdapter {
   private String authorName;
   private String commitMessage;
 
-  public static String findGitRepository( String pathname ) {
+  public String findGitRepository( String pathname ) {
     Repository repository;
     try {
       repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables

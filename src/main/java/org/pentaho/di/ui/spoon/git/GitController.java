@@ -196,10 +196,11 @@ public class GitController extends AbstractXulEventHandler {
           return null;
         } else if ( meta.getFilename() == null ) { // not saved yet
           return null;
+        } else {
+          // Find the git repository for this file
+          String fileName = meta.getFilename();
+          return uiGit.findGitRepository( fileName );
         }
-        // Find the git repository for this file
-        String fileName = meta.getFilename();
-        return UIGit.findGitRepository( fileName );
       }
     }
   }

@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.repository.BaseRepositoryMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryMeta;
@@ -93,6 +94,31 @@ public class GitControllerTest {
     String baseDirectory = controller.determineBaseDirectory();
 
     assertNull( baseDirectory );
+  }
+
+  @Test
+  public void returnNullWhenFileNotSaved() {
+    doReturn( null ).when( controller ).getRepository();
+    EngineMetaInterface meta = mock( EngineMetaInterface.class );
+    when( meta.getFilename() ).thenReturn( null );
+    doReturn( meta ).when( controller ).getActiveMeta();
+
+    String baseDirectory = controller.determineBaseDirectory();
+
+    assertNull( baseDirectory );
+  }
+
+  @Test
+  public void returnWhenFileIsOpen() {
+    doReturn( null ).when( controller ).getRepository();
+    EngineMetaInterface meta = mock( EngineMetaInterface.class );
+    when( meta.getFilename() ).thenReturn( "/tmp/test" );
+    doReturn( meta ).when( controller ).getActiveMeta();
+    doReturn( "/tmp/test" ).when( uiGit ).findGitRepository( anyString() );
+
+    String baseDirectory = controller.determineBaseDirectory();
+
+    assertEquals( "/tmp/test", baseDirectory );
   }
 
   @Test
