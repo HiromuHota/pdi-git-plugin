@@ -54,38 +54,27 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testGetRemote() throws Exception {
-    setupRemote();
+    RemoteConfig remote = setupRemote();
 
-    assertNotNull( uiGit.getRemote() );
+    assertEquals( remote.getURIs().get( 0 ).toString(), uiGit.getRemote() );
   }
 
   @Test
   public void testSetRemote() throws Exception {
-    // create another repository
-    Repository remoteRepository = createWorkRepository();
-    URIish uri = new URIish(
-        remoteRepository.getDirectory().toURI().toURL() );
-
-    RemoteConfig remote = uiGit.addRemote( uri.toString() );
+    RemoteConfig remote = setupRemote();
 
     // assert that the added remote represents the remote repository
     assertEquals( Constants.DEFAULT_REMOTE_NAME, remote.getName() );
-    assertArrayEquals( new URIish[] { uri }, remote.getURIs().toArray() );
     assertEquals( 1, remote.getFetchRefSpecs().size() );
     assertEquals( 1, remote.getURIs().size() );
     assertEquals(
-                    String.format( "+refs/heads/*:refs/remotes/%s/*", Constants.DEFAULT_REMOTE_NAME ),
-                    remote.getFetchRefSpecs().get( 0 ).toString() );
+      String.format( "+refs/heads/*:refs/remotes/%s/*", Constants.DEFAULT_REMOTE_NAME ),
+      remote.getFetchRefSpecs().get( 0 ).toString() );
   }
 
   @Test
   public void testDeleteRemote() throws Exception {
-    // create another repository
-    Repository remoteRepository = createWorkRepository();
-    URIish uri = new URIish(
-        remoteRepository.getDirectory().toURI().toURL() );
-    RemoteConfig remoteConfig = uiGit.addRemote( uri.toString() );
-
+    RemoteConfig remoteConfig = setupRemote();
     RemoteConfig remote = uiGit.removeRemote();
 
     // assert that the removed remote is the initial remote
@@ -94,27 +83,12 @@ public class UIGitTest extends RepositoryTestCase {
     assertTrue( RemoteConfig.getAllRemoteConfigs( db.getConfig() ).isEmpty() );
   }
 
-  private RemoteConfig setupRemote() throws IOException, URISyntaxException {
+  private RemoteConfig setupRemote() throws Exception {
     // create another repository
     Repository remoteRepository = createWorkRepository();
-
-    // set it up as a remote to this repository
-    final StoredConfig config = db.getConfig();
-    RemoteConfig remoteConfig = new RemoteConfig( config, Constants.DEFAULT_REMOTE_NAME );
-
-    RefSpec refSpec = new RefSpec();
-    refSpec = refSpec.setForceUpdate( true );
-    refSpec = refSpec.setSourceDestination( Constants.R_HEADS + "*",
-                   Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME + "/*" );
-    remoteConfig.addFetchRefSpec( refSpec );
-
-    URIish uri = new URIish( remoteRepository.getDirectory().toURI().toURL() );
-    remoteConfig.addURI( uri );
-
-    remoteConfig.update( config );
-    config.save();
-
-    return remoteConfig;
+    URIish uri = new URIish(
+        remoteRepository.getDirectory().toURI().toURL() );
+    return uiGit.addRemote( uri.toString() );
   }
 
   @Test
