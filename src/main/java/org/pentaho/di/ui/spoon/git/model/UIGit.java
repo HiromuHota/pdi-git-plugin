@@ -36,6 +36,7 @@ import org.pentaho.ui.xul.XulEventSourceAdapter;
 public class UIGit extends XulEventSourceAdapter {
 
   private Git git;
+  private String path;
   private String authorName;
   private String commitMessage;
 
@@ -45,6 +46,15 @@ public class UIGit extends XulEventSourceAdapter {
 
   public void setGit( Git git ) {
     this.git = git;
+  }
+
+  public void setPath( String path ) {
+    this.path = "".equals( path ) ? null : path;
+    firePropertyChange( "path", null, path );
+  }
+
+  public String getPath() {
+    return this.path;
   }
 
   public String getAuthorName() {

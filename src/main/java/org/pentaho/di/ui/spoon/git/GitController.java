@@ -54,7 +54,6 @@ public class GitController extends AbstractXulEventHandler {
 
   private static final Class<?> PKG = RepositoryExplorer.class;
 
-  private String path;
   private UIGit uiGit = new UIGit();
 
   private XulTextbox pathText;
@@ -71,7 +70,6 @@ public class GitController extends AbstractXulEventHandler {
   private XulPromptBox promptBox;
 
   private BindingFactory bf = new SwtBindingFactory();
-  private Binding pathBinding;
   private Binding branchBinding;
   private Binding remoteBinding;
   private Binding revisionBinding;
@@ -109,7 +107,7 @@ public class GitController extends AbstractXulEventHandler {
     stagedBinding = bf.createBinding( uiGit, "stagedObjects", stagedTable, "elements" );
 
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
-    pathBinding = bf.createBinding( this, "path", pathText, "value" );
+    bf.createBinding( uiGit, "path", pathText, "value" );
     bf.createBinding( uiGit, "authorName", authorName, "value" );
     bf.createBinding( uiGit, "commitMessage", commitMessage, "value" );
   }
@@ -164,7 +162,7 @@ public class GitController extends AbstractXulEventHandler {
     String baseDirectory = determineBaseDirectory();
     try {
       uiGit.openGit( baseDirectory );
-      path = baseDirectory;
+      uiGit.setPath( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
       openGit();
@@ -184,8 +182,8 @@ public class GitController extends AbstractXulEventHandler {
         return ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
       }
     } else { // when not connected to a repository
-      if ( path != null ) { // when specified by the user
-        return path;
+      if ( uiGit.getPath() != null ) { // when specified by the user
+        return uiGit.getPath();
       } else {
         // Get the data integration perspective
         List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
@@ -218,7 +216,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   private void closeGit() {
-    path = null;
+    uiGit.setPath( null );
     uiGit.closeGit();
   }
 
@@ -236,7 +234,7 @@ public class GitController extends AbstractXulEventHandler {
         if ( returnCode == Status.ACCEPT ) {
           try {
             uiGit.initGit( baseDirectory );
-            path = baseDirectory;
+            uiGit.setPath( baseDirectory );
             messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
             messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
             messageBox.setMessage( BaseMessages.getString( PKG, "Dialog.Success" ) );
@@ -258,7 +256,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
-    pathBinding.fireSourceChanged();
     branchBinding.fireSourceChanged();
     remoteBinding.fireSourceChanged();
     revisionBinding.fireSourceChanged();
@@ -368,7 +365,7 @@ public class GitController extends AbstractXulEventHandler {
     DirectoryDialog dialog = new DirectoryDialog( shell, SWT.OPEN );
     if ( dialog.open() != null ) {
       closeGit();
-      setPath( dialog.getFilterPath() );
+      uiGit.setPath( dialog.getFilterPath() );
       openGit();
       fireSourceChanged();
     }
@@ -410,13 +407,5 @@ public class GitController extends AbstractXulEventHandler {
   @VisibleForTesting
   void setUIGit( UIGit uiGit ) {
     this.uiGit = uiGit;
-  }
-
-  public void setPath( String path ) {
-    this.path = "".equals( path ) ? null : path;
-  }
-
-  public String getPath() {
-    return this.path;
   }
 }
