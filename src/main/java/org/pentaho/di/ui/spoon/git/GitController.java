@@ -1,6 +1,5 @@
 package org.pentaho.di.ui.spoon.git;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
@@ -12,7 +11,6 @@ import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.swt.SWT;
@@ -201,14 +199,7 @@ public class GitController extends AbstractXulEventHandler {
         }
         // Find the git repository for this file
         String fileName = meta.getFilename();
-        try {
-          org.eclipse.jgit.lib.Repository repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
-            .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
-            .build();
-          return repository.getDirectory().getParent();
-        } catch ( IOException e ) {
-          return null;
-        }
+        return UIGit.findGitRepository( fileName );
       }
     }
   }

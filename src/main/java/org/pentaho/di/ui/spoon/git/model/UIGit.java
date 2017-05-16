@@ -13,8 +13,10 @@ import org.eclipse.jgit.api.RemoteSetUrlCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
@@ -39,6 +41,18 @@ public class UIGit extends XulEventSourceAdapter {
   private String path;
   private String authorName;
   private String commitMessage;
+
+  public static String findGitRepository( String pathname ) {
+    Repository repository;
+    try {
+      repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
+          .findGitDir( new File( pathname ).getParentFile() ) // scan up the file system tree
+          .build();
+      return repository.getDirectory().getParent();
+    } catch ( IOException e ) {
+      return null;
+    }
+  }
 
   public Git getGit() {
     return git;
