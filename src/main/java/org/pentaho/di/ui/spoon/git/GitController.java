@@ -162,6 +162,10 @@ public class GitController extends AbstractXulEventHandler {
 
   private void openGit() {
     String baseDirectory = determineBaseDirectory();
+    openGit( baseDirectory );
+  }
+
+  private void openGit( String baseDirectory ) {
     try {
       uiGit.openGit( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
@@ -377,8 +381,7 @@ public class GitController extends AbstractXulEventHandler {
     DirectoryDialog dialog = new DirectoryDialog( shell, SWT.OPEN );
     if ( dialog.open() != null ) {
       uiGit.closeGit();
-      uiGit.setPath( dialog.getFilterPath() );
-      openGit();
+      openGit( dialog.getFilterPath() );
       fireSourceChanged();
     }
   }
