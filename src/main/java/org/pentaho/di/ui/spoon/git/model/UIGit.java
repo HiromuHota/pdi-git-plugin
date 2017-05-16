@@ -197,13 +197,16 @@ public class UIGit extends XulEventSourceAdapter {
 
   public void initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {
     git = Git.init().setDirectory( new File( baseDirectory ) ).call();
+    setPath( baseDirectory );
   }
 
   public void openGit( String baseDirectory ) throws IOException {
     git = Git.open( new File( baseDirectory ) );
+    setPath( baseDirectory );
   }
 
   public void closeGit() {
+    setPath( null );
     git.close();
     git = null;
   }

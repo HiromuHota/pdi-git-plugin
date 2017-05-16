@@ -151,7 +151,7 @@ public class GitController extends AbstractXulEventHandler {
     pullButton.setDisabled( true );
     pushButton.setDisabled( true );
 
-    closeGit();
+    uiGit.closeGit();
 
     try {
       fireSourceChanged();
@@ -164,7 +164,6 @@ public class GitController extends AbstractXulEventHandler {
     String baseDirectory = determineBaseDirectory();
     try {
       uiGit.openGit( baseDirectory );
-      uiGit.setPath( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
       openGit();
@@ -217,11 +216,6 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  private void closeGit() {
-    uiGit.setPath( null );
-    uiGit.closeGit();
-  }
-
   @VisibleForTesting
   void initGit( final String baseDirectory ) {
     XulConfirmBox confirmBox = (XulConfirmBox) document.getElementById( "confirmbox" );
@@ -236,7 +230,6 @@ public class GitController extends AbstractXulEventHandler {
         if ( returnCode == Status.ACCEPT ) {
           try {
             uiGit.initGit( baseDirectory );
-            uiGit.setPath( baseDirectory );
             messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
             messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
             messageBox.setMessage( BaseMessages.getString( PKG, "Dialog.Success" ) );
@@ -383,7 +376,7 @@ public class GitController extends AbstractXulEventHandler {
     Shell shell = Spoon.getInstance().getShell();
     DirectoryDialog dialog = new DirectoryDialog( shell, SWT.OPEN );
     if ( dialog.open() != null ) {
-      closeGit();
+      uiGit.closeGit();
       uiGit.setPath( dialog.getFilterPath() );
       openGit();
       fireSourceChanged();
