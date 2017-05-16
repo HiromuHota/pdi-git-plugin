@@ -192,17 +192,8 @@ public class GitController extends AbstractXulEventHandler {
       if ( uiGit.getPath() != null ) { // when specified by the user
         return uiGit.getPath();
       } else {
-        // Get the data integration perspective
-        List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
-        SpoonPerspective mainSpoonPerspective = null;
-        for ( SpoonPerspective perspective : perspectives ) {
-          if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
-            mainSpoonPerspective = perspective;
-            break;
-          }
-        }
         // Get the active Kettle file
-        EngineMetaInterface meta = mainSpoonPerspective.getActiveMeta();
+        EngineMetaInterface meta = getActiveMeta();
         if ( meta == null ) { // no file is opened.
           return null;
         } else if ( meta.getFilename() == null ) { // not saved yet
@@ -220,6 +211,21 @@ public class GitController extends AbstractXulEventHandler {
         }
       }
     }
+  }
+
+  @VisibleForTesting
+  EngineMetaInterface getActiveMeta() {
+    // Get the data integration perspective
+    List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
+    SpoonPerspective mainSpoonPerspective = null;
+    for ( SpoonPerspective perspective : perspectives ) {
+      if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
+        mainSpoonPerspective = perspective;
+        break;
+      }
+    }
+    // Get the active Kettle file
+    return mainSpoonPerspective.getActiveMeta();
   }
 
   @VisibleForTesting
