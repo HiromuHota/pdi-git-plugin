@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.RemoteSetUrlCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -98,6 +99,12 @@ public class UIGit extends XulEventSourceAdapter {
     cmd.setPush( true );
     cmd.call();
     firePropertyChange( "remote", null, s );
+  }
+
+  public RemoteConfig deleteRemote() throws GitAPIException {
+    RemoteRemoveCommand cmd = git.remoteRemove();
+    cmd.setName( Constants.DEFAULT_REMOTE_NAME );
+    return cmd.call();
   }
 
   public boolean hasRemote() throws IOException {

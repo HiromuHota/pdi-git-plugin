@@ -10,14 +10,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
-import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -389,7 +387,7 @@ public class GitController extends AbstractXulEventHandler {
           } catch ( URISyntaxException e ) {
             if ( value.equals( "" ) ) {
               try {
-                deleteRemote();
+                uiGit.deleteRemote();
               } catch ( Exception e1 ) {
                 e1.printStackTrace();
               }
@@ -406,13 +404,6 @@ public class GitController extends AbstractXulEventHandler {
       }
     } );
     promptBox.open();
-  }
-
-  @VisibleForTesting
-  RemoteConfig deleteRemote() throws GitAPIException {
-    RemoteRemoveCommand cmd = uiGit.getGit().remoteRemove();
-    cmd.setName( Constants.DEFAULT_REMOTE_NAME );
-    return cmd.call();
   }
 
   @VisibleForTesting
