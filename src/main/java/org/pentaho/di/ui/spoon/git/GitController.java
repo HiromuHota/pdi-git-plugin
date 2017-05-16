@@ -12,7 +12,6 @@ import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
@@ -21,6 +20,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
@@ -120,7 +120,7 @@ public class GitController extends AbstractXulEventHandler {
       return;
     }
 
-    if ( Spoon.getInstance().rep == null ) { // when not connected to a repository
+    if ( getRepository() == null ) { // when not connected to a repository
       pathText.setDisabled( false );
       browseButton.setDisabled( false );
     }
@@ -180,11 +180,11 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   private String determineBaseDirectory() {
-    if ( Spoon.getInstance().rep != null ) { // when connected to a repository
-      if ( Spoon.getInstance().rep.getClass() != KettleFileRepository.class ) {
+    if ( getRepository() != null ) { // when connected to a repository
+      if ( getRepository().getClass() != KettleFileRepository.class ) {
         return null; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
       } else {
-        return ( (KettleFileRepository) Spoon.getInstance().rep ).getRepositoryMeta().getBaseDirectory();
+        return ( (KettleFileRepository) getRepository() ).getRepositoryMeta().getBaseDirectory();
       }
     } else { // when not connected to a repository
       if ( uiGit.getPath() != null ) { // when specified by the user
@@ -209,7 +209,7 @@ public class GitController extends AbstractXulEventHandler {
         // Find the git repository for this file
         String fileName = meta.getFilename();
         try {
-          Repository repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
+          org.eclipse.jgit.lib.Repository repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
             .findGitDir( new File( fileName ).getParentFile() ) // scan up the file system tree
             .build();
           return repository.getDirectory().getParent();
@@ -422,5 +422,10 @@ public class GitController extends AbstractXulEventHandler {
   @VisibleForTesting
   void setUIGit( UIGit uiGit ) {
     this.uiGit = uiGit;
+  }
+
+  @VisibleForTesting
+  Repository getRepository() {
+    return Spoon.getInstance().rep;
   }
 }
