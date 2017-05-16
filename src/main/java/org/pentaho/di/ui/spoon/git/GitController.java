@@ -187,20 +187,16 @@ public class GitController extends AbstractXulEventHandler {
         return ( (KettleFileRepository) getRepository() ).getRepositoryMeta().getBaseDirectory();
       }
     } else { // when not connected to a repository
-      if ( uiGit.getPath() != null ) { // when specified by the user
-        return uiGit.getPath();
+      // Get the active Kettle file
+      EngineMetaInterface meta = getActiveMeta();
+      if ( meta == null ) { // no file is opened.
+        return null;
+      } else if ( meta.getFilename() == null ) { // not saved yet
+        return null;
       } else {
-        // Get the active Kettle file
-        EngineMetaInterface meta = getActiveMeta();
-        if ( meta == null ) { // no file is opened.
-          return null;
-        } else if ( meta.getFilename() == null ) { // not saved yet
-          return null;
-        } else {
-          // Find the git repository for this file
-          String fileName = meta.getFilename();
-          return uiGit.findGitRepository( fileName );
-        }
+        // Find the git repository for this file
+        String fileName = meta.getFilename();
+        return uiGit.findGitRepository( fileName );
       }
     }
   }
