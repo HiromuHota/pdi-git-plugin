@@ -86,6 +86,16 @@ public class GitControllerTest {
   }
 
   @Test
+  public void returnNullWhenNoFileIsOpen() {
+    doReturn( null ).when( controller ).getRepository();
+    doReturn( null ).when( controller ).getActiveMeta();
+
+    String baseDirectory = controller.determineBaseDirectory();
+
+    assertNull( baseDirectory );
+  }
+
+  @Test
   public void shouldInitializeGitOnAccept() throws Exception {
     XulConfirmBox confirm = new XulConfirmBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( CONFIRMBOX ) ).thenReturn( confirm );
