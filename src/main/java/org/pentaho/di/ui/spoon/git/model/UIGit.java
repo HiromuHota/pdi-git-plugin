@@ -8,8 +8,8 @@ import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
-import org.eclipse.jgit.api.RemoteSetUrlCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
@@ -111,23 +111,22 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
-  public void setRemote( String s ) throws Exception {
-    RemoteSetUrlCommand cmd = git.remoteSetUrl();
-    cmd.setName( Constants.DEFAULT_REMOTE_NAME );
+  public RemoteConfig setRemote( String s ) throws Exception {
+    // Make sure you have only one URI for push
+    deleteRemote();
+
     URIish uri = new URIish( s );
+    RemoteAddCommand cmd = git.remoteAdd();
+    cmd.setName( Constants.DEFAULT_REMOTE_NAME );
     cmd.setUri( uri );
-    // execute the command to change the fetch url
-    cmd.setPush( false );
-    cmd.call();
-    // execute the command to change the push url
-    cmd.setPush( true );
-    cmd.call();
     firePropertyChange( "remote", null, s );
+    return cmd.call();
   }
 
   public RemoteConfig deleteRemote() throws GitAPIException {
     RemoteRemoveCommand cmd = git.remoteRemove();
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
+    firePropertyChange( "remote", null, "" );
     return cmd.call();
   }
 
