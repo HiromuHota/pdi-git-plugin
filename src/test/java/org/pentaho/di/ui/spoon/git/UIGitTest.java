@@ -59,6 +59,41 @@ public class UIGitTest extends RepositoryTestCase {
     assertNotNull( uiGit.getRemote() );
   }
 
+  @Test
+  public void testSetRemote() throws Exception {
+    // create another repository
+    Repository remoteRepository = createWorkRepository();
+    URIish uri = new URIish(
+        remoteRepository.getDirectory().toURI().toURL() );
+
+    RemoteConfig remote = uiGit.setRemote( uri.toString() );
+
+    // assert that the added remote represents the remote repository
+    assertEquals( Constants.DEFAULT_REMOTE_NAME, remote.getName() );
+    assertArrayEquals( new URIish[] { uri }, remote.getURIs().toArray() );
+    assertEquals( 1, remote.getFetchRefSpecs().size() );
+    assertEquals( 1, remote.getURIs().size() );
+    assertEquals(
+                    String.format( "+refs/heads/*:refs/remotes/%s/*", Constants.DEFAULT_REMOTE_NAME ),
+                    remote.getFetchRefSpecs().get( 0 ).toString() );
+  }
+
+  @Test
+  public void testDeleteRemote() throws Exception {
+    // create another repository
+    Repository remoteRepository = createWorkRepository();
+    URIish uri = new URIish(
+        remoteRepository.getDirectory().toURI().toURL() );
+    RemoteConfig remoteConfig = uiGit.setRemote( uri.toString() );
+
+    RemoteConfig remote = uiGit.deleteRemote();
+
+    // assert that the removed remote is the initial remote
+    assertEquals( remoteConfig.getName(), remote.getName() );
+    // assert that there are no remotes left
+    assertTrue( RemoteConfig.getAllRemoteConfigs( db.getConfig() ).isEmpty() );
+  }
+
   private RemoteConfig setupRemote() throws IOException, URISyntaxException {
     // create another repository
     Repository remoteRepository = createWorkRepository();
