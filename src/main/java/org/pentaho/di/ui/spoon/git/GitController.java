@@ -375,6 +375,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void editRemote() {
+    promptBox = (XulPromptBox) document.getElementById( "promptbox" );
     promptBox.setTitle( "Remote repository" );
     promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
     promptBox.setMessage( "URL/path (The remote name will be \"" + Constants.DEFAULT_REMOTE_NAME + "\")" );
