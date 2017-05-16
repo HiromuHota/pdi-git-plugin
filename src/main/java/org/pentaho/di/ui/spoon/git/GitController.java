@@ -348,14 +348,13 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  public void push() throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-    final String fullBranch = uiGit.getGit().getRepository().getFullBranch();
-    final StoredConfig config = uiGit.getGit().getRepository().getConfig();
-    Set<String> remotes = config.getSubsections( "remote" );
-    if ( remotes.contains( Constants.DEFAULT_REMOTE_NAME ) ) {
-      PushResult result = uiGit.getGit().push().call().iterator().next();
+  public void push() throws Exception {
+    messageBox = (XulMessageBox) document.getElementById( "messagebox" );
+    if ( uiGit.hasRemote() ) {
+      Iterable<PushResult> resultIterable = uiGit.push();
+      PushResult result = resultIterable.iterator().next();
+      String fullBranch = uiGit.getFullBranch();
       RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
-      messageBox = (XulMessageBox) document.getElementById( "messagebox" );
       if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
         messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
       } else {
@@ -365,8 +364,10 @@ public class GitController extends AbstractXulEventHandler {
       messageBox.setMessage( update.getStatus().toString() );
       messageBox.open();
     } else {
-      editRemote();
-      push();
+      messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+      messageBox.setMessage( "Please setup a remote" );
+      messageBox.open();
     }
   }
 

@@ -13,6 +13,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.ObjectRevision;
@@ -69,6 +70,10 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
+  public String getFullBranch() throws IOException {
+    return git.getRepository().getFullBranch();
+  }
+
   public String getRemote() {
     try {
       StoredConfig config = git.getRepository().getConfig();
@@ -77,6 +82,12 @@ public class UIGit extends XulEventSourceAdapter {
     } catch ( Exception e ) {
       return "";
     }
+  }
+
+  public boolean hasRemote() throws IOException {
+    StoredConfig config = git.getRepository().getConfig();
+    Set<String> remotes = config.getSubsections( "remote" );
+    return remotes.contains( Constants.DEFAULT_REMOTE_NAME );
   }
 
   public RevCommit commit( String name, String email, String message ) throws Exception {
@@ -166,5 +177,9 @@ public class UIGit extends XulEventSourceAdapter {
 
   public PullResult pull() throws Exception {
     return git.pull().call();
+  }
+
+  public Iterable<PushResult> push() throws Exception {
+    return git.push().call();
   }
 }
