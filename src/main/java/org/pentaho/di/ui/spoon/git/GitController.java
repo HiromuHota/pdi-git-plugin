@@ -22,6 +22,7 @@ import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
+import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
@@ -179,9 +180,10 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  private String determineBaseDirectory() {
+  @VisibleForTesting
+  String determineBaseDirectory() {
     if ( getRepository() != null ) { // when connected to a repository
-      if ( getRepository().getClass() != KettleFileRepository.class ) {
+      if ( getRepository().getRepositoryMeta().getId() != KettleFileRepositoryMeta.REPOSITORY_TYPE_ID ) {
         return null; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
       } else {
         return ( (KettleFileRepository) getRepository() ).getRepositoryMeta().getBaseDirectory();

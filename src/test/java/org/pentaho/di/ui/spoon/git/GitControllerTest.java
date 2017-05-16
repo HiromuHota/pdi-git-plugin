@@ -1,11 +1,21 @@
 package org.pentaho.di.ui.spoon.git;
 
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.net.URISyntaxException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.repository.BaseRepositoryMeta;
+import org.pentaho.di.repository.Repository;
+import org.pentaho.di.repository.RepositoryMeta;
+import org.pentaho.di.repository.filerep.KettleFileRepository;
+import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
+import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
+import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
+import org.pentaho.di.repository.pur.PurRepository;
+import org.pentaho.di.repository.pur.PurRepositoryMeta;
 import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.components.XulConfirmBox;
@@ -38,6 +48,41 @@ public class GitControllerTest {
     XulDomContainer xulDomContainer = mock( XulDomContainer.class );
     when( xulDomContainer.getDocumentRoot() ).thenReturn( document );
     controller.setXulDomContainer( xulDomContainer );
+  }
+
+  @Test
+  public void returnNullWhenNonKettleFileRepository() {
+    Repository rep = mock( KettleDatabaseRepository.class );
+    doReturn( rep ).when( controller ).getRepository();
+    when( controller.getRepository().getRepositoryMeta() )
+      .thenReturn( mock( KettleDatabaseRepositoryMeta.class ) );
+    when( controller.getRepository().getRepositoryMeta().getId() )
+      .thenReturn( KettleDatabaseRepositoryMeta.REPOSITORY_TYPE_ID );
+
+    String baseDirectory = controller.determineBaseDirectory();
+
+    assertNull( baseDirectory );
+
+    rep = mock( PurRepository.class );
+    doReturn( rep ).when( controller ).getRepository();
+    when( controller.getRepository().getRepositoryMeta() )
+      .thenReturn( mock( PurRepositoryMeta.class ) );
+    when( controller.getRepository().getRepositoryMeta().getId() )
+      .thenReturn( PurRepositoryMeta.REPOSITORY_TYPE_ID );
+
+    baseDirectory = controller.determineBaseDirectory();
+
+    assertNull( baseDirectory );
+  }
+
+  @Test
+  public void returnBaseDirectoryWhenKettleFileRepository() {
+    Repository rep = new KettleFileRepositoryMock();
+    doReturn( rep ).when( controller ).getRepository();
+
+    String baseDirectory = controller.determineBaseDirectory();
+
+    assertEquals( "/tmp/test", baseDirectory );
   }
 
   @Test
@@ -200,6 +245,20 @@ public class GitControllerTest {
     @Override
     public void setValue( String value ) {
       this.value = value;
+    }
+  }
+
+  private static class KettleFileRepositoryMock extends KettleFileRepository implements Repository {
+    @Override
+    public KettleFileRepositoryMeta getRepositoryMeta() {
+      return new KettleFileRepositoryMetaMock();
+    }
+  }
+
+  private static class KettleFileRepositoryMetaMock extends KettleFileRepositoryMeta implements RepositoryMeta {
+    @Override
+    public String getBaseDirectory() {
+      return "/tmp/test";
     }
   }
 }
