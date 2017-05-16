@@ -2,10 +2,14 @@ package org.pentaho.di.ui.spoon.git;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RemoteAddCommand;
+import org.eclipse.jgit.api.MergeResult.MergeStatus;
+import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.errors.MissingObjectException;
@@ -13,6 +17,7 @@ import org.eclipse.jgit.junit.RepositoryTestCase;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
@@ -128,6 +133,33 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
+  public void testPull() throws Exception {
+    // source: db2, target: db
+    setupRemote();
+    Git git2 = new Git( db2 );
+
+    // put some file in the source repo and sync
+    File sourceFile = new File( db2.getWorkTree(), "SomeFile.txt" );
+    writeToFile( sourceFile, "Hello world" );
+    git2.add().addFilepattern( "SomeFile.txt" ).call();
+    git2.commit().setMessage( "Initial commit for source" ).call();
+    PullResult pullResult = git.pull().call();
+
+    // change the source file
+    writeToFile( sourceFile, "Another change" );
+    git2.add().addFilepattern( "SomeFile.txt" ).call();
+    git2.commit().setMessage( "Some change in remote" ).call();
+    git2.close();
+
+    pullResult = uiGit.pull();
+
+    assertFalse( pullResult.getFetchResult().getTrackingRefUpdates().isEmpty() );
+    assertEquals( pullResult.getMergeResult().getMergeStatus(),
+                    MergeStatus.FAST_FORWARD );
+    assertEquals( RepositoryState.SAFE, db.getRepositoryState() );
+  }
+
+  @Test
   public void testPush() throws Exception {
     URIish uri = new URIish(
       db2.getDirectory().toURI().toURL() );
@@ -150,5 +182,18 @@ public class UIGitTest extends RepositoryTestCase {
         db2.resolve( commit.getId().getName() + "^{commit}" ) );
     assertEquals( tagRef.getObjectId(),
         db2.resolve( tagRef.getObjectId().getName() ) );
+  }
+
+  private static void writeToFile( File actFile, String string ) throws IOException {
+    FileOutputStream fos = null;
+    try {
+      fos = new FileOutputStream( actFile );
+      fos.write( string.getBytes( "UTF-8" ) );
+      fos.close();
+    } finally {
+      if ( fos != null ) {
+        fos.close();
+      }
+    }
   }
 }
