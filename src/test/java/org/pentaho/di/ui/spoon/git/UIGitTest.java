@@ -3,16 +3,16 @@ package org.pentaho.di.ui.spoon.git;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.junit.RepositoryTestCase;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.StoredConfig;
-import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.junit.Before;
@@ -119,5 +119,32 @@ public class UIGitTest extends RepositoryTestCase {
     assertEquals( 2, stagedObjects.size() );
     assertEquals( UITransformation.class, stagedObjects.get( 0 ).getClass() );
     assertEquals( UIJob.class, stagedObjects.get( 1 ).getClass() );
+  }
+
+  @Test
+  public void testPush() throws Exception {
+    // create another repository
+    Repository db2 = createWorkRepository();
+    URIish uri = new URIish(
+      db2.getDirectory().toURI().toURL() );
+    uiGit.addRemote( uri.toString() );
+
+    // create some refs via commits and tag
+    RevCommit commit = git.commit().setMessage( "initial commit" ).call();
+    Ref tagRef = git.tag().setName( "tag" ).call();
+
+    try {
+      db2.resolve( commit.getId().getName() + "^{commit}" );
+      fail( "id shouldn't exist yet" );
+    } catch ( MissingObjectException e ) {
+      // we should get here
+    }
+
+    uiGit.push();
+
+    assertEquals( commit.getId(),
+        db2.resolve( commit.getId().getName() + "^{commit}" ) );
+    assertEquals( tagRef.getObjectId(),
+        db2.resolve( tagRef.getObjectId().getName() ) );
   }
 }
