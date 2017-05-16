@@ -111,9 +111,9 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
-  public RemoteConfig setRemote( String s ) throws Exception {
+  public RemoteConfig addRemote( String s ) throws Exception {
     // Make sure you have only one URI for push
-    deleteRemote();
+    removeRemote();
 
     URIish uri = new URIish( s );
     RemoteAddCommand cmd = git.remoteAdd();
@@ -123,7 +123,7 @@ public class UIGit extends XulEventSourceAdapter {
     return cmd.call();
   }
 
-  public RemoteConfig deleteRemote() throws GitAPIException {
+  public RemoteConfig removeRemote() throws GitAPIException {
     RemoteRemoveCommand cmd = git.remoteRemove();
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
     firePropertyChange( "remote", null, "" );

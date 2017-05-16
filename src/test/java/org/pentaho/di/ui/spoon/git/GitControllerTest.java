@@ -206,20 +206,20 @@ public class GitControllerTest {
 
     controller.editRemote();
 
-    verify( uiGit, never() ).setRemote( anyString() );
+    verify( uiGit, never() ).addRemote( anyString() );
   }
 
   @Test
   public void shouldDeleteRemoteWhenEmptyString() throws Exception {
     XulPromptBox prompt = new XulPromptBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( PROMPTBOX ) ).thenReturn( prompt );
-    doThrow( URISyntaxException.class ).when( uiGit ).setRemote( anyString() );
+    doThrow( URISyntaxException.class ).when( uiGit ).addRemote( anyString() );
     doReturn( "" ).when( uiGit ).getRemote();
 
     controller.editRemote();
 
-    verify( uiGit ).setRemote( anyString() );
-    verify( uiGit ).deleteRemote();
+    verify( uiGit ).addRemote( anyString() );
+    verify( uiGit ).removeRemote();
   }
 
   private static class XulConfirmBoxMock extends MessageDialogBase implements XulConfirmBox {

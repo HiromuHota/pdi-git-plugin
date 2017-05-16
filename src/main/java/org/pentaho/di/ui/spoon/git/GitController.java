@@ -392,11 +392,11 @@ public class GitController extends AbstractXulEventHandler {
       public void onClose( XulComponent component, Status status, String value ) {
         if ( !status.equals( Status.CANCEL ) ) {
           try {
-            uiGit.setRemote( value );
+            uiGit.addRemote( value );
           } catch ( URISyntaxException e ) {
             if ( value.equals( "" ) ) {
               try {
-                uiGit.deleteRemote();
+                uiGit.removeRemote();
               } catch ( Exception e1 ) {
                 e1.printStackTrace();
               }

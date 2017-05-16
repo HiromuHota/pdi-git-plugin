@@ -66,7 +66,7 @@ public class UIGitTest extends RepositoryTestCase {
     URIish uri = new URIish(
         remoteRepository.getDirectory().toURI().toURL() );
 
-    RemoteConfig remote = uiGit.setRemote( uri.toString() );
+    RemoteConfig remote = uiGit.addRemote( uri.toString() );
 
     // assert that the added remote represents the remote repository
     assertEquals( Constants.DEFAULT_REMOTE_NAME, remote.getName() );
@@ -84,9 +84,9 @@ public class UIGitTest extends RepositoryTestCase {
     Repository remoteRepository = createWorkRepository();
     URIish uri = new URIish(
         remoteRepository.getDirectory().toURI().toURL() );
-    RemoteConfig remoteConfig = uiGit.setRemote( uri.toString() );
+    RemoteConfig remoteConfig = uiGit.addRemote( uri.toString() );
 
-    RemoteConfig remote = uiGit.deleteRemote();
+    RemoteConfig remote = uiGit.removeRemote();
 
     // assert that the removed remote is the initial remote
     assertEquals( remoteConfig.getName(), remote.getName() );
