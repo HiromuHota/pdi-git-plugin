@@ -181,10 +181,10 @@ public class GitController extends AbstractXulEventHandler {
   @VisibleForTesting
   String determineBaseDirectory() {
     if ( getRepository() != null ) { // when connected to a repository
-      if ( getRepository().getRepositoryMeta().getId() != KettleFileRepositoryMeta.REPOSITORY_TYPE_ID ) {
-        return null; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
-      } else {
+      if ( getRepository().getRepositoryMeta().getId().equals( KettleFileRepositoryMeta.REPOSITORY_TYPE_ID ) ) {
         return ( (KettleFileRepository) getRepository() ).getRepositoryMeta().getBaseDirectory();
+      } else {
+        return null; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
       }
     } else { // when not connected to a repository
       // Get the active Kettle file
