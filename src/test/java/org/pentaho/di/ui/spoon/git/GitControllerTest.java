@@ -42,8 +42,8 @@ public class GitControllerTest {
 
   @Test
   public void shouldInitializeGitOnAccept() throws Exception {
-    XulConfirmBox prompt = new XulConfirmBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.getElementById( CONFIRMBOX ) ).thenReturn( prompt );
+    XulConfirmBox confirm = new XulConfirmBoxMock( XulDialogCallback.Status.ACCEPT );
+    when( document.getElementById( CONFIRMBOX ) ).thenReturn( confirm );
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
 
@@ -54,8 +54,8 @@ public class GitControllerTest {
 
   @Test
   public void shouldNotInitializeGitOnCencel() throws Exception {
-    XulConfirmBox prompt = new XulConfirmBoxMock( XulDialogCallback.Status.CANCEL );
-    when( document.getElementById( CONFIRMBOX ) ).thenReturn( prompt );
+    XulConfirmBox confirm = new XulConfirmBoxMock( XulDialogCallback.Status.CANCEL );
+    when( document.getElementById( CONFIRMBOX ) ).thenReturn( confirm );
 
     controller.initGit( "random-path" );
 
