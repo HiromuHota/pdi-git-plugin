@@ -97,6 +97,7 @@ public class UIGit extends XulEventSourceAdapter {
     // execute the command to change the push url
     cmd.setPush( true );
     cmd.call();
+    firePropertyChange( "remote", null, s );
   }
 
   public boolean hasRemote() throws IOException {

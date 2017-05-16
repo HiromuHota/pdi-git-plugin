@@ -386,12 +386,10 @@ public class GitController extends AbstractXulEventHandler {
         if ( !status.equals( Status.CANCEL ) ) {
           try {
             uiGit.setRemote( value );
-            remoteBinding.fireSourceChanged();
           } catch ( URISyntaxException e ) {
             if ( value.equals( "" ) ) {
               try {
                 deleteRemote();
-                remoteBinding.fireSourceChanged();
               } catch ( Exception e1 ) {
                 e1.printStackTrace();
               }
