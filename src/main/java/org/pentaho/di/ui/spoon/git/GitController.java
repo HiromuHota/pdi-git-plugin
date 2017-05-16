@@ -273,6 +273,14 @@ public class GitController extends AbstractXulEventHandler {
     fireSourceChanged();
   }
 
+  public void removeFromIndex() throws Exception {
+    List<UIRepositoryObject> contents = getSelectedStagedItems();
+    for ( UIRepositoryObject content : contents ) {
+      uiGit.getGit().reset().addPath( content.getName() ).call();
+    }
+    fireSourceChanged();
+  }
+
   public void onDropToStaged( DropEvent event ) throws Exception {
     for ( Object o : event.getDataTransfer().getData() ) {
       if ( o instanceof UIRepositoryObject ) {
@@ -292,14 +300,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void onDrag( DropEvent event ) {
-  }
-
-  public void removeFromIndex() throws Exception {
-    List<UIRepositoryObject> contents = getSelectedStagedItems();
-    for ( UIRepositoryObject content : contents ) {
-      uiGit.getGit().reset().addPath( content.getName() ).call();
-    }
-    fireSourceChanged();
   }
 
   public List<UIRepositoryObject> getSelectedUnstagedItems() {
