@@ -62,7 +62,6 @@ public class GitController extends AbstractXulEventHandler {
   private List<UIFile> selectedUnstagedItems;
   private List<UIFile> selectedStagedItems;
 
-  private XulTextbox pathText;
   private XulTree revisionTable;
   private XulTree unstagedTable;
   private XulTree stagedTable;
@@ -84,7 +83,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
-    pathText = (XulTextbox) document.getElementById( "path-text" );
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
     stagedTable = (XulTree) document.getElementById( "staged-table" );
@@ -98,6 +96,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   private void createBindings() {
+    XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
     XulLabel branchLabel = (XulLabel) document.getElementById( "branch" );
     XulLabel remoteLabel = (XulLabel) document.getElementById( "remote" );
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
@@ -105,6 +104,7 @@ public class GitController extends AbstractXulEventHandler {
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
+    bf.createBinding( this, "path", pathLabel, "value" );
     branchBinding = bf.createBinding( uiGit, "branch", branchLabel, "value" );
     remoteBinding = bf.createBinding( uiGit, "remote", remoteLabel, "value" );
     revisionBinding = bf.createBinding( uiGit, "revisionObjects", revisionTable, "elements" );
@@ -115,7 +115,6 @@ public class GitController extends AbstractXulEventHandler {
     bf.createBinding( stagedTable, "selectedItems", this, "selectedStagedItems" );
 
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
-    bf.createBinding( this, "path", pathText, "value" );
     bf.createBinding( this, "authorName", authorName, "value" );
     bf.createBinding( this, "commitMessage", commitMessage, "value" );
   }
@@ -127,7 +126,6 @@ public class GitController extends AbstractXulEventHandler {
     }
 
     if ( getRepository() == null ) { // when not connected to a repository
-      pathText.setDisabled( false );
       browseButton.setDisabled( false );
     }
     remoteButton.setDisabled( false );
@@ -149,7 +147,6 @@ public class GitController extends AbstractXulEventHandler {
       return; // No thing to do
     }
 
-    pathText.setDisabled( true );
     browseButton.setDisabled( true );
     remoteButton.setDisabled( true );
     commitButton.setDisabled( true );

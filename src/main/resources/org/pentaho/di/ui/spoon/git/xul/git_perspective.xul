@@ -9,7 +9,7 @@
     <vbox flex="2">
       <hbox>
         <label value="Directory:" />
-        <textbox id="path-text" multiline="false" flex="1" disabled="true"/>
+        <label id="path" flex="1"/>
         <button id="browseButton" onclick="gitController.editPath()" image="org/pentaho/di/ui/spoon/git/images/Edit.svg" disabled="true"/>
       </hbox>
       <hbox>
