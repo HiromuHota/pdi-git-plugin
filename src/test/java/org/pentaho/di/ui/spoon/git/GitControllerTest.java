@@ -5,6 +5,9 @@ import static org.mockito.Mockito.*;
 
 import java.net.URISyntaxException;
 
+import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.MergeResult.MergeStatus;
+import org.eclipse.jgit.api.PullResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.EngineMetaInterface;
@@ -194,6 +197,35 @@ public class GitControllerTest {
     controller.commit();
 
     verify( uiGit ).commit( anyString(), anyString(), anyString() );
+  }
+
+  @Test
+  public void shouldFireSourceChangedWhenSuccessful() throws Exception {
+    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
+    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    PullResult pullResult = mock( PullResult.class );
+    when( pullResult.isSuccessful() ).thenReturn( true );
+    doReturn( pullResult ).when( uiGit ).pull();
+
+    controller.pull();
+
+    verify( controller ).fireSourceChanged();
+  }
+
+  @Test
+  public void shouldResetHardWhenMergeConflict() throws Exception {
+    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
+    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    PullResult pullResult = mock( PullResult.class );
+    when( pullResult.isSuccessful() ).thenReturn( false );
+    doReturn( pullResult ).when( uiGit ).pull();
+    MergeResult mergeResult = mock( MergeResult.class );
+    when( mergeResult.getMergeStatus() ).thenReturn( MergeStatus.CONFLICTING );
+    when( pullResult.getMergeResult() ).thenReturn( mergeResult );
+
+    controller.pull();
+
+    verify( uiGit ).resetHard();
   }
 
   @Test

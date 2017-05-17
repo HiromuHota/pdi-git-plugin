@@ -375,12 +375,12 @@ public class GitController extends AbstractXulEventHandler {
       PullResult pullResult = uiGit.pull();
       FetchResult fetchResult = pullResult.getFetchResult();
       MergeResult mergeResult = pullResult.getMergeResult();
-      revisionBinding.fireSourceChanged();
       if ( pullResult.isSuccessful() ) {
         messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
         messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
         messageBox.setMessage( BaseMessages.getString( PKG, "Dialog.Success" ) );
         messageBox.open();
+        fireSourceChanged();
       } else {
         messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
         messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
