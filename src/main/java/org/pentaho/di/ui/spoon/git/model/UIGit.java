@@ -224,6 +224,13 @@ public class UIGit extends XulEventSourceAdapter {
     git = null;
   }
 
+  /**
+   * Equivalent of <tt>git fetch; git merge --ff</tt>
+   *
+   * @return PullResult
+   * @throws Exception
+   * @see <a href="http://www.kernel.org/pub/software/scm/git/docs/git-pull.html">Git documentation about Pull</a>
+   */
   public PullResult pull() throws Exception {
     return git.pull().call();
   }
