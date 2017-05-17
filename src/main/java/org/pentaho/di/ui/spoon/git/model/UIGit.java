@@ -2,7 +2,9 @@ package org.pentaho.di.ui.spoon.git.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
@@ -28,8 +30,6 @@ import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
 import org.pentaho.ui.xul.XulEventSourceAdapter;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -134,7 +134,7 @@ public class UIGit extends XulEventSourceAdapter {
     return revisions;
   }
 
-  public UIRepositoryObjects getUnstagedObjects() throws Exception {
+  public List<UIFile> getUnstagedObjects() throws Exception {
     Set<String> files = new HashSet<String>();
     try {
       Status status = git.status().call();
@@ -145,7 +145,7 @@ public class UIGit extends XulEventSourceAdapter {
     return getObjects( files );
   }
 
-  public UIRepositoryObjects getStagedObjects() throws Exception {
+  public List<UIFile> getStagedObjects() throws Exception {
     Set<String> files = new HashSet<String>();
     try {
       Status status = git.status().call();
@@ -160,16 +160,16 @@ public class UIGit extends XulEventSourceAdapter {
     return getStagedObjects().size() != 0;
   }
 
-  private UIRepositoryObjects getObjects( Set<String> files ) throws Exception {
-    UIRepositoryObjects objs = new UIRepositoryObjects();
+  private List<UIFile> getObjects( Set<String> files ) throws Exception {
+    List<UIFile> objs = new ArrayList<UIFile>();
     for ( String file : files ) {
-      UIRepositoryObject obj;
+      UIFile obj;
       if ( file.endsWith( ".ktr" ) ) {
         obj = new UITransformation();
       } else if ( file.endsWith( ".kjb" ) ) {
         obj = new UIJob();
       } else {
-        obj = new UIOther();
+        obj = new UIFile();
       }
       obj.setName( file );
       objs.add( obj );

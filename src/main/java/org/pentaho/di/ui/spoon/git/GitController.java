@@ -30,6 +30,7 @@ import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
+import org.pentaho.di.ui.spoon.git.model.UIFile;
 import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulComponent;
 import org.pentaho.ui.xul.XulException;
@@ -58,8 +59,8 @@ public class GitController extends AbstractXulEventHandler {
   private String path;
   private String authorName;
   private String commitMessage;
-  private List<UIRepositoryObject> selectedUnstagedItems;
-  private List<UIRepositoryObject> selectedStagedItems;
+  private List<UIFile> selectedUnstagedItems;
+  private List<UIFile> selectedStagedItems;
 
   private XulTextbox pathText;
   private XulTree revisionTable;
@@ -266,16 +267,16 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void addToIndex() throws Exception {
-    List<UIRepositoryObject> contents = getSelectedUnstagedItems();
-    for ( UIRepositoryObject content : contents ) {
+    List<UIFile> contents = getSelectedUnstagedItems();
+    for ( UIFile content : contents ) {
       uiGit.add( content.getName() );
     }
     fireSourceChanged();
   }
 
   public void removeFromIndex() throws Exception {
-    List<UIRepositoryObject> contents = getSelectedStagedItems();
-    for ( UIRepositoryObject content : contents ) {
+    List<UIFile> contents = getSelectedStagedItems();
+    for ( UIFile content : contents ) {
       uiGit.reset( content.getName() );
     }
     fireSourceChanged();
@@ -302,19 +303,19 @@ public class GitController extends AbstractXulEventHandler {
   public void onDrag( DropEvent event ) {
   }
 
-  public List<UIRepositoryObject> getSelectedUnstagedItems() {
+  public List<UIFile> getSelectedUnstagedItems() {
     return selectedUnstagedItems;
   }
 
-  public void setSelectedUnstagedItems( List<UIRepositoryObject> selectedUnstagedItems ) {
+  public void setSelectedUnstagedItems( List<UIFile> selectedUnstagedItems ) {
     this.selectedUnstagedItems = selectedUnstagedItems;
   }
 
-  public List<UIRepositoryObject> getSelectedStagedItems() {
+  public List<UIFile> getSelectedStagedItems() {
     return selectedStagedItems;
   }
 
-  public void setSelectedStagedItems( List<UIRepositoryObject> selectedStagedItems ) {
+  public void setSelectedStagedItems( List<UIFile> selectedStagedItems ) {
     this.selectedStagedItems = selectedStagedItems;
   }
 

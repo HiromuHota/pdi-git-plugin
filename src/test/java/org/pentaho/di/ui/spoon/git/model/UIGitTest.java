@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
@@ -27,7 +28,6 @@ import org.eclipse.jgit.transport.URIish;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
 
 public class UIGitTest extends RepositoryTestCase {
   private Git git;
@@ -103,7 +103,7 @@ public class UIGitTest extends RepositoryTestCase {
   public void testGetUnstagedObjects() throws Exception {
     writeTrashFile( "a.ktr", "content" );
     writeTrashFile( "b.kjb", "content" );
-    UIRepositoryObjects stagedObjects = uiGit.getUnstagedObjects();
+    List<UIFile> stagedObjects = uiGit.getUnstagedObjects();
     assertEquals( 2, stagedObjects.size() );
     assertEquals( UITransformation.class, stagedObjects.get( 0 ).getClass() );
     assertEquals( UIJob.class, stagedObjects.get( 1 ).getClass() );
@@ -114,7 +114,7 @@ public class UIGitTest extends RepositoryTestCase {
     writeTrashFile( "a.ktr", "content" );
     writeTrashFile( "b.kjb", "content" );
     git.add().addFilepattern( "." ).call();
-    UIRepositoryObjects stagedObjects = uiGit.getStagedObjects();
+    List<UIFile> stagedObjects = uiGit.getStagedObjects();
     assertEquals( 2, stagedObjects.size() );
     assertEquals( UITransformation.class, stagedObjects.get( 0 ).getClass() );
     assertEquals( UIJob.class, stagedObjects.get( 1 ).getClass() );
