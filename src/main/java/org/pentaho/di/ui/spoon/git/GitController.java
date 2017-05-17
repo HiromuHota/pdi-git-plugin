@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,6 +14,7 @@ import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
@@ -381,12 +383,15 @@ public class GitController extends AbstractXulEventHandler {
       } else {
         messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
         messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+        String msg = mergeResult.getMergeStatus().toString();
         if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
           uiGit.resetHard();
-          messageBox.setMessage( mergeResult.getMergeStatus().toString() );
-        } else {
-          messageBox.setMessage( "Fetch: " + fetchResult.getMessages() + "\nMerge: " + mergeResult.getMergeStatus() );
+        } else if ( mergeResult.getFailingPaths().size() != 0 ) {
+          for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
+            msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
+          }
         }
+        messageBox.setMessage( msg );
         messageBox.open();
       }
     } catch ( GitAPIException e ) {
