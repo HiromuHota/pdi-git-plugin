@@ -8,7 +8,7 @@
   <splitter flex="1" orient="HORIZONTAL">
     <vbox flex="2">
       <hbox>
-        <label value="Directory path for .git: " />
+        <label value="Directory:" />
         <textbox id="path-text" multiline="false" flex="1" disabled="true"/>
         <button id="browseButton" onclick="gitController.editPath()" image="org/pentaho/di/ui/spoon/git/images/Edit.svg" disabled="true"/>
       </hbox>
