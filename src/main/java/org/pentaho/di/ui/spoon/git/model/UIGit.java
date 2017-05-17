@@ -2,7 +2,6 @@ package org.pentaho.di.ui.spoon.git.model;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,19 +24,12 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
-import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.ObjectRevision;
-import org.pentaho.di.repository.RepositoryElementMetaInterface;
-import org.pentaho.di.repository.RepositoryObject;
-import org.pentaho.di.repository.RepositoryObjectType;
-import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
 import org.pentaho.ui.xul.XulEventSourceAdapter;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -172,21 +164,14 @@ public class UIGit extends XulEventSourceAdapter {
     UIRepositoryObjects objs = new UIRepositoryObjects();
     for ( String file : files ) {
       UIRepositoryObject obj;
-      Date date = new Date();
-      ObjectId id = new StringObjectId( file );
       if ( file.endsWith( ".ktr" ) ) {
-        RepositoryElementMetaInterface rc =  new RepositoryObject(
-            id, file, null, "-", date, RepositoryObjectType.TRANSFORMATION, "", false );
-        obj = new UITransformation( rc, null, null );
+        obj = new UITransformation();
       } else if ( file.endsWith( ".kjb" ) ) {
-        RepositoryElementMetaInterface rc =  new RepositoryObject(
-            id, file, null, "-", date, RepositoryObjectType.JOB, "", false );
-        obj = new UIJob( rc, null, null );
+        obj = new UIJob();
       } else {
-        RepositoryElementMetaInterface rc =  new RepositoryObject(
-            id, file, null, "-", date, RepositoryObjectType.UNKNOWN, "", false );
-        obj = new UIJob( rc, null, null );
+        obj = new UIOther();
       }
+      obj.setName( file );
       objs.add( obj );
     }
     return objs;

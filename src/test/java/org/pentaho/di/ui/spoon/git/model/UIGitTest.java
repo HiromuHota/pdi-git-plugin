@@ -27,9 +27,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
 
 public class UIGitTest extends RepositoryTestCase {
   private Git git;
