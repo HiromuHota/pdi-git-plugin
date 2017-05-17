@@ -1,6 +1,8 @@
 # Change Log
 
-## [Unreleased]
+## Unreleased
+
+## 0.1.0 - 2017-05-17
 
 ### Added
 - Show directory, branch, remote (origin)
