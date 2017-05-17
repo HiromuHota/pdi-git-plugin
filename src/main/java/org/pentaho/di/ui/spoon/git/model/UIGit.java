@@ -38,6 +38,8 @@ import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
 import org.pentaho.ui.xul.XulEventSourceAdapter;
 
+import com.google.common.annotations.VisibleForTesting;
+
 public class UIGit extends XulEventSourceAdapter {
 
   private Git git;
@@ -57,11 +59,16 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
+  public boolean isOpen() {
+    return git != null;
+  }
+
   public Git getGit() {
     return git;
   }
 
-  public void setGit( Git git ) {
+  @VisibleForTesting
+  void setGit( Git git ) {
     this.git = git;
   }
 

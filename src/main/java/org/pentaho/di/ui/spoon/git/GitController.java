@@ -118,7 +118,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void setActive() {
     openGit();
-    if ( uiGit.getGit() == null ) {
+    if ( !uiGit.isOpen() ) {
       return;
     }
 
@@ -142,7 +142,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setInactive() {
-    if ( uiGit.getGit() == null ) {
+    if ( !uiGit.isOpen() ) {
       return; // No thing to do
     }
 

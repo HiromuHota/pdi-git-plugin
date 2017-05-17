@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git;
+package org.pentaho.di.ui.spoon.git.model;
 
 import static org.junit.Assert.*;
 
@@ -30,7 +30,6 @@ import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObj
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIJob;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObjects;
 import org.pentaho.di.ui.repository.repositoryexplorer.model.UITransformation;
-import org.pentaho.di.ui.spoon.git.model.UIGit;
 
 public class UIGitTest extends RepositoryTestCase {
   private Git git;
@@ -40,11 +39,11 @@ public class UIGitTest extends RepositoryTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+    git = new Git( db );
     uiGit = new UIGit();
-    uiGit.openGit( db.getDirectory().getPath() );
+    uiGit.setGit( git );
     uiGit.setAuthorName( "test <test@example.com>" );
     uiGit.setCommitMessage( "test" );
-    git = uiGit.getGit();
 
     // create another repository
     db2 = createWorkRepository();
