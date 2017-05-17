@@ -4,13 +4,19 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
+import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
+import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.api.PullResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.EngineMetaInterface;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryMeta;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
@@ -19,6 +25,7 @@ import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
 import org.pentaho.di.repository.pur.PurRepository;
 import org.pentaho.di.repository.pur.PurRepositoryMeta;
+import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
 import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.components.XulConfirmBox;
@@ -31,6 +38,8 @@ import org.pentaho.ui.xul.swt.custom.MessageDialogBase;
 import org.pentaho.ui.xul.util.XulDialogCallback;
 
 public class GitControllerTest {
+
+  private static final Class<?> PKG = RepositoryExplorer.class;
 
   private static final String CONFIRMBOX = "confirmbox";
   private static final String MESSAGEBOX = "messagebox";
@@ -238,6 +247,25 @@ public class GitControllerTest {
     controller.push();
 
     verify( uiGit, never() ).push();
+  }
+
+  @Test
+  public void shouldShowSuccessWhenPushSucceeds() throws Exception {
+    XulMessageBox message = spy( new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT ) );
+    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    doReturn( true ).when( uiGit ).hasRemote();
+    PushResult result = mock( PushResult.class );
+    List<PushResult> results = Arrays.asList( result );
+    RemoteRefUpdate update = mock( RemoteRefUpdate.class );
+    when( update.getStatus() ).thenReturn( Status.OK );
+    when( result.getRemoteUpdate( anyString() ) ).thenReturn( update );
+    when( uiGit.getFullBranch() ).thenReturn( "refs/heads/master" );
+    when( uiGit.push() ).thenReturn( results );
+
+    controller.push();
+
+    verify( uiGit ).push();
+    verify( message ).setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
   }
 
   @Test
