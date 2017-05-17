@@ -19,7 +19,10 @@
         <label id="remote" flex="1"/>
         <button id="remoteButton" onclick="gitController.editRemote()" image="org/pentaho/di/ui/spoon/git/images/Edit.svg" disabled="true"/>
       </hbox>
-      <pen:include src="org/pentaho/di/ui/spoon/git/xul/git_revision-table.xul" ignoreroot="true" />
+      <splitter flex="1" orient="VERTICAL">
+        <pen:include src="org/pentaho/di/ui/spoon/git/xul/git_revision-table.xul" ignoreroot="true" />
+        <textbox id="diff" multiline="true" readonly="true" flex="2"/>
+      </splitter>
     </vbox>
     <vbox flex="1">
       <splitter flex="1" orient="VERTICAL">

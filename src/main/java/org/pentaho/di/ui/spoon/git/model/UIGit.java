@@ -1,7 +1,9 @@
 package org.pentaho.di.ui.spoon.git.model;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -215,5 +217,11 @@ public class UIGit extends XulEventSourceAdapter {
 
   public Iterable<PushResult> push() throws Exception {
     return git.push().call();
+  }
+
+  public String diff() throws Exception {
+    OutputStream out = new ByteArrayOutputStream();
+    git.diff().setOutputStream( out ).call();
+    return out.toString();
   }
 }

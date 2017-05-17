@@ -1,6 +1,5 @@
 package org.pentaho.di.ui.spoon.git;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -59,6 +58,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private UIGit uiGit = new UIGit();
   private String path;
+  private String diff;
   private String authorName;
   private String commitMessage;
   private List<UIFile> selectedUnstagedItems;
@@ -99,6 +99,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private void createBindings() {
     XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
+    XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
     XulLabel branchLabel = (XulLabel) document.getElementById( "branch" );
     XulLabel remoteLabel = (XulLabel) document.getElementById( "remote" );
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
@@ -107,6 +108,7 @@ public class GitController extends AbstractXulEventHandler {
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
     bf.createBinding( this, "path", pathLabel, "value" );
+    bf.createBinding( this, "diff", diffText, "value" );
     branchBinding = bf.createBinding( uiGit, "branch", branchLabel, "value" );
     remoteBinding = bf.createBinding( uiGit, "remote", remoteLabel, "value" );
     revisionBinding = bf.createBinding( uiGit, "revisionObjects", revisionTable, "elements" );
@@ -174,13 +176,14 @@ public class GitController extends AbstractXulEventHandler {
     try {
       uiGit.openGit( baseDirectory );
       setPath( baseDirectory );
+      setDiff( uiGit.diff() );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
-    } catch ( IOException e ) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
     } catch ( NullPointerException e ) {
       return;
+    } catch ( Exception e ) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 
@@ -325,6 +328,15 @@ public class GitController extends AbstractXulEventHandler {
   public void setPath( String path ) {
     this.path = "".equals( path ) ? null : path;
     firePropertyChange( "path", null, path );
+  }
+
+  public String getDiff() {
+    return this.diff;
+  }
+
+  public void setDiff( String diff ) {
+    this.diff = diff;
+    firePropertyChange( "diff", null, diff );
   }
 
   public String getAuthorName() {
