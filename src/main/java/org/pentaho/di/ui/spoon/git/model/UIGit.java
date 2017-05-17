@@ -10,9 +10,11 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
+import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -233,6 +235,10 @@ public class UIGit extends XulEventSourceAdapter {
    */
   public PullResult pull() throws Exception {
     return git.pull().call();
+  }
+
+  public Ref resetHard() throws Exception {
+    return git.reset().setMode( ResetType.HARD ).call();
   }
 
   public Iterable<PushResult> push() throws Exception {

@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
@@ -335,10 +336,12 @@ public class GitController extends AbstractXulEventHandler {
     fireSourceChanged();
   }
 
-  public void pull() {
+  public void pull() throws Exception {
     XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
     try {
       PullResult pullResult = uiGit.pull();
+      FetchResult fetchResult = pullResult.getFetchResult();
+      MergeResult mergeResult = pullResult.getMergeResult();
       revisionBinding.fireSourceChanged();
       if ( pullResult.isSuccessful() ) {
         messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
@@ -346,11 +349,14 @@ public class GitController extends AbstractXulEventHandler {
         messageBox.setMessage( BaseMessages.getString( PKG, "Dialog.Success" ) );
         messageBox.open();
       } else {
-        FetchResult fetchResult = pullResult.getFetchResult();
-        MergeResult mergeResult = pullResult.getMergeResult();
         messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
         messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-        messageBox.setMessage( "Fetch: " + fetchResult.getMessages() + "\nMerge: " + mergeResult.getMergeStatus() );
+        if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
+          uiGit.resetHard();
+          messageBox.setMessage( mergeResult.getMergeStatus().toString() );
+        } else {
+          messageBox.setMessage( "Fetch: " + fetchResult.getMessages() + "\nMerge: " + mergeResult.getMergeStatus() );
+        }
         messageBox.open();
       }
     } catch ( GitAPIException e ) {
