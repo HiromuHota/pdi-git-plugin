@@ -19,15 +19,20 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.UserConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.treewalk.AbstractTreeIterator;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
@@ -124,7 +129,7 @@ public class UIGit extends XulEventSourceAdapter {
       Iterable<RevCommit> iterable = git.log().call();
       for ( RevCommit commit : iterable ) {
         PurObjectRevision rev = new PurObjectRevision(
-          commit.getName().substring( 0, 7 ),
+          commit.getName(),
           commit.getAuthorIdent().getName(),
           commit.getAuthorIdent().getWhen(),
           commit.getShortMessage() );
@@ -223,5 +228,31 @@ public class UIGit extends XulEventSourceAdapter {
     OutputStream out = new ByteArrayOutputStream();
     git.diff().setOutputStream( out ).call();
     return out.toString();
+  }
+
+  public String show( String commitId ) throws Exception {
+    AbstractTreeIterator newTree = getTreeIterator( commitId );
+    AbstractTreeIterator oldTree = getTreeIterator( commitId + "^" );
+
+    OutputStream out = new ByteArrayOutputStream();
+    git.diff().setOutputStream( out )
+      .setOldTree( oldTree )
+      .setNewTree( newTree )
+      .call();
+    return out.toString();
+  }
+
+  private AbstractTreeIterator getTreeIterator( String name ) throws IOException {
+    final ObjectId id = git.getRepository().resolve( name );
+    if ( id == null ) {
+      throw new IllegalArgumentException( name );
+    }
+    final CanonicalTreeParser p = new CanonicalTreeParser();
+    try ( ObjectReader or = git.getRepository().newObjectReader();
+        RevWalk rw = new RevWalk( git.getRepository() ) ) {
+      p.reset( or, rw.parseTree( id ) );
+    }
+
+    return p;
   }
 }

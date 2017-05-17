@@ -25,8 +25,8 @@ import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
+import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
-import org.pentaho.di.ui.repository.repositoryexplorer.model.UIRepositoryObject;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
@@ -61,6 +61,7 @@ public class GitController extends AbstractXulEventHandler {
   private String diff;
   private String authorName;
   private String commitMessage;
+  private List<UIRepositoryObjectRevision> selectedRevisions;
   private List<UIFile> selectedUnstagedItems;
   private List<UIFile> selectedStagedItems;
 
@@ -115,6 +116,7 @@ public class GitController extends AbstractXulEventHandler {
     unstagedBinding = bf.createBinding( uiGit, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( uiGit, "stagedObjects", stagedTable, "elements" );
 
+    bf.createBinding( revisionTable, "selectedItems", this, "selectedRevisions" );
     bf.createBinding( unstagedTable, "selectedItems", this, "selectedUnstagedItems" );
     bf.createBinding( stagedTable, "selectedItems", this, "selectedStagedItems" );
 
@@ -176,7 +178,7 @@ public class GitController extends AbstractXulEventHandler {
     try {
       uiGit.openGit( baseDirectory );
       setPath( baseDirectory );
-      setDiff( uiGit.diff() );
+      diff();
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
     } catch ( NullPointerException e ) {
@@ -303,6 +305,15 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void onDrag( DropEvent event ) {
+  }
+
+  public List<UIRepositoryObjectRevision> getSelectedRevisions() {
+    return selectedRevisions;
+  }
+
+  public void setSelectedRevisions( List<UIRepositoryObjectRevision> selectedRevisions ) throws Exception {
+    this.selectedRevisions = selectedRevisions;
+    this.diff();
   }
 
   public List<UIFile> getSelectedUnstagedItems() {
@@ -436,6 +447,14 @@ public class GitController extends AbstractXulEventHandler {
       messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
       messageBox.setMessage( "Please setup a remote" );
       messageBox.open();
+    }
+  }
+
+  public void diff() throws Exception {
+    if ( getSelectedRevisions().size() == 0 ) { //When no revision is selected
+      setDiff( uiGit.diff() );
+    } else {
+      setDiff( uiGit.show( getSelectedRevisions().get( 0 ).getName() ) );
     }
   }
 
