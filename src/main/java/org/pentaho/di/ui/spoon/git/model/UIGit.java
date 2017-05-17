@@ -13,6 +13,7 @@ import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -224,6 +225,14 @@ public class UIGit extends XulEventSourceAdapter {
     setPath( null );
     git.close();
     git = null;
+  }
+
+  public DirCache add( String filepattern ) throws Exception {
+    return git.add().addFilepattern( filepattern ).call();
+  }
+
+  public Ref reset( String path ) throws Exception {
+    return git.reset().addPath( path ).call();
   }
 
   /**

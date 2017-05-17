@@ -263,7 +263,7 @@ public class GitController extends AbstractXulEventHandler {
   public void addToIndex() throws Exception {
     List<UIRepositoryObject> contents = getSelectedUnstagedItems();
     for ( UIRepositoryObject content : contents ) {
-      uiGit.getGit().add().addFilepattern( content.getName() ).call();
+      uiGit.add( content.getName() );
     }
     fireSourceChanged();
   }
@@ -271,7 +271,7 @@ public class GitController extends AbstractXulEventHandler {
   public void removeFromIndex() throws Exception {
     List<UIRepositoryObject> contents = getSelectedStagedItems();
     for ( UIRepositoryObject content : contents ) {
-      uiGit.getGit().reset().addPath( content.getName() ).call();
+      uiGit.reset( content.getName() );
     }
     fireSourceChanged();
   }
@@ -280,7 +280,7 @@ public class GitController extends AbstractXulEventHandler {
     for ( Object o : event.getDataTransfer().getData() ) {
       if ( o instanceof UIRepositoryObject ) {
         UIRepositoryObject content = (UIRepositoryObject) o;
-        uiGit.getGit().add().addFilepattern( content.getName() ).call();
+        uiGit.add( content.getName() );
       }
     }
   }
@@ -289,7 +289,7 @@ public class GitController extends AbstractXulEventHandler {
     for ( Object o : event.getDataTransfer().getData() ) {
       if ( o instanceof UIRepositoryObject ) {
         UIRepositoryObject content = (UIRepositoryObject) o;
-        uiGit.getGit().reset().addPath( content.getName() ).call();
+        uiGit.reset( content.getName() );
       }
     }
   }
