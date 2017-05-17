@@ -39,6 +39,8 @@ public class GitControllerTest {
   @Before
   public void setUp() throws Exception {
     controller = spy( new GitController() );
+    controller.setAuthorName( "test <test@example.com>" );
+    controller.setCommitMessage( "test" );
     uiGit = mock( UIGit.class );
     controller.setUIGit( uiGit );
     doNothing().when( controller ).fireSourceChanged();
@@ -48,6 +50,16 @@ public class GitControllerTest {
     XulDomContainer xulDomContainer = mock( XulDomContainer.class );
     when( xulDomContainer.getDocumentRoot() ).thenReturn( document );
     controller.setXulDomContainer( xulDomContainer );
+  }
+
+  @Test
+  public void testGetAuthorName() {
+    assertEquals( "test <test@example.com>", controller.getAuthorName() );
+  }
+
+  @Test
+  public void testGetCommitMessage() {
+    assertEquals( "test", controller.getCommitMessage() );
   }
 
   @Test
@@ -166,7 +178,7 @@ public class GitControllerTest {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
     doReturn( true ).when( uiGit ).hasStagedObjects();
-    doReturn( "random author" ).when( uiGit ).getAuthorName();
+    controller.setAuthorName( "random author" );
 
     controller.commit();
 
@@ -178,8 +190,6 @@ public class GitControllerTest {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
     doReturn( true ).when( uiGit ).hasStagedObjects();
-    doReturn( "test <test@example.com>" ).when( uiGit ).getAuthorName();
-    doReturn( "test" ).when( uiGit ).getCommitMessage();
 
     controller.commit();
 

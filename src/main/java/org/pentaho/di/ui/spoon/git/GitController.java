@@ -55,6 +55,9 @@ public class GitController extends AbstractXulEventHandler {
   private static final Class<?> PKG = RepositoryExplorer.class;
 
   private UIGit uiGit = new UIGit();
+  private String path;
+  private String authorName;
+  private String commitMessage;
   private List<UIRepositoryObject> selectedUnstagedItems;
   private List<UIRepositoryObject> selectedStagedItems;
 
@@ -111,9 +114,9 @@ public class GitController extends AbstractXulEventHandler {
     bf.createBinding( stagedTable, "selectedItems", this, "selectedStagedItems" );
 
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
-    bf.createBinding( uiGit, "path", pathText, "value" );
-    bf.createBinding( uiGit, "authorName", authorName, "value" );
-    bf.createBinding( uiGit, "commitMessage", commitMessage, "value" );
+    bf.createBinding( this, "path", pathText, "value" );
+    bf.createBinding( this, "authorName", authorName, "value" );
+    bf.createBinding( this, "commitMessage", commitMessage, "value" );
   }
 
   public void setActive() {
@@ -131,8 +134,7 @@ public class GitController extends AbstractXulEventHandler {
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
 
-    uiGit.setAuthorName( uiGit.getGit().getRepository().getConfig().getString( "user", null, "name" )
-        + " <" + uiGit.getGit().getRepository().getConfig().getString( "user", null, "email" ) + ">" );
+    setAuthorName( uiGit.getAuthorName() );
 
     try {
       fireSourceChanged();
@@ -154,6 +156,7 @@ public class GitController extends AbstractXulEventHandler {
     pushButton.setDisabled( true );
 
     uiGit.closeGit();
+    setPath( null );
 
     try {
       fireSourceChanged();
@@ -170,6 +173,7 @@ public class GitController extends AbstractXulEventHandler {
   private void openGit( String baseDirectory ) {
     try {
       uiGit.openGit( baseDirectory );
+      setPath( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
     } catch ( IOException e ) {
@@ -232,6 +236,7 @@ public class GitController extends AbstractXulEventHandler {
         if ( returnCode == Status.ACCEPT ) {
           try {
             uiGit.initGit( baseDirectory );
+            setPath( baseDirectory );
             messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
             messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
             messageBox.setMessage( BaseMessages.getString( PKG, "Dialog.Success" ) );
@@ -313,6 +318,33 @@ public class GitController extends AbstractXulEventHandler {
     this.selectedStagedItems = selectedStagedItems;
   }
 
+  public String getPath() {
+    return this.path;
+  }
+
+  public void setPath( String path ) {
+    this.path = "".equals( path ) ? null : path;
+    firePropertyChange( "path", null, path );
+  }
+
+  public String getAuthorName() {
+    return authorName;
+  }
+
+  public void setAuthorName( String authorName ) {
+    this.authorName = authorName;
+    firePropertyChange( "authorName", null, authorName );
+  }
+
+  public String getCommitMessage() {
+    return commitMessage;
+  }
+
+  public void setCommitMessage( String commitMessage ) {
+    this.commitMessage = commitMessage;
+    firePropertyChange( "commitMessage", null, commitMessage );
+  }
+
   public void commit() throws Exception {
     XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
     if ( !uiGit.hasStagedObjects() ) {
@@ -323,7 +355,7 @@ public class GitController extends AbstractXulEventHandler {
       return;
     }
 
-    Matcher m = Pattern.compile( "(.*) <(.*@.*)>" ).matcher( uiGit.getAuthorName() );
+    Matcher m = Pattern.compile( "(.*) <(.*@.*)>" ).matcher( getAuthorName() );
     if ( !m.matches() ) {
       messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
       messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
@@ -331,8 +363,8 @@ public class GitController extends AbstractXulEventHandler {
       messageBox.open();
       return;
     }
-    uiGit.commit( m.group( 1 ), m.group( 2 ), uiGit.getCommitMessage() );
-    uiGit.setCommitMessage( "" );
+    uiGit.commit( m.group( 1 ), m.group( 2 ), getCommitMessage() );
+    setCommitMessage( "" );
     fireSourceChanged();
   }
 
@@ -397,6 +429,7 @@ public class GitController extends AbstractXulEventHandler {
     DirectoryDialog dialog = new DirectoryDialog( shell, SWT.OPEN );
     if ( dialog.open() != null ) {
       uiGit.closeGit();
+      setPath( null );
       openGit( dialog.getFilterPath() );
       fireSourceChanged();
     }

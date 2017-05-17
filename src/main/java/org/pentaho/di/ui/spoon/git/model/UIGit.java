@@ -14,10 +14,12 @@ import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.dircache.DirCache;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.lib.UserConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
@@ -43,9 +45,6 @@ import com.google.common.annotations.VisibleForTesting;
 public class UIGit extends XulEventSourceAdapter {
 
   private Git git;
-  private String path;
-  private String authorName;
-  private String commitMessage;
 
   public String findGitRepository( String pathname ) {
     Repository repository;
@@ -63,40 +62,15 @@ public class UIGit extends XulEventSourceAdapter {
     return git != null;
   }
 
-  public Git getGit() {
-    return git;
-  }
-
   @VisibleForTesting
   void setGit( Git git ) {
     this.git = git;
   }
 
-  public void setPath( String path ) {
-    this.path = "".equals( path ) ? null : path;
-    firePropertyChange( "path", null, path );
-  }
-
-  public String getPath() {
-    return this.path;
-  }
-
   public String getAuthorName() {
-    return authorName;
-  }
-
-  public void setAuthorName( String authorName ) {
-    this.authorName = authorName;
-    firePropertyChange( "authorName", null, authorName );
-  }
-
-  public String getCommitMessage() {
-    return commitMessage;
-  }
-
-  public void setCommitMessage( String commitMessage ) {
-    this.commitMessage = commitMessage;
-    firePropertyChange( "commitMessage", null, commitMessage );
+    Config config = git.getRepository().getConfig();
+    return config.get( UserConfig.KEY ).getAuthorName()
+        + " <" + config.get( UserConfig.KEY ).getAuthorEmail() + ">";
   }
 
   public String getBranch() {
@@ -220,16 +194,13 @@ public class UIGit extends XulEventSourceAdapter {
 
   public void initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {
     git = Git.init().setDirectory( new File( baseDirectory ) ).call();
-    setPath( baseDirectory );
   }
 
   public void openGit( String baseDirectory ) throws IOException {
     git = Git.open( new File( baseDirectory ) );
-    setPath( baseDirectory );
   }
 
   public void closeGit() {
-    setPath( null );
     git.close();
     git = null;
   }

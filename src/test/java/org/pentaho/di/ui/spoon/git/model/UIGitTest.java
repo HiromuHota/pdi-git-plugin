@@ -42,21 +42,9 @@ public class UIGitTest extends RepositoryTestCase {
     git = new Git( db );
     uiGit = new UIGit();
     uiGit.setGit( git );
-    uiGit.setAuthorName( "test <test@example.com>" );
-    uiGit.setCommitMessage( "test" );
 
     // create another repository
     db2 = createWorkRepository();
-  }
-
-  @Test
-  public void testGetAuthorName() {
-    assertEquals( "test <test@example.com>", uiGit.getAuthorName() );
-  }
-
-  @Test
-  public void testGetCommitMessage() {
-    assertEquals( "test", uiGit.getCommitMessage() );
   }
 
   @Test
