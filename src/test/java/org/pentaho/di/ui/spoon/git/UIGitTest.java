@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
@@ -15,10 +16,12 @@ import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.junit.RepositoryTestCase;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.junit.Before;
@@ -157,6 +160,45 @@ public class UIGitTest extends RepositoryTestCase {
     assertEquals( pullResult.getMergeResult().getMergeStatus(),
                     MergeStatus.FAST_FORWARD );
     assertEquals( RepositoryState.SAFE, db.getRepositoryState() );
+  }
+
+  @Test
+  public void testPullMerge() throws Exception {
+    // source: db2, target: db
+    setupRemote();
+    Git git2 = new Git( db2 );
+
+    // put some file in the source repo and sync
+    File sourceFile = new File( db2.getWorkTree(), "SomeFile.txt" );
+    writeToFile( sourceFile, "Hello world" );
+    git2.add().addFilepattern( "SomeFile.txt" ).call();
+    git2.commit().setMessage( "Initial commit for source" ).call();
+    PullResult pullResult = git.pull().call();
+
+    // change the source file
+    writeToFile( sourceFile, "Another change" );
+    git2.add().addFilepattern( "SomeFile.txt" ).call();
+    RevCommit sourceCommit = git2.commit().setMessage( "Some change in remote" ).call();
+    git2.close();
+
+    File targetFile = new File( db.getWorkTree(), "OtherFile.txt" );
+    writeToFile( targetFile, "Unconflicting change" );
+    git.add().addFilepattern( "OtherFile.txt" ).call();
+    RevCommit targetCommit = git.commit().setMessage( "Unconflicting change in local" ).call();
+
+    pullResult = uiGit.pull();
+
+    MergeResult mergeResult = pullResult.getMergeResult();
+    ObjectId[] mergedCommits = mergeResult.getMergedCommits();
+    assertEquals( targetCommit.getId(), mergedCommits[0] );
+    assertEquals( sourceCommit.getId(), mergedCommits[1] );
+    try ( RevWalk rw = new RevWalk( db ) ) {
+      RevCommit mergeCommit = rw.parseCommit( mergeResult.getNewHead() );
+      URIish uri = new URIish(
+          db2.getDirectory().toURI().toURL() );
+      String message = "Merge branch 'master' of " + uri;
+      assertEquals( message, mergeCommit.getShortMessage() );
+    }
   }
 
   @Test
