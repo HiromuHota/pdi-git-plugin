@@ -34,6 +34,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.EmptyTreeIterator;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
@@ -228,6 +229,15 @@ public class UIGit extends XulEventSourceAdapter {
   public String diff() throws Exception {
     OutputStream out = new ByteArrayOutputStream();
     git.diff().setOutputStream( out ).call();
+    return out.toString();
+  }
+
+  public String diff( String file, boolean isCached ) throws Exception {
+    OutputStream out = new ByteArrayOutputStream();
+    git.diff().setOutputStream( out )
+      .setPathFilter( PathFilter.create( file ) )
+      .setCached( isCached )
+      .call();
     return out.toString();
   }
 

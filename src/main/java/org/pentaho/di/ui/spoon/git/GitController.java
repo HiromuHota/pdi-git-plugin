@@ -320,16 +320,22 @@ public class GitController extends AbstractXulEventHandler {
     return selectedUnstagedItems;
   }
 
-  public void setSelectedUnstagedItems( List<UIFile> selectedUnstagedItems ) {
+  public void setSelectedUnstagedItems( List<UIFile> selectedUnstagedItems ) throws Exception {
     this.selectedUnstagedItems = selectedUnstagedItems;
+    if ( selectedUnstagedItems.size() != 0 ) {
+      setDiff( uiGit.diff( selectedUnstagedItems.get( 0 ).getName(), false ) );
+    }
   }
 
   public List<UIFile> getSelectedStagedItems() {
     return selectedStagedItems;
   }
 
-  public void setSelectedStagedItems( List<UIFile> selectedStagedItems ) {
+  public void setSelectedStagedItems( List<UIFile> selectedStagedItems ) throws Exception {
     this.selectedStagedItems = selectedStagedItems;
+    if ( selectedStagedItems.size() != 0 ) {
+      setDiff( uiGit.diff( selectedStagedItems.get( 0 ).getName(), true ) );
+    }
   }
 
   public String getPath() {
