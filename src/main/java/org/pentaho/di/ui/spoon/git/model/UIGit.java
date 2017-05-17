@@ -33,6 +33,7 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
@@ -245,7 +246,7 @@ public class UIGit extends XulEventSourceAdapter {
   private AbstractTreeIterator getTreeIterator( String name ) throws IOException {
     final ObjectId id = git.getRepository().resolve( name );
     if ( id == null ) {
-      throw new IllegalArgumentException( name );
+      return new EmptyTreeIterator();
     }
     final CanonicalTreeParser p = new CanonicalTreeParser();
     try ( ObjectReader or = git.getRepository().newObjectReader();
