@@ -17,6 +17,7 @@ import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
@@ -247,10 +248,11 @@ public class UIGit extends XulEventSourceAdapter {
     AbstractTreeIterator oldTree = getTreeIterator( commitId + "^" );
 
     OutputStream out = new ByteArrayOutputStream();
-    git.diff().setOutputStream( out )
-      .setOldTree( oldTree )
-      .setNewTree( newTree )
-      .call();
+    DiffFormatter formatter = new DiffFormatter( out );
+    formatter.setRepository( git.getRepository() );
+    formatter.setDetectRenames( true );
+    formatter.format( oldTree, newTree );
+    formatter.close();
     return out.toString();
   }
 
