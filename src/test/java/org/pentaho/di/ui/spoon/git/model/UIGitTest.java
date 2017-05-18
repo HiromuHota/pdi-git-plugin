@@ -91,7 +91,7 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testGetRevisionObjects() throws IOException, NoFilepatternException, GitAPIException {
+  public void testGetRevisionObjects() throws Exception {
     writeTrashFile( "Test.txt", "Hello world" );
     git.add().addFilepattern( "Test.txt" ).call();
     git.commit().setMessage( "initial commit" ).call();

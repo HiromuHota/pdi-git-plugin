@@ -459,6 +459,8 @@ public class GitController extends AbstractXulEventHandler {
   public void diff() throws Exception {
     if ( getSelectedRevisions().size() == 0 ) { //When no revision is selected
       setDiff( uiGit.diff() );
+    } else if ( getSelectedRevisions().get( 0 ).getName().equals( "" ) ) { //When WIP is selected
+      setDiff( uiGit.diff() );
     } else {
       setDiff( uiGit.show( getSelectedRevisions().get( 0 ).getName() ) );
     }

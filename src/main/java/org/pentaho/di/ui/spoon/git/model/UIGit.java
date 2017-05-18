@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -125,9 +126,17 @@ public class UIGit extends XulEventSourceAdapter {
     return git.commit().setAuthor( name, email ).setMessage( message ).call();
   }
 
-  public UIRepositoryObjectRevisions getRevisionObjects() {
+  public UIRepositoryObjectRevisions getRevisionObjects() throws Exception {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     try {
+      if ( !git.status().call().isClean() ) {
+        PurObjectRevision rev = new PurObjectRevision(
+            "",
+            "*",
+            new Date(),
+            " // WIP" );
+        revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
+      }
       Iterable<RevCommit> iterable = git.log().call();
       for ( RevCommit commit : iterable ) {
         PurObjectRevision rev = new PurObjectRevision(
