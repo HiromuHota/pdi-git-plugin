@@ -107,8 +107,8 @@ public class UIGitTest extends RepositoryTestCase {
     writeTrashFile( "b.kjb", "content" );
     List<UIFile> stagedObjects = uiGit.getUnstagedObjects();
     assertEquals( 2, stagedObjects.size() );
-    assertEquals( UITransformation.class, stagedObjects.get( 0 ).getClass() );
-    assertEquals( UIJob.class, stagedObjects.get( 1 ).getClass() );
+    assertEquals( "a.ktr", stagedObjects.get( 0 ).getName() );
+    assertEquals( "b.kjb", stagedObjects.get( 1 ).getName() );
   }
 
   @Test
@@ -118,8 +118,8 @@ public class UIGitTest extends RepositoryTestCase {
     git.add().addFilepattern( "." ).call();
     List<UIFile> stagedObjects = uiGit.getStagedObjects();
     assertEquals( 2, stagedObjects.size() );
-    assertEquals( UITransformation.class, stagedObjects.get( 0 ).getClass() );
-    assertEquals( UIJob.class, stagedObjects.get( 1 ).getClass() );
+    assertEquals( "a.ktr", stagedObjects.get( 0 ).getName() );
+    assertEquals( "b.kjb", stagedObjects.get( 1 ).getName() );
   }
 
   @Test

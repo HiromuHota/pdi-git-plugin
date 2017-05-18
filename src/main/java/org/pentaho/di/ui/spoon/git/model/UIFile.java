@@ -1,10 +1,15 @@
 package org.pentaho.di.ui.spoon.git.model;
 
+import org.apache.commons.io.FilenameUtils;
 import org.pentaho.ui.xul.XulEventSourceAdapter;
 
 public class UIFile extends XulEventSourceAdapter {
 
   private String name;
+
+  public UIFile( String name ) {
+    this.name = name;
+  }
 
   public String getName() {
     return name;
@@ -15,6 +20,13 @@ public class UIFile extends XulEventSourceAdapter {
   }
 
   public String getImage() {
-    return "";
+    String ext = FilenameUtils.getExtension( name );
+    if ( "ktr".equalsIgnoreCase( ext ) ) {
+      return "ui/images/transrepo.svg";
+    } else if ( "kjb".equalsIgnoreCase( ext ) ) {
+      return "ui/images/jobrepo.svg";
+    } else {
+      return "";
+    }
   }
 }

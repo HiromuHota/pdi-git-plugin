@@ -181,15 +181,7 @@ public class UIGit extends XulEventSourceAdapter {
   private List<UIFile> getObjects( Set<String> files ) throws Exception {
     List<UIFile> objs = new ArrayList<UIFile>();
     for ( String file : files ) {
-      UIFile obj;
-      if ( file.endsWith( ".ktr" ) ) {
-        obj = new UITransformation();
-      } else if ( file.endsWith( ".kjb" ) ) {
-        obj = new UIJob();
-      } else {
-        obj = new UIFile();
-      }
-      obj.setName( file );
+      UIFile obj = new UIFile( file );
       objs.add( obj );
     }
     return objs;
