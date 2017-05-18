@@ -26,7 +26,9 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
 public class UIGitTest extends RepositoryTestCase {
@@ -213,6 +215,47 @@ public class UIGitTest extends RepositoryTestCase {
         db2.resolve( commit.getId().getName() + "^{commit}" ) );
     assertEquals( tagRef.getObjectId(),
         db2.resolve( tagRef.getObjectId().getName() ) );
+  }
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
+  @Test
+  public void testShouldPushOnlyToOrigin() throws Exception {
+    // origin for db2
+    URIish uri = new URIish(
+      db2.getDirectory().toURI().toURL() );
+    RemoteAddCommand cmd = git.remoteAdd();
+    cmd.setName( Constants.DEFAULT_REMOTE_NAME );
+    cmd.setUri( uri );
+    cmd.call();
+
+    // upstream for db3
+    Repository db3 = createWorkRepository();
+    uri = new URIish(
+        db3.getDirectory().toURI().toURL() );
+    cmd = git.remoteAdd();
+    cmd.setName( "upstream" );
+    cmd.setUri( uri );
+    cmd.call();
+
+    // create some refs via commits and tag
+    RevCommit commit = git.commit().setMessage( "initial commit" ).call();
+    Ref tagRef = git.tag().setName( "tag" ).call();
+
+    try {
+      db3.resolve( commit.getId().getName() + "^{commit}" );
+      fail( "id shouldn't exist yet" );
+    } catch ( MissingObjectException e ) {
+      // we should get here
+    }
+
+    uiGit.push();
+
+    // The followings should throw MissingObjectException
+    thrown.expect( MissingObjectException.class );
+    db3.resolve( commit.getId().getName() + "^{commit}" );
+    db3.resolve( tagRef.getObjectId().getName() );
   }
 
   private static void writeToFile( File actFile, String string ) throws IOException {
