@@ -88,6 +88,10 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
+    XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
+    Text text = ( (Text) diffText.getManagedObject() );
+    text.setFont( JFaceResources.getFont( JFaceResources.TEXT_FONT ) );
+
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
     stagedTable = (XulTree) document.getElementById( "staged-table" );
@@ -103,8 +107,6 @@ public class GitController extends AbstractXulEventHandler {
   private void createBindings() {
     XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
     XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
-    Text text = ( (Text) diffText.getManagedObject() );
-    text.setFont( JFaceResources.getFont( JFaceResources.TEXT_FONT ) );
     XulLabel branchLabel = (XulLabel) document.getElementById( "branch" );
     XulLabel remoteLabel = (XulLabel) document.getElementById( "remote" );
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
