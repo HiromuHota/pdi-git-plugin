@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -53,10 +55,12 @@ public class UIGit extends XulEventSourceAdapter {
     Repository repository;
     try {
       repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
-          .findGitDir( new File( pathname ).getParentFile() ) // scan up the file system tree
+          .findGitDir( new File( new URI( pathname ) ).getParentFile() ) // scan up the file system tree
           .build();
       return repository.getDirectory().getParent();
     } catch ( IOException e ) {
+      return null;
+    } catch ( URISyntaxException e ) {
       return null;
     }
   }

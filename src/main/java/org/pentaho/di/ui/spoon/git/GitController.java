@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.vfs2.FileObject;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
@@ -23,6 +24,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.EngineMetaInterface;
+import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
@@ -213,7 +215,12 @@ public class GitController extends AbstractXulEventHandler {
       } else {
         // Find the git repository for this file
         String fileName = meta.getFilename();
-        return uiGit.findGitRepository( fileName );
+        try {
+          FileObject f = KettleVFS.getFileObject( fileName );
+          return uiGit.findGitRepository( f.getURL().toString() );
+        } catch ( Exception e ) {
+          return null;
+        }
       }
     }
   }
