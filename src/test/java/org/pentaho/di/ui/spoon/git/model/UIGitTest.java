@@ -188,9 +188,13 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testPush() throws Exception {
+    // Set remote
     URIish uri = new URIish(
       db2.getDirectory().toURI().toURL() );
-    uiGit.addRemote( uri.toString() );
+    RemoteAddCommand cmd = git.remoteAdd();
+    cmd.setName( Constants.DEFAULT_REMOTE_NAME );
+    cmd.setUri( uri );
+    cmd.call();
 
     // create some refs via commits and tag
     RevCommit commit = git.commit().setMessage( "initial commit" ).call();
