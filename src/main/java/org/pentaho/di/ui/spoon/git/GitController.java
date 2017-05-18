@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
@@ -20,6 +21,7 @@ import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.Repository;
@@ -101,6 +103,8 @@ public class GitController extends AbstractXulEventHandler {
   private void createBindings() {
     XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
     XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
+    Text text = ( (Text) diffText.getManagedObject() );
+    text.setFont( JFaceResources.getFont( JFaceResources.TEXT_FONT ) );
     XulLabel branchLabel = (XulLabel) document.getElementById( "branch" );
     XulLabel remoteLabel = (XulLabel) document.getElementById( "remote" );
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
