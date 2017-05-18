@@ -126,7 +126,7 @@ public class UIGit extends XulEventSourceAdapter {
     return git.commit().setAuthor( name, email ).setMessage( message ).call();
   }
 
-  public UIRepositoryObjectRevisions getRevisionObjects() throws Exception {
+  public UIRepositoryObjectRevisions getRevisions() throws Exception {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     try {
       if ( !git.status().call().isClean() ) {

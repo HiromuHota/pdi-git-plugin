@@ -62,8 +62,8 @@ public class GitController extends AbstractXulEventHandler {
   private String authorName;
   private String commitMessage;
   private List<UIRepositoryObjectRevision> selectedRevisions;
-  private List<UIFile> selectedUnstagedItems;
-  private List<UIFile> selectedStagedItems;
+  private List<UIFile> selectedUnstagedObjects;
+  private List<UIFile> selectedStagedObjects;
 
   private XulTree revisionTable;
   private XulTree unstagedTable;
@@ -112,13 +112,13 @@ public class GitController extends AbstractXulEventHandler {
     bf.createBinding( this, "diff", diffText, "value" );
     branchBinding = bf.createBinding( uiGit, "branch", branchLabel, "value" );
     remoteBinding = bf.createBinding( uiGit, "remote", remoteLabel, "value" );
-    revisionBinding = bf.createBinding( uiGit, "revisionObjects", revisionTable, "elements" );
+    revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( uiGit, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( uiGit, "stagedObjects", stagedTable, "elements" );
 
     bf.createBinding( revisionTable, "selectedItems", this, "selectedRevisions" );
-    bf.createBinding( unstagedTable, "selectedItems", this, "selectedUnstagedItems" );
-    bf.createBinding( stagedTable, "selectedItems", this, "selectedStagedItems" );
+    bf.createBinding( unstagedTable, "selectedItems", this, "selectedUnstagedObjects" );
+    bf.createBinding( stagedTable, "selectedItems", this, "selectedStagedObjects" );
 
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
     bf.createBinding( this, "authorName", authorName, "value" );
@@ -271,7 +271,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void addToIndex() throws Exception {
-    List<UIFile> contents = getSelectedUnstagedItems();
+    List<UIFile> contents = getSelectedUnstagedObjects();
     for ( UIFile content : contents ) {
       uiGit.add( content.getName() );
     }
@@ -279,7 +279,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void removeFromIndex() throws Exception {
-    List<UIFile> contents = getSelectedStagedItems();
+    List<UIFile> contents = getSelectedStagedObjects();
     for ( UIFile content : contents ) {
       uiGit.reset( content.getName() );
     }
@@ -316,25 +316,25 @@ public class GitController extends AbstractXulEventHandler {
     this.diff();
   }
 
-  public List<UIFile> getSelectedUnstagedItems() {
-    return selectedUnstagedItems;
+  public List<UIFile> getSelectedUnstagedObjects() {
+    return selectedUnstagedObjects;
   }
 
-  public void setSelectedUnstagedItems( List<UIFile> selectedUnstagedItems ) throws Exception {
-    this.selectedUnstagedItems = selectedUnstagedItems;
-    if ( selectedUnstagedItems.size() != 0 ) {
-      setDiff( uiGit.diff( selectedUnstagedItems.get( 0 ).getName(), false ) );
+  public void setSelectedUnstagedObjects( List<UIFile> selectedUnstagedObjects ) throws Exception {
+    this.selectedUnstagedObjects = selectedUnstagedObjects;
+    if ( selectedUnstagedObjects.size() != 0 ) {
+      setDiff( uiGit.diff( selectedUnstagedObjects.get( 0 ).getName(), false ) );
     }
   }
 
-  public List<UIFile> getSelectedStagedItems() {
-    return selectedStagedItems;
+  public List<UIFile> getSelectedStagedObjects() {
+    return selectedStagedObjects;
   }
 
-  public void setSelectedStagedItems( List<UIFile> selectedStagedItems ) throws Exception {
-    this.selectedStagedItems = selectedStagedItems;
-    if ( selectedStagedItems.size() != 0 ) {
-      setDiff( uiGit.diff( selectedStagedItems.get( 0 ).getName(), true ) );
+  public void setSelectedStagedObjects( List<UIFile> selectedStagedObjects ) throws Exception {
+    this.selectedStagedObjects = selectedStagedObjects;
+    if ( selectedStagedObjects.size() != 0 ) {
+      setDiff( uiGit.diff( selectedStagedObjects.get( 0 ).getName(), true ) );
     }
   }
 

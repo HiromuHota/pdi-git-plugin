@@ -91,11 +91,11 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testGetRevisionObjects() throws Exception {
+  public void testGetRevisions() throws Exception {
     writeTrashFile( "Test.txt", "Hello world" );
     git.add().addFilepattern( "Test.txt" ).call();
     git.commit().setMessage( "initial commit" ).call();
-    UIRepositoryObjectRevisions revisions = uiGit.getRevisionObjects();
+    UIRepositoryObjectRevisions revisions = uiGit.getRevisions();
     assertEquals( 1, revisions.size() );
   }
 
