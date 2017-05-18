@@ -89,7 +89,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void init() throws IllegalArgumentException, InvocationTargetException, XulException {
     XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
-    Text text = ( (Text) diffText.getManagedObject() );
+    Text text = (Text) diffText.getManagedObject();
     text.setFont( JFaceResources.getFont( JFaceResources.TEXT_FONT ) );
 
     revisionTable = (XulTree) document.getElementById( "revision-table" );
