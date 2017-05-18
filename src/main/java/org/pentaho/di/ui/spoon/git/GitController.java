@@ -178,7 +178,7 @@ public class GitController extends AbstractXulEventHandler {
     try {
       uiGit.openGit( baseDirectory );
       setPath( baseDirectory );
-      diff();
+      setDiff( uiGit.diff() );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
     } catch ( NullPointerException e ) {
@@ -313,7 +313,14 @@ public class GitController extends AbstractXulEventHandler {
 
   public void setSelectedRevisions( List<UIRepositoryObjectRevision> selectedRevisions ) throws Exception {
     this.selectedRevisions = selectedRevisions;
-    this.diff();
+    if ( selectedRevisions.size() != 0 ) {
+      if ( getSelectedRevisions().get( 0 ).getName().equals( "" ) ) { //When WIP is selected
+        setDiff( uiGit.diff() );
+      } else {
+        // TODO Should show diff for multiple commits
+        setDiff( uiGit.show( getSelectedRevisions().get( 0 ).getName() ) );
+      }
+    }
   }
 
   public List<UIFile> getSelectedUnstagedObjects() {
@@ -453,16 +460,6 @@ public class GitController extends AbstractXulEventHandler {
       messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
       messageBox.setMessage( "Please setup a remote" );
       messageBox.open();
-    }
-  }
-
-  public void diff() throws Exception {
-    if ( getSelectedRevisions().size() == 0 ) { //When no revision is selected
-      setDiff( uiGit.diff() );
-    } else if ( getSelectedRevisions().get( 0 ).getName().equals( "" ) ) { //When WIP is selected
-      setDiff( uiGit.diff() );
-    } else {
-      setDiff( uiGit.show( getSelectedRevisions().get( 0 ).getName() ) );
     }
   }
 
