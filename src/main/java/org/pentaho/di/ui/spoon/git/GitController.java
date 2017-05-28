@@ -27,6 +27,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -36,6 +37,7 @@ import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
+import org.pentaho.di.ui.core.ConstUI;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
@@ -54,11 +56,13 @@ import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
 import org.pentaho.ui.xul.containers.XulBox;
+import org.pentaho.ui.xul.containers.XulMenupopup;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.dnd.DropEvent;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
 import org.pentaho.ui.xul.swt.custom.DialogConstant;
+import org.pentaho.ui.xul.swt.tags.SwtButton;
 import org.pentaho.ui.xul.util.XulDialogCallback.Status;
 import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
 
@@ -85,6 +89,8 @@ public class GitController extends AbstractXulEventHandler {
   private XulButton commitButton;
   private XulButton pullButton;
   private XulButton pushButton;
+  private XulButton branchButton;
+  private XulButton mergeButton;
   private XulTextbox authorNameTextbox;
   private XulTextbox commitMessageTextbox;
 
@@ -104,6 +110,12 @@ public class GitController extends AbstractXulEventHandler {
     XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
     Text text = (Text) diffText.getManagedObject();
     text.setFont( JFaceResources.getFont( JFaceResources.TEXT_FONT ) );
+
+    // ToolTip
+    branchButton = (SwtButton) document.getElementById( "branchButton" );
+    branchButton.setTooltiptext( BaseMessages.getString( PKG, "Git.ToolTip.Branch" ) );
+    mergeButton = (SwtButton) document.getElementById( "mergeButton" );
+    mergeButton.setTooltiptext( BaseMessages.getString( PKG, "Git.ToolTip.Merge" ) );
 
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
@@ -156,6 +168,9 @@ public class GitController extends AbstractXulEventHandler {
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
+    branchButton.setDisabled( false );
+    mergeButton.setDisabled( false );
+
     commitMessageTextbox.setReadonly( false );
     authorNameTextbox.setReadonly( false );
 
@@ -179,6 +194,8 @@ public class GitController extends AbstractXulEventHandler {
     commitButton.setDisabled( true );
     pullButton.setDisabled( true );
     pushButton.setDisabled( true );
+    branchButton.setDisabled( true );
+    mergeButton.setDisabled( true );
 
     uiGit.closeGit();
     setPath( null );
@@ -589,6 +606,75 @@ public class GitController extends AbstractXulEventHandler {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           update.getStatus().toString() );
     }
+  }
+
+  public void branch() {
+    ConstUI.displayMenu( (XulMenupopup) document.getElementById( "branchContextMenu" ), (Control) branchButton.getManagedObject() );
+  }
+
+  public void createBranch() throws XulException {
+    XulPromptBox promptBox = (XulPromptBox) document.createElement( "promptbox" );
+    promptBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.CreateBranch" ) );
+    promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
+    promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.CreateBranch" ) );
+    promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
+      if ( status.equals( Status.ACCEPT ) ) {
+        try {
+          uiGit.createBranch( value );
+          uiGit.checkout( value );
+          fireSourceChanged();
+          setBranches();
+        } catch ( Exception e ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+        }
+      }
+    } );
+    promptBox.open();
+  }
+
+  public void deleteBranch() throws XulException {
+    XulPromptBox promptBox = (XulPromptBox) document.createElement( "promptbox" );
+    promptBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.DeleteBranch" ) );
+    promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
+    promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.DeleteBranch" ) );
+    promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
+      if ( status.equals( Status.ACCEPT ) ) {
+        try {
+          uiGit.deleteBranch( value );
+          setBranches();
+        } catch ( Exception e ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+        }
+      }
+    } );
+    promptBox.open();
+  }
+
+  public void merge() throws XulException {
+    XulPromptBox promptBox = (XulPromptBox) document.createElement( "promptbox" );
+    promptBox.setTitle( BaseMessages.getString( PKG, "Git.Merge" ) );
+    promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
+    promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.MergeBranch" ) );
+    promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
+      if ( status.equals( Status.ACCEPT ) ) {
+        try {
+          MergeResult result = uiGit.mergeBranch( value );
+          if ( result.getMergeStatus().isSuccessful() ) {
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+            fireSourceChanged();
+            setBranches();
+          } else {
+            if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
+              uiGit.resetHard();
+            }
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
+          }
+        } catch ( Exception e ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+        }
+      }
+    } );
+    promptBox.open();
   }
 
   public void editPath() throws IllegalArgumentException, InvocationTargetException, XulException {

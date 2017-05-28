@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
@@ -400,5 +401,20 @@ public class UIGit extends XulEventSourceAdapter {
    */
   public void checkout( String name ) throws Exception {
     git.checkout().setName( name ).call();
+  }
+
+  public Ref createBranch( String value ) throws Exception {
+    return git.branchCreate().setName( value ).call();
+  }
+
+  public List<String> deleteBranch( String value ) throws Exception {
+    return git.branchDelete().setBranchNames( value ).call();
+  }
+
+  public MergeResult mergeBranch( String value ) throws Exception {
+    Ref ref = git.getRepository().exactRef( Constants.R_HEADS + value );
+    return git.merge()
+        .include( ref )
+        .call();
   }
 }
