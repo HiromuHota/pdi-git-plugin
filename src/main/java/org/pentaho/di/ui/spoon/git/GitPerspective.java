@@ -4,9 +4,11 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Composite;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveImageProvider;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveListener;
 import org.pentaho.di.ui.xul.KettleXulLoader;
@@ -14,8 +16,10 @@ import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.XulOverlay;
 import org.pentaho.ui.xul.XulRunner;
+import org.pentaho.ui.xul.containers.XulVbox;
 import org.pentaho.ui.xul.impl.XulEventHandler;
 import org.pentaho.ui.xul.swt.SwtXulRunner;
+import org.pentaho.ui.xul.swt.tags.SwtDeck;
 
 public class GitPerspective implements SpoonPerspectiveImageProvider {
 
@@ -26,6 +30,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
 
   private XulDomContainer container;
   private GitController controller;
+  private XulVbox box;
 
   public GitPerspective() throws XulException {
     // Loading Xul Document
@@ -41,6 +46,16 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     final XulRunner runner = new SwtXulRunner();
     runner.addContainer( container );
     runner.initialize(); //calls any onload events
+
+    /*
+     * To make compatible with webSpoon
+     * Create a temporary parent for the UI and then call layout().
+     * A different parent will be assigned to the UI in SpoonPerspectiveManager.PerspectiveManager.performInit().
+     */
+    SwtDeck deck = (SwtDeck) Spoon.getInstance().getXulDomContainer().getDocumentRoot().getElementById( "canvas-deck" );
+    box = deck.createVBoxCard();
+    getUI().setParent( (Composite) box.getManagedObject() );
+    getUI().layout();
   }
 
   @Override
@@ -70,6 +85,11 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
 
   @Override
   public void setActive( boolean active ) {
+    try { // Dispose the temporary parent
+      ( (Composite) box.getManagedObject() ).dispose();
+    } catch ( SWTException e ) {
+      // To nothing
+    }
     if ( active ) {
       controller.setActive();
     } else {
