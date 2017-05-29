@@ -1,6 +1,10 @@
 # Change Log
 
-## Unreleased
+## 0.2.0 - 2017-05-28
+
+### Added
+- Show diff
+- Support VFS (local)
 
 ## 0.1.0 - 2017-05-17
 
