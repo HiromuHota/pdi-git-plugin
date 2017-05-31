@@ -100,17 +100,6 @@
       <version>4.6.1.201703071140-r</version>
     </dependency>
     <dependency>
-      <groupId>pentaho-kettle</groupId>
-      <artifactId>pdi-pur-plugin</artifactId>
-      <version>${dependency.kettle.revision}</version>
-    </dependency>
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>pentaho-platform-api</artifactId>
-      <version>${dependency.kettle.revision}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.12</version>
