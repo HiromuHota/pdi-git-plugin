@@ -232,12 +232,6 @@ public class UIGit extends XulEventSourceAdapter {
     return git.push().call();
   }
 
-  public String diff() throws Exception {
-    OutputStream out = new ByteArrayOutputStream();
-    git.diff().setOutputStream( out ).call();
-    return out.toString();
-  }
-
   public String diff( String file, boolean isCached ) throws Exception {
     OutputStream out = new ByteArrayOutputStream();
     git.diff().setOutputStream( out )

@@ -186,7 +186,7 @@ public class GitController extends AbstractXulEventHandler {
     try {
       uiGit.openGit( baseDirectory );
       setPath( baseDirectory );
-      setDiff( uiGit.diff() );
+      setDiff( "" );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
     } catch ( NullPointerException e ) {
@@ -328,7 +328,7 @@ public class GitController extends AbstractXulEventHandler {
     this.selectedRevisions = selectedRevisions;
     if ( selectedRevisions.size() != 0 ) {
       if ( getSelectedRevisions().get( 0 ).getName().equals( "" ) ) { //When WIP is selected
-        setDiff( uiGit.diff() );
+        setDiff( "" );
       } else {
         // TODO Should show diff for multiple commits
         setDiff( uiGit.show( getSelectedRevisions().get( 0 ).getName() ) );
