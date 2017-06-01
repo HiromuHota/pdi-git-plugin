@@ -23,8 +23,6 @@ import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
-import org.pentaho.di.repository.pur.PurRepository;
-import org.pentaho.di.repository.pur.PurRepositoryMeta;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
 import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulDomContainer;
@@ -84,17 +82,6 @@ public class GitControllerTest {
       .thenReturn( KettleDatabaseRepositoryMeta.REPOSITORY_TYPE_ID );
 
     String baseDirectory = controller.determineBaseDirectory();
-
-    assertNull( baseDirectory );
-
-    rep = mock( PurRepository.class );
-    doReturn( rep ).when( controller ).getRepository();
-    when( controller.getRepository().getRepositoryMeta() )
-      .thenReturn( mock( PurRepositoryMeta.class ) );
-    when( controller.getRepository().getRepositoryMeta().getId() )
-      .thenReturn( PurRepositoryMeta.REPOSITORY_TYPE_ID );
-
-    baseDirectory = controller.determineBaseDirectory();
 
     assertNull( baseDirectory );
   }
