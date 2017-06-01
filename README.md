@@ -3,6 +3,10 @@
 The Git plugin allows you to manage versions of Kettle files without leaving Spoon.
 Local filesystem (whether or not connected as a File Repository) is supported, but neither Pentaho Repository nor Database Repository is.
 
+# System requirements
+
+It's been tested with PDI (CE) of 6.1, 7.0, and 7.1; but it should run on the corresponding version of EE.
+
 # How to install
 
 ```

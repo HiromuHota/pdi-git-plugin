@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.2.1 - 2017-05-31
+### Changed
+- Do not show diff when WIP (work-in-progress) is selected for the sake of performance
+- Remove the dependency on pdi-pur-plugin and copy the required classes
+
 ## 0.2.0 - 2017-05-28
 
 ### Added
