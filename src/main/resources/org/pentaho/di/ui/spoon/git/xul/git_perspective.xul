@@ -15,6 +15,7 @@
       <hbox>
         <label value="Branch:" />
         <label id="branch" flex="1"/>
+        <box id="boxBranch" flex="1"/>
         <label value="Remote (origin):" />
         <label id="remote" flex="1"/>
         <button id="remoteButton" onclick="gitController.editRemote()" image="org/pentaho/di/ui/spoon/git/images/Edit.svg" disabled="true"/>

@@ -4,7 +4,10 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
@@ -16,6 +19,7 @@ import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.XulOverlay;
 import org.pentaho.ui.xul.XulRunner;
+import org.pentaho.ui.xul.containers.XulBox;
 import org.pentaho.ui.xul.containers.XulVbox;
 import org.pentaho.ui.xul.impl.XulEventHandler;
 import org.pentaho.ui.xul.swt.SwtXulRunner;
@@ -37,6 +41,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     KettleXulLoader loader = new KettleXulLoader();
     loader.registerClassLoader( getClass().getClassLoader() );
     container = loader.loadXul( "org/pentaho/di/ui/spoon/git/xul/git_perspective.xul" );
+    addWidgets();
 
     // Adding Event Handlers
     controller = new GitController();
@@ -56,6 +61,12 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     box = deck.createVBoxCard();
     getUI().setParent( (Composite) box.getManagedObject() );
     getUI().layout();
+  }
+
+  private void addWidgets() {
+    XulBox boxBranch = (XulBox) container.getDocumentRoot().getElementById( "boxBranch" );
+    Combo comboDropDown = new Combo( (Composite) boxBranch.getManagedObject(), SWT.DROP_DOWN );
+    ( (Composite) boxBranch.getManagedObject() ).setLayout( new FillLayout() );
   }
 
   @Override
