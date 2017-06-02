@@ -213,8 +213,24 @@ public class GitController extends AbstractXulEventHandler {
       comboBranch.addSelectionListener( new SelectionAdapter() {
         @Override
         public void widgetSelected( SelectionEvent e ) {
+          XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
           String branch = ( (Combo) e.getSource() ).getText();
-          uiGit.checkout( branch );
+          try {
+            uiGit.checkout( branch );
+          } catch ( Exception e1 ) {
+            messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+            messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+            messageBox.setMessage( e1.getMessage() );
+            messageBox.open();
+            String current = uiGit.getBranch();
+            int currentIndex = 0;
+            for ( String branch2 : uiGit.getBranches() ) {
+              if ( current.equals( branch2 ) ) {
+                comboBranch.select( currentIndex );
+              }
+              currentIndex++;
+            }
+          }
           try {
             fireSourceChanged();
           } catch ( Exception e1 ) {
