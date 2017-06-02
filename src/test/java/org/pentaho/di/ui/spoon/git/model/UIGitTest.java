@@ -18,6 +18,7 @@ import org.eclipse.jgit.junit.RepositoryTestCase;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -71,6 +72,22 @@ public class UIGitTest extends RepositoryTestCase {
   @Test
   public void testGetBranch() {
     assertEquals( "master", uiGit.getBranch() );
+  }
+
+  @Test
+  public void testGetBranches() throws Exception {
+    // commit something
+    writeTrashFile( "Test.txt", "Hello world" );
+    git.add().addFilepattern( "Test.txt" ).call();
+    RevCommit commit = git.commit().setMessage( "initial commit" ).call();
+
+    // create a master branch
+    RefUpdate rup = db.updateRef( Constants.R_HEADS + Constants.MASTER );
+    rup.setNewObjectId( commit.getId() );
+    rup.setForceUpdate( true );
+    rup.update();
+
+    assertEquals( Constants.MASTER, uiGit.getBranches().get( 0 ) );
   }
 
   @Test

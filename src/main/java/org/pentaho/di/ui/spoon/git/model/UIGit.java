@@ -100,12 +100,32 @@ public class UIGit extends XulEventSourceAdapter {
         + " <" + config.get( UserConfig.KEY ).getAuthorEmail() + ">";
   }
 
+  /**
+   * Get the current branch
+   * @return Current branch
+   */
   public String getBranch() {
     try {
       return git.getRepository().getBranch();
     } catch ( Exception e ) {
       return "";
     }
+  }
+
+  /**
+   * Get a list of branches
+   * @return
+   */
+  public List<String> getBranches() {
+    List<String> branches = new ArrayList<String>();
+    try {
+      for ( Ref ref : git.branchList().call() ) {
+        branches.add( Repository.shortenRefName( ref.getName() ) );
+      }
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
+    return branches;
   }
 
   public String getFullBranch() throws IOException {

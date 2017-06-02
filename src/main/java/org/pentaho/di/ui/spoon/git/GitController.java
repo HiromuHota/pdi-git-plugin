@@ -22,6 +22,9 @@ import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -48,6 +51,7 @@ import org.pentaho.ui.xul.components.XulLabel;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
+import org.pentaho.ui.xul.containers.XulBox;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.dnd.DropEvent;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
@@ -86,6 +90,8 @@ public class GitController extends AbstractXulEventHandler {
   private Binding revisionBinding;
   private Binding unstagedBinding;
   private Binding stagedBinding;
+
+  private Combo comboBranch;
 
   public GitController() {
     setName( "gitController" );
@@ -137,6 +143,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void setActive() {
     openGit();
+    addWidgets();
     if ( !uiGit.isOpen() ) {
       return;
     }
@@ -195,6 +202,18 @@ public class GitController extends AbstractXulEventHandler {
       return;
     } catch ( Exception e ) {
       e.printStackTrace();
+    }
+  }
+
+  private void addWidgets() {
+    XulBox boxBranch = (XulBox) document.getElementById( "boxBranch" );
+    ( (Composite) boxBranch.getManagedObject() ).setLayout( new FillLayout() );
+    if ( comboBranch == null ) {
+      comboBranch = new Combo( (Composite) boxBranch.getManagedObject(), SWT.DROP_DOWN );
+    }
+    comboBranch.removeAll();
+    for ( String name : uiGit.getBranches() ) {
+      comboBranch.add( name );
     }
   }
 
