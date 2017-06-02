@@ -13,6 +13,7 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
@@ -443,6 +444,12 @@ public class GitController extends AbstractXulEventHandler {
         messageBox.setMessage( msg );
         messageBox.open();
       }
+    } catch ( TransportException e ) {
+      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
+        pullWithUsernamePassword();
+      } else {
+        e.printStackTrace();
+      }
     } catch ( GitAPIException e ) {
       messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
       messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
@@ -451,6 +458,54 @@ public class GitController extends AbstractXulEventHandler {
     } catch ( Exception e ) {
       e.printStackTrace();
     }
+  }
+
+  public void pullWithUsernamePassword() throws Exception {
+    final XulPromptBox userPromptBox = (XulPromptBox) document.createElement( "promptbox" );
+    userPromptBox.setTitle( "Credential" );
+    userPromptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
+    userPromptBox.setMessage( "Username" );
+    userPromptBox.addDialogCallback( new XulDialogCallback<String>() {
+      public void onClose( XulComponent component, Status status, String value ) {
+        if ( !status.equals( Status.CANCEL ) ) {
+          try {
+            XulPromptBox passPromptBox = (XulPromptBox) document.createElement( "promptbox" );
+            passPromptBox.setId( "passwordpromptbox" );
+            passPromptBox.setTitle( "Credential" );
+            passPromptBox.setMessage( "Password for " + value );
+            passPromptBox.addDialogCallback( new XulDialogCallback<String>() {
+              public void onClose( XulComponent component, Status status, String value ) {
+                if ( !status.equals( Status.CANCEL ) ) {
+                  String username = userPromptBox.getValue();
+                  String password = value;
+                  try {
+                    uiGit.pull( username, password );
+                    fireSourceChanged();
+                  } catch ( GitAPIException e ) {
+                    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+                  } catch ( Exception e ) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                  }
+                }
+              }
+
+              @Override
+              public void onError( XulComponent sender, Throwable t ) {
+                // TODO Auto-generated method stub
+              }
+            } );
+            passPromptBox.open();
+          } catch ( XulException e ) {
+            e.printStackTrace();
+          }
+        }
+      }
+      public void onError( XulComponent component, Throwable err ) {
+        throw new RuntimeException( err );
+      }
+    } );
+    userPromptBox.open();
   }
 
   public void push() throws Exception {
@@ -518,6 +573,14 @@ public class GitController extends AbstractXulEventHandler {
       }
     } );
     promptBox.open();
+  }
+
+  private void showMessageBox( String title, String message ) {
+    XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
+    messageBox.setTitle( title );
+    messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+    messageBox.setMessage( message );
+    messageBox.open();
   }
 
   @VisibleForTesting

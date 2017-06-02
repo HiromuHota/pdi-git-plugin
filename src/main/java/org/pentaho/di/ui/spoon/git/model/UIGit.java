@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
@@ -32,9 +33,11 @@ import org.eclipse.jgit.lib.UserConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.EmptyTreeIterator;
@@ -238,6 +241,13 @@ public class UIGit extends XulEventSourceAdapter {
    */
   public PullResult pull() throws Exception {
     return git.pull().call();
+  }
+
+  public PullResult pull( String username, String password ) throws Exception {
+    PullCommand cmd = git.pull();
+    CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
+    cmd.setCredentialsProvider( credentialsProvider );
+    return cmd.call();
   }
 
   public Ref resetHard() throws Exception {
