@@ -87,7 +87,6 @@ public class GitController extends AbstractXulEventHandler {
   private XulButton pushButton;
 
   private BindingFactory bf = new SwtBindingFactory();
-  private Binding branchBinding;
   private Binding remoteBinding;
   private Binding revisionBinding;
   private Binding unstagedBinding;
@@ -128,7 +127,6 @@ public class GitController extends AbstractXulEventHandler {
     bf.setBindingType( Binding.Type.ONE_WAY );
     bf.createBinding( this, "path", pathLabel, "value" );
     bf.createBinding( this, "diff", diffText, "value" );
-    branchBinding = bf.createBinding( uiGit, "branch", branchLabel, "value" );
     remoteBinding = bf.createBinding( uiGit, "remote", remoteLabel, "value" );
     revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( uiGit, "unstagedObjects", unstagedTable, "elements" );
@@ -306,7 +304,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
-    branchBinding.fireSourceChanged();
     remoteBinding.fireSourceChanged();
     revisionBinding.fireSourceChanged();
     unstagedBinding.fireSourceChanged();

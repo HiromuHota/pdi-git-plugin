@@ -14,7 +14,6 @@
       </hbox>
       <hbox>
         <label value="Branch:" />
-        <label id="branch" flex="1"/>
         <box id="boxBranch" flex="1"/>
         <label value="Remote (origin):" />
         <label id="remote" flex="1"/>
