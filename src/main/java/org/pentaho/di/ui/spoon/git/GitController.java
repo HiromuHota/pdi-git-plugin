@@ -240,15 +240,17 @@ public class GitController extends AbstractXulEventHandler {
       } );
     }
     comboBranch.removeAll();
-    String current = uiGit.getBranch();
-    int currentIndex = 0;
-    for ( String branch : uiGit.getBranches() ) {
-      comboBranch.add( branch );
-      if ( current.equals( branch ) ) {
-        currentIndex = comboBranch.getItemCount() - 1;
+    if ( uiGit.isOpen() ) {
+      String current = uiGit.getBranch();
+      int currentIndex = 0;
+      for ( String branch : uiGit.getBranches() ) {
+        comboBranch.add( branch );
+        if ( current.equals( branch ) ) {
+          currentIndex = comboBranch.getItemCount() - 1;
+        }
       }
+      comboBranch.select( currentIndex );
     }
-    comboBranch.select( currentIndex );
   }
 
   @VisibleForTesting

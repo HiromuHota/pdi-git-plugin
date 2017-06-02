@@ -85,6 +85,10 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
+  /**
+   * If git is null or not
+   * @return
+   */
   public boolean isOpen() {
     return git != null;
   }
