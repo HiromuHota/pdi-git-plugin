@@ -22,6 +22,8 @@ import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -210,11 +212,29 @@ public class GitController extends AbstractXulEventHandler {
     ( (Composite) boxBranch.getManagedObject() ).setLayout( new FillLayout() );
     if ( comboBranch == null ) {
       comboBranch = new Combo( (Composite) boxBranch.getManagedObject(), SWT.DROP_DOWN );
+      comboBranch.addSelectionListener( new SelectionAdapter() {
+        @Override
+        public void widgetSelected( SelectionEvent e ) {
+          String branch = ( (Combo) e.getSource() ).getText();
+          uiGit.checkout( branch );
+          try {
+            fireSourceChanged();
+          } catch ( Exception e1 ) {
+            e1.printStackTrace();
+          }
+        }
+      } );
     }
     comboBranch.removeAll();
-    for ( String name : uiGit.getBranches() ) {
-      comboBranch.add( name );
+    String current = uiGit.getBranch();
+    int currentIndex = 0;
+    for ( String branch : uiGit.getBranches() ) {
+      comboBranch.add( branch );
+      if ( current.equals( branch ) ) {
+        currentIndex = comboBranch.getItemCount() - 1;
+      }
     }
+    comboBranch.select( currentIndex );
   }
 
   @VisibleForTesting
