@@ -22,10 +22,10 @@ import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -92,7 +92,7 @@ public class GitController extends AbstractXulEventHandler {
   private Binding unstagedBinding;
   private Binding stagedBinding;
 
-  private Combo comboBranch;
+  private CCombo comboBranch;
 
   public GitController() {
     setName( "gitController" );
@@ -209,12 +209,12 @@ public class GitController extends AbstractXulEventHandler {
     XulBox boxBranch = (XulBox) document.getElementById( "boxBranch" );
     ( (Composite) boxBranch.getManagedObject() ).setLayout( new FillLayout() );
     if ( comboBranch == null ) {
-      comboBranch = new Combo( (Composite) boxBranch.getManagedObject(), SWT.DROP_DOWN );
+      comboBranch = new CCombo( (Composite) boxBranch.getManagedObject(), SWT.DROP_DOWN );
       comboBranch.addSelectionListener( new SelectionAdapter() {
         @Override
         public void widgetSelected( SelectionEvent e ) {
           XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
-          String branch = ( (Combo) e.getSource() ).getText();
+          String branch = ( (CCombo) e.getSource() ).getText();
           try {
             uiGit.checkout( branch );
           } catch ( Exception e1 ) {
