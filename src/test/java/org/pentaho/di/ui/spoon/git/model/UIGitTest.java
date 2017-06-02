@@ -79,13 +79,7 @@ public class UIGitTest extends RepositoryTestCase {
     // commit something
     writeTrashFile( "Test.txt", "Hello world" );
     git.add().addFilepattern( "Test.txt" ).call();
-    RevCommit commit = git.commit().setMessage( "initial commit" ).call();
-
-    // create a master branch
-    RefUpdate rup = db.updateRef( Constants.R_HEADS + Constants.MASTER );
-    rup.setNewObjectId( commit.getId() );
-    rup.setForceUpdate( true );
-    rup.update();
+    git.commit().setMessage( "initial commit" ).call();
 
     assertEquals( Constants.MASTER, uiGit.getBranches().get( 0 ) );
   }
