@@ -323,6 +323,19 @@ public class UIGitTest extends RepositoryTestCase {
     assertTrue( diff.contains( "Second commit" ) );
   }
 
+  public void testCheckout() throws Exception {
+    // commit something
+    writeTrashFile( "Test.txt", "Hello world" );
+    git.add().addFilepattern( "Test.txt" ).call();
+    git.commit().setMessage( "initial commit" ).call();
+
+    git.branchCreate().setName( "develop" ).call();
+    uiGit.checkout( "master" );
+    assertEquals( "master", uiGit.getBranch() );
+    uiGit.checkout( "develop" );
+    assertEquals( "develop", uiGit.getBranch() );
+  }
+
   private static void writeToFile( File actFile, String string ) throws IOException {
     FileOutputStream fos = null;
     try {

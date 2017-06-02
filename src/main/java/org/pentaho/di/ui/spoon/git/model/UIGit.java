@@ -325,4 +325,12 @@ public class UIGit extends XulEventSourceAdapter {
     formatter.close();
     return out.toString();
   }
+
+  public void checkout( String branch ) {
+    try {
+      git.checkout().setName( branch ).call();
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
+  }
 }
