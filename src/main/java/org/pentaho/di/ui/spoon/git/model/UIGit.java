@@ -51,17 +51,33 @@ public class UIGit extends XulEventSourceAdapter {
 
   private Git git;
 
+  /**
+   * Find a Git repository by scanning up the file system tree
+   * @param pathname of a Kettle file
+   * @return
+   */
   public String findGitRepository( String pathname ) {
+    File parentFile = null;
+    try {
+      parentFile = new File( new URI( pathname ) ).getParentFile();
+    } catch ( URISyntaxException e1 ) {
+      e1.printStackTrace();
+    }
     Repository repository;
     try {
       repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
-          .findGitDir( new File( new URI( pathname ) ).getParentFile() ) // scan up the file system tree
+          .findGitDir( parentFile ) // scan up the file system tree
           .build();
       return repository.getDirectory().getParent();
     } catch ( IOException e ) {
       return null;
-    } catch ( URISyntaxException e ) {
-      return null;
+    } catch ( IllegalArgumentException e ) {
+      if ( e.getMessage().equals( "One of setGitDir or setWorkTree must be called." ) ) {
+        // git repository not found
+        return parentFile.getPath();
+      } else {
+        return null;
+      }
     }
   }
 
