@@ -53,7 +53,8 @@ import org.pentaho.ui.xul.dnd.DropEvent;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
 import org.pentaho.ui.xul.swt.custom.DialogConstant;
-import org.pentaho.ui.xul.util.XulDialogCallback;
+import org.pentaho.ui.xul.util.XulDialogCallback.Status;
+import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -248,22 +249,15 @@ public class GitController extends AbstractXulEventHandler {
     confirmBox.setMessage( "Create a new repository in the following path?\n" + baseDirectory );
     confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
     confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
-    confirmBox.addDialogCallback( new XulDialogCallback<Object>() {
-
-      public void onClose( XulComponent sender, Status returnCode, Object retVal ) {
-        if ( returnCode == Status.ACCEPT ) {
-          try {
-            uiGit.initGit( baseDirectory );
-            setPath( baseDirectory );
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-          } catch ( Exception e ) {
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
-          }
+    confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
+      if ( returnCode == Status.ACCEPT ) {
+        try {
+          uiGit.initGit( baseDirectory );
+          setPath( baseDirectory );
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+        } catch ( Exception e ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
         }
-      }
-
-      public void onError( XulComponent sender, Throwable t ) {
-        throw new RuntimeException( t );
       }
     } );
     confirmBox.open();
@@ -444,44 +438,32 @@ public class GitController extends AbstractXulEventHandler {
     userPromptBox.setTitle( "Credential" );
     userPromptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
     userPromptBox.setMessage( "Username" );
-    userPromptBox.addDialogCallback( new XulDialogCallback<String>() {
-      public void onClose( XulComponent component, Status status, String value ) {
-        if ( !status.equals( Status.CANCEL ) ) {
-          try {
-            XulPromptBox passPromptBox = (XulPromptBox) document.createElement( "promptbox" );
-            passPromptBox.setId( "passwordpromptbox" );
-            passPromptBox.setTitle( "Credential" );
-            passPromptBox.setMessage( "Password for " + value );
-            passPromptBox.addDialogCallback( new XulDialogCallback<String>() {
-              public void onClose( XulComponent component, Status status, String value ) {
-                if ( !status.equals( Status.CANCEL ) ) {
-                  String username = userPromptBox.getValue();
-                  String password = value;
-                  try {
-                    uiGit.pull( username, password );
-                    fireSourceChanged();
-                  } catch ( GitAPIException e ) {
-                    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-                  } catch ( Exception e ) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                  }
-                }
+    userPromptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
+      if ( status.equals( Status.ACCEPT ) ) {
+        try {
+          XulPromptBox passPromptBox = (XulPromptBox) document.createElement( "promptbox" );
+          passPromptBox.setId( "passwordpromptbox" );
+          passPromptBox.setTitle( "Credential" );
+          passPromptBox.setMessage( "Password for " + value );
+          passPromptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component1, status1, value1 ) -> {
+            if ( status1.equals( Status.ACCEPT ) ) {
+              String username = userPromptBox.getValue();
+              String password = value1;
+              try {
+                uiGit.pull( username, password );
+                fireSourceChanged();
+              } catch ( GitAPIException e ) {
+                showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+              } catch ( Exception e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
               }
-
-              @Override
-              public void onError( XulComponent sender, Throwable t ) {
-                // TODO Auto-generated method stub
-              }
-            } );
-            passPromptBox.open();
-          } catch ( XulException e ) {
-            e.printStackTrace();
-          }
+            }
+          } );
+          passPromptBox.open();
+        } catch ( XulException e ) {
+          e.printStackTrace();
         }
-      }
-      public void onError( XulComponent component, Throwable err ) {
-        throw new RuntimeException( err );
       }
     } );
     userPromptBox.open();
@@ -523,28 +505,23 @@ public class GitController extends AbstractXulEventHandler {
     promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
     promptBox.setMessage( "URL/path (The remote name will be \"" + Constants.DEFAULT_REMOTE_NAME + "\")" );
     promptBox.setValue( uiGit.getRemote() );
-    promptBox.addDialogCallback( new XulDialogCallback<String>() {
-      public void onClose( XulComponent component, Status status, String value ) {
-        if ( !status.equals( Status.CANCEL ) ) {
-          try {
-            uiGit.addRemote( value );
-          } catch ( URISyntaxException e ) {
-            if ( value.equals( "" ) ) {
-              try {
-                uiGit.removeRemote();
-              } catch ( Exception e1 ) {
-                e1.printStackTrace();
-              }
-            } else {
-              editRemote();
+    promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
+      if ( status.equals( Status.ACCEPT ) ) {
+        try {
+          uiGit.addRemote( value );
+        } catch ( URISyntaxException e ) {
+          if ( value.equals( "" ) ) {
+            try {
+              uiGit.removeRemote();
+            } catch ( Exception e1 ) {
+              e1.printStackTrace();
             }
-          } catch ( Exception e ) {
-            e.printStackTrace();
+          } else {
+            editRemote();
           }
+        } catch ( Exception e ) {
+          e.printStackTrace();
         }
-      }
-      public void onError( XulComponent component, Throwable err ) {
-        throw new RuntimeException( err );
       }
     } );
     promptBox.open();
