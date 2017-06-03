@@ -15,6 +15,7 @@ import java.util.Set;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
@@ -256,6 +257,13 @@ public class UIGit extends XulEventSourceAdapter {
 
   public Iterable<PushResult> push() throws Exception {
     return git.push().call();
+  }
+
+  public Iterable<PushResult> push( String username, String password ) throws Exception {
+    PushCommand cmd = git.push();
+    CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
+    cmd.setCredentialsProvider( credentialsProvider );
+    return cmd.call();
   }
 
   public String diff( String file, boolean isCached ) throws Exception {

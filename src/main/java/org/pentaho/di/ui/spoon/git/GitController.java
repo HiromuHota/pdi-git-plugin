@@ -1,5 +1,6 @@
 package org.pentaho.di.ui.spoon.git;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -452,22 +453,46 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  public void push() throws Exception {
+  public void push() throws IOException {
     if ( uiGit.hasRemote() ) {
-      Iterable<PushResult> resultIterable = uiGit.push();
-      PushResult result = resultIterable.iterator().next();
-      String fullBranch = uiGit.getFullBranch();
-      RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
-      if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
-            update.getStatus().toString() );
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
-            update.getStatus().toString() );
+      try {
+        Iterable<PushResult> resultIterable = uiGit.push();
+        PushResult result = resultIterable.iterator().next();
+        String fullBranch = uiGit.getFullBranch();
+        RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
+        if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
+              update.getStatus().toString() );
+        } else {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+              update.getStatus().toString() );
+        }
+      } catch ( TransportException e ) {
+        if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
+          pushWithUsernamePassword();
+        } else {
+          e.printStackTrace();
+        }
+      } catch ( Exception e ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
       }
     } else {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           "Please setup a remote" );
+    }
+  }
+
+  private void pushWithUsernamePassword() {
+    UsernamePasswordDialog dialog = new UsernamePasswordDialog( getShell() );
+    if ( dialog.open() == Window.OK ) {
+      String username = dialog.getUsername();
+      String password = dialog.getPassword();
+      try {
+        uiGit.push( username, password );
+        fireSourceChanged();
+      } catch ( Exception e ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+      }
     }
   }
 
