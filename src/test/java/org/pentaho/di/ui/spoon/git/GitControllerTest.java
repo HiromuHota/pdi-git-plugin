@@ -136,7 +136,7 @@ public class GitControllerTest {
     XulConfirmBox confirm = new XulConfirmBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( CONFIRMBOX ) ).thenReturn( confirm );
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
 
     controller.initGit( "random-path" );
 
@@ -164,7 +164,7 @@ public class GitControllerTest {
   @Test
   public void shouldNotCommitWhenNoStagedObjects() throws Exception {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     doReturn( false ).when( uiGit ).hasStagedObjects();
 
     controller.commit();
@@ -175,7 +175,7 @@ public class GitControllerTest {
   @Test
   public void shouldNotCommitWhenAuthorNameMalformed() throws Exception {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     doReturn( true ).when( uiGit ).hasStagedObjects();
     controller.setAuthorName( "random author" );
 
@@ -198,7 +198,7 @@ public class GitControllerTest {
   @Test
   public void shouldFireSourceChangedWhenSuccessful() throws Exception {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     PullResult pullResult = mock( PullResult.class );
     when( pullResult.isSuccessful() ).thenReturn( true );
     doReturn( pullResult ).when( uiGit ).pull();
@@ -211,7 +211,7 @@ public class GitControllerTest {
   @Test
   public void shouldResetHardWhenMergeConflict() throws Exception {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     PullResult pullResult = mock( PullResult.class );
     when( pullResult.isSuccessful() ).thenReturn( false );
     doReturn( pullResult ).when( uiGit ).pull();
@@ -227,7 +227,7 @@ public class GitControllerTest {
   @Test
   public void shouldNotPushWhenNoRemote() throws Exception {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     doReturn( false ).when( uiGit ).hasRemote();
     doNothing().when( controller ).editPath();
 
@@ -239,7 +239,7 @@ public class GitControllerTest {
   @Test
   public void shouldShowSuccessWhenPushSucceeds() throws Exception {
     XulMessageBox message = spy( new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT ) );
-    when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
+    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     doReturn( true ).when( uiGit ).hasRemote();
     PushResult result = mock( PushResult.class );
     List<PushResult> results = Arrays.asList( result );

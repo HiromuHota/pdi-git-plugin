@@ -251,20 +251,13 @@ public class GitController extends AbstractXulEventHandler {
     confirmBox.addDialogCallback( new XulDialogCallback<Object>() {
 
       public void onClose( XulComponent sender, Status returnCode, Object retVal ) {
-        XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
         if ( returnCode == Status.ACCEPT ) {
           try {
             uiGit.initGit( baseDirectory );
             setPath( baseDirectory );
-            messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
-            messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-            messageBox.setMessage( BaseMessages.getString( PKG, "Dialog.Success" ) );
-            messageBox.open();
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           } catch ( Exception e ) {
-            messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
-            messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-            messageBox.setMessage( BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
-            messageBox.open();
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
           }
         }
       }
@@ -396,21 +389,16 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void commit() throws Exception {
-    XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
     if ( !uiGit.hasStagedObjects() ) {
-      messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
-      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-      messageBox.setMessage( "There are no staged files" );
-      messageBox.open();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+          "There are no staged files" );
       return;
     }
 
     Matcher m = Pattern.compile( "(.*) <(.*@.*)>" ).matcher( getAuthorName() );
     if ( !m.matches() ) {
-      messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
-      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-      messageBox.setMessage( "Malformed author name" );
-      messageBox.open();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+          "Malformed author name" );
       return;
     }
     uiGit.commit( m.group( 1 ), m.group( 2 ), getCommitMessage() );
@@ -425,14 +413,9 @@ public class GitController extends AbstractXulEventHandler {
       FetchResult fetchResult = pullResult.getFetchResult();
       MergeResult mergeResult = pullResult.getMergeResult();
       if ( pullResult.isSuccessful() ) {
-        messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
-        messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-        messageBox.setMessage( BaseMessages.getString( PKG, "Dialog.Success" ) );
-        messageBox.open();
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
         fireSourceChanged();
       } else {
-        messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
-        messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
         String msg = mergeResult.getMergeStatus().toString();
         if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
           uiGit.resetHard();
@@ -441,8 +424,7 @@ public class GitController extends AbstractXulEventHandler {
             msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
           }
         }
-        messageBox.setMessage( msg );
-        messageBox.open();
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
       }
     } catch ( TransportException e ) {
       if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
@@ -451,10 +433,7 @@ public class GitController extends AbstractXulEventHandler {
         e.printStackTrace();
       }
     } catch ( GitAPIException e ) {
-      messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
-      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-      messageBox.setMessage( e.getMessage() );
-      messageBox.open();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
     } catch ( Exception e ) {
       e.printStackTrace();
     }
@@ -509,25 +488,21 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void push() throws Exception {
-    XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
     if ( uiGit.hasRemote() ) {
       Iterable<PushResult> resultIterable = uiGit.push();
       PushResult result = resultIterable.iterator().next();
       String fullBranch = uiGit.getFullBranch();
       RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
       if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
-        messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
+            update.getStatus().toString() );
       } else {
-        messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+            update.getStatus().toString() );
       }
-      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-      messageBox.setMessage( update.getStatus().toString() );
-      messageBox.open();
     } else {
-      messageBox.setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
-      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-      messageBox.setMessage( "Please setup a remote" );
-      messageBox.open();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+          "Please setup a remote" );
     }
   }
 
@@ -576,11 +551,15 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   private void showMessageBox( String title, String message ) {
-    XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
-    messageBox.setTitle( title );
-    messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-    messageBox.setMessage( message );
-    messageBox.open();
+    try {
+      XulMessageBox messageBox = (XulMessageBox) document.createElement( "messagebox" );
+      messageBox.setTitle( title );
+      messageBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+      messageBox.setMessage( message );
+      messageBox.open();
+    } catch ( XulException e ) {
+      e.printStackTrace();
+    }
   }
 
   @VisibleForTesting
