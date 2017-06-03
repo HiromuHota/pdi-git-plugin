@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.vfs2.FileObject;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
@@ -346,6 +347,10 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
+  private Shell getShell() {
+    return Spoon.getInstance().getShell();
+  }
+
   public String getPath() {
     return this.path;
   }
@@ -400,7 +405,7 @@ public class GitController extends AbstractXulEventHandler {
     fireSourceChanged();
   }
 
-  public void pull() throws Exception {
+  public void pull() {
     XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
     try {
       PullResult pullResult = uiGit.pull();
@@ -433,40 +438,18 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  public void pullWithUsernamePassword() throws Exception {
-    final XulPromptBox userPromptBox = (XulPromptBox) document.createElement( "promptbox" );
-    userPromptBox.setTitle( "Credential" );
-    userPromptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
-    userPromptBox.setMessage( "Username" );
-    userPromptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
-      if ( status.equals( Status.ACCEPT ) ) {
-        try {
-          XulPromptBox passPromptBox = (XulPromptBox) document.createElement( "promptbox" );
-          passPromptBox.setId( "passwordpromptbox" );
-          passPromptBox.setTitle( "Credential" );
-          passPromptBox.setMessage( "Password for " + value );
-          passPromptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component1, status1, value1 ) -> {
-            if ( status1.equals( Status.ACCEPT ) ) {
-              String username = userPromptBox.getValue();
-              String password = value1;
-              try {
-                uiGit.pull( username, password );
-                fireSourceChanged();
-              } catch ( GitAPIException e ) {
-                showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-              } catch ( Exception e ) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-              }
-            }
-          } );
-          passPromptBox.open();
-        } catch ( XulException e ) {
-          e.printStackTrace();
-        }
+  public void pullWithUsernamePassword() {
+    UsernamePasswordDialog dialog = new UsernamePasswordDialog( getShell() );
+    if ( dialog.open() == Window.OK ) {
+      String username = dialog.getUsername();
+      String password = dialog.getPassword();
+      try {
+        uiGit.pull( username, password );
+        fireSourceChanged();
+      } catch ( Exception e ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
       }
-    } );
-    userPromptBox.open();
+    }
   }
 
   public void push() throws Exception {
