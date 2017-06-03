@@ -24,6 +24,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
@@ -141,9 +142,9 @@ public class UIGit extends XulEventSourceAdapter {
     return cmd.call();
   }
 
-  public boolean hasRemote() throws IOException {
+  public boolean hasRemote() {
     StoredConfig config = git.getRepository().getConfig();
-    Set<String> remotes = config.getSubsections( "remote" );
+    Set<String> remotes = config.getSubsections( ConfigConstants.CONFIG_REMOTE_SECTION );
     return remotes.contains( Constants.DEFAULT_REMOTE_NAME );
   }
 

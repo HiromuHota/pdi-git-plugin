@@ -225,18 +225,6 @@ public class GitControllerTest {
   }
 
   @Test
-  public void shouldNotPushWhenNoRemote() throws Exception {
-    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
-    doReturn( false ).when( uiGit ).hasRemote();
-    doNothing().when( controller ).editPath();
-
-    controller.push();
-
-    verify( uiGit, never() ).push();
-  }
-
-  @Test
   public void shouldShowSuccessWhenPushSucceeds() throws Exception {
     XulMessageBox message = spy( new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT ) );
     when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
