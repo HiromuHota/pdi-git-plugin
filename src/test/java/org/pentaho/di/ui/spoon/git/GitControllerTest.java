@@ -169,7 +169,7 @@ public class GitControllerTest {
 
     controller.commit();
 
-    verify( uiGit, never() ).commit( anyString(), anyString(), anyString() );
+    verify( uiGit, never() ).commit( any(), anyString() );
   }
 
   @Test
@@ -181,7 +181,7 @@ public class GitControllerTest {
 
     controller.commit();
 
-    verify( uiGit, never() ).commit( anyString(), anyString(), anyString() );
+    verify( uiGit, never() ).commit( any(), anyString() );
   }
 
   @Test
@@ -192,7 +192,7 @@ public class GitControllerTest {
 
     controller.commit();
 
-    verify( uiGit ).commit( anyString(), anyString(), anyString() );
+    verify( uiGit ).commit( any(), anyString() );
   }
 
   @Test

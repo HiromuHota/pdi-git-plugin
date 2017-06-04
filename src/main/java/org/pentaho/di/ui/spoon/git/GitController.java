@@ -5,8 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.vfs2.FileObject;
 import org.eclipse.jface.resource.JFaceResources;
@@ -18,10 +16,13 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
+import org.eclipse.jgit.util.RawParseUtils;
+import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -395,15 +396,20 @@ public class GitController extends AbstractXulEventHandler {
       return;
     }
 
-    Matcher m = Pattern.compile( "(.*) <(.*@.*)>" ).matcher( getAuthorName() );
-    if ( !m.matches() ) {
+    try {
+      PersonIdent author = RawParseUtils.parsePersonIdent( getAuthorName() );
+      // Set the local time
+      PersonIdent author2 = new PersonIdent( author.getName(), author.getEmailAddress(),
+          SystemReader.getInstance().getCurrentTime(),
+          SystemReader.getInstance().getTimezone( SystemReader.getInstance().getCurrentTime() ) );
+
+      uiGit.commit( author2, getCommitMessage() );
+      setCommitMessage( "" );
+      fireSourceChanged();
+    } catch ( NullPointerException e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           "Malformed author name" );
-      return;
     }
-    uiGit.commit( m.group( 1 ), m.group( 2 ), getCommitMessage() );
-    setCommitMessage( "" );
-    fireSourceChanged();
   }
 
   public void pull() {

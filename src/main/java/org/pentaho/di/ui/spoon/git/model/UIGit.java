@@ -28,6 +28,7 @@ import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -148,8 +149,8 @@ public class UIGit extends XulEventSourceAdapter {
     return remotes.contains( Constants.DEFAULT_REMOTE_NAME );
   }
 
-  public RevCommit commit( String name, String email, String message ) throws Exception {
-    return git.commit().setAuthor( name, email ).setMessage( message ).call();
+  public RevCommit commit( PersonIdent author, String message ) throws Exception {
+    return git.commit().setAuthor( author ).setMessage( message ).call();
   }
 
   public UIRepositoryObjectRevisions getRevisions() throws Exception {
