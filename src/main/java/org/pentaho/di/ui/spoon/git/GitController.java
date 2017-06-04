@@ -519,31 +519,35 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void editRemote() {
-    XulPromptBox promptBox = (XulPromptBox) document.getElementById( "promptbox" );
-    promptBox.setTitle( "Remote repository" );
-    promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
-    promptBox.setMessage( "URL/path (The remote name will be \"" + Constants.DEFAULT_REMOTE_NAME + "\")" );
-    promptBox.setValue( uiGit.getRemote() );
-    promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
-      if ( status.equals( Status.ACCEPT ) ) {
-        try {
-          uiGit.addRemote( value );
-        } catch ( URISyntaxException e ) {
-          if ( value.equals( "" ) ) {
-            try {
-              uiGit.removeRemote();
-            } catch ( Exception e1 ) {
-              e1.printStackTrace();
+    try {
+      XulPromptBox promptBox = (XulPromptBox) document.createElement( "promptbox" );
+      promptBox.setTitle( "Remote repository" );
+      promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
+      promptBox.setMessage( "URL/path (The remote name will be \"" + Constants.DEFAULT_REMOTE_NAME + "\")" );
+      promptBox.setValue( uiGit.getRemote() );
+      promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
+        if ( status.equals( Status.ACCEPT ) ) {
+          try {
+            uiGit.addRemote( value );
+          } catch ( URISyntaxException e ) {
+            if ( value.equals( "" ) ) {
+              try {
+                uiGit.removeRemote();
+              } catch ( Exception e1 ) {
+                e1.printStackTrace();
+              }
+            } else {
+              editRemote();
             }
-          } else {
-            editRemote();
+          } catch ( Exception e ) {
+            e.printStackTrace();
           }
-        } catch ( Exception e ) {
-          e.printStackTrace();
         }
-      }
-    } );
-    promptBox.open();
+      } );
+      promptBox.open();
+    } catch ( XulException e ) {
+      e.printStackTrace();
+    }
   }
 
   private void showMessageBox( String title, String message ) {

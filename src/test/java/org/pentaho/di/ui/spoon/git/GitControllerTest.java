@@ -246,7 +246,7 @@ public class GitControllerTest {
   @Test
   public void shouldNotEditRemoteOnCancel() throws Exception {
     XulPromptBox prompt = new XulPromptBoxMock( XulDialogCallback.Status.CANCEL );
-    when( document.getElementById( PROMPTBOX ) ).thenReturn( prompt );
+    when( document.createElement( PROMPTBOX ) ).thenReturn( prompt );
 
     controller.editRemote();
 
@@ -256,7 +256,7 @@ public class GitControllerTest {
   @Test
   public void shouldDeleteRemoteWhenEmptyString() throws Exception {
     XulPromptBox prompt = new XulPromptBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.getElementById( PROMPTBOX ) ).thenReturn( prompt );
+    when( document.createElement( PROMPTBOX ) ).thenReturn( prompt );
     doThrow( URISyntaxException.class ).when( uiGit ).addRemote( anyString() );
     doReturn( "" ).when( uiGit ).getRemote();
 

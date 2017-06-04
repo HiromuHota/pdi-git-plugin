@@ -55,5 +55,4 @@
     <menuitem label="Remove from Index" command="gitController.removeFromIndex()"/>
   </menupopup>
 
-  <promptbox id="promptbox"/>
 </window>
