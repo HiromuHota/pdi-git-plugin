@@ -27,7 +27,6 @@ import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -43,9 +42,6 @@ import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.eclipse.jgit.treewalk.AbstractTreeIterator;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
-import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
@@ -176,7 +172,7 @@ public class UIGit extends XulEventSourceAdapter {
         revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
       }
     } catch ( Exception e ) {
-
+      // Do nothing
     }
     return revisions;
   }
@@ -188,6 +184,7 @@ public class UIGit extends XulEventSourceAdapter {
       files.addAll( status.getModified() );
       files.addAll( status.getUntracked() );
     } catch ( Exception e ) {
+      // Do nothing
     }
     return getObjects( files );
   }
@@ -199,6 +196,7 @@ public class UIGit extends XulEventSourceAdapter {
       files.addAll( status.getAdded() );
       files.addAll( status.getChanged() );
     } catch ( Exception e ) {
+      // Do nothing
     }
     return getObjects( files );
   }

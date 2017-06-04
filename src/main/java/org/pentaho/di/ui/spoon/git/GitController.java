@@ -1,6 +1,5 @@
 package org.pentaho.di.ui.spoon.git;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
@@ -41,7 +39,6 @@ import org.pentaho.di.ui.spoon.SpoonPerspective;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
 import org.pentaho.di.ui.spoon.git.model.UIFile;
 import org.pentaho.di.ui.spoon.git.model.UIGit;
-import org.pentaho.ui.xul.XulComponent;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
@@ -197,7 +194,6 @@ public class GitController extends AbstractXulEventHandler {
     } catch ( NullPointerException e ) {
       return;
     } catch ( Exception e ) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -417,7 +413,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void pull() {
-    XulMessageBox messageBox = (XulMessageBox) document.getElementById( "messagebox" );
     try {
       PullResult pullResult = uiGit.pull();
       FetchResult fetchResult = pullResult.getFetchResult();
@@ -508,8 +503,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void editPath() throws IllegalArgumentException, InvocationTargetException, XulException {
-    Shell shell = Spoon.getInstance().getShell();
-    DirectoryDialog dialog = new DirectoryDialog( shell, SWT.OPEN );
+    DirectoryDialog dialog = new DirectoryDialog( getShell(), SWT.OPEN );
     if ( dialog.open() != null ) {
       uiGit.closeGit();
       setPath( null );
