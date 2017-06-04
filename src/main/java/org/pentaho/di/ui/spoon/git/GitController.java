@@ -247,23 +247,27 @@ public class GitController extends AbstractXulEventHandler {
 
   @VisibleForTesting
   void initGit( final String baseDirectory ) {
-    XulConfirmBox confirmBox = (XulConfirmBox) document.getElementById( "confirmbox" );
-    confirmBox.setTitle( "Repository not found" );
-    confirmBox.setMessage( "Create a new repository in the following path?\n" + baseDirectory );
-    confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
-    confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
-    confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
-      if ( returnCode == Status.ACCEPT ) {
-        try {
-          uiGit.initGit( baseDirectory );
-          setPath( baseDirectory );
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-        } catch ( Exception e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
+    try {
+      XulConfirmBox confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
+      confirmBox.setTitle( "Repository not found" );
+      confirmBox.setMessage( "Create a new repository in the following path?\n" + baseDirectory );
+      confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+      confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
+      confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
+        if ( returnCode == Status.ACCEPT ) {
+          try {
+            uiGit.initGit( baseDirectory );
+            setPath( baseDirectory );
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+          } catch ( Exception e ) {
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
+          }
         }
-      }
-    } );
-    confirmBox.open();
+      } );
+      confirmBox.open();
+    } catch ( XulException e ) {
+      e.printStackTrace();
+    }
   }
 
   protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
