@@ -282,6 +282,14 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
+  public void testDiff() throws Exception {
+    writeTrashFile( "Test.txt", "Hello world" );
+
+    String diff = uiGit.diff( "Test.txt", false );
+    assertTrue( diff.contains( "Hello world" ) );
+  }
+
+  @Test
   public void testShow() throws Exception {
     // Make the initial commit
     writeTrashFile( "Test.txt", "Hello world" );
