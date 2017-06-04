@@ -30,12 +30,12 @@ public class UsernamePasswordDialog extends Dialog {
 
     Label usernameLabel = new Label( comp, SWT.RIGHT );
     usernameLabel.setText( "Username: " );
-    usernameText = new Text( comp, SWT.SINGLE );
+    usernameText = new Text( comp, SWT.SINGLE | SWT.BORDER );
     usernameText.setLayoutData( new GridData( GridData.FILL_HORIZONTAL ) );
 
     Label passwordLabel = new Label( comp, SWT.RIGHT );
     passwordLabel.setText( "Password: " );
-    passwordText = new Text( comp, SWT.SINGLE | SWT.PASSWORD );
+    passwordText = new Text( comp, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD );
     passwordText.setLayoutData( new GridData( GridData.FILL_HORIZONTAL ) );
 
     return comp;
