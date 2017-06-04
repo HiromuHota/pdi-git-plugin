@@ -281,6 +281,25 @@ public class UIGitTest extends RepositoryTestCase {
     db3.resolve( tagRef.getObjectId().getName() );
   }
 
+  @Test
+  public void testShow() throws Exception {
+    // Make the initial commit
+    writeTrashFile( "Test.txt", "Hello world" );
+    git.add().addFilepattern( "Test.txt" ).call();
+    RevCommit commit = git.commit().setMessage( "initial commit" ).call();
+
+    String diff = uiGit.show( commit.getId().name() );
+    assertTrue( diff.contains( "Hello world" ) );
+
+    // Make the second commit
+    writeTrashFile( "Test2.txt", "Second commit" );
+    git.add().addFilepattern( "Test2.txt" ).call();
+    commit = git.commit().setMessage( "initial commit" ).call();
+
+    diff = uiGit.show( commit.getId().name() );
+    assertTrue( diff.contains( "Second commit" ) );
+  }
+
   private static void writeToFile( File actFile, String string ) throws IOException {
     FileOutputStream fos = null;
     try {

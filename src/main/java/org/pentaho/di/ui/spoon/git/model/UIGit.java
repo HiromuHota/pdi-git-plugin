@@ -34,6 +34,8 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.UserConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
@@ -277,9 +279,25 @@ public class UIGit extends XulEventSourceAdapter {
     return out.toString();
   }
 
+  /**
+   * Show diff for a commit
+   * @param commitId
+   * @return
+   * @throws Exception
+   */
   public String show( String commitId ) throws Exception {
-    AbstractTreeIterator newTree = getTreeIterator( commitId );
-    AbstractTreeIterator oldTree = getTreeIterator( commitId + "^" );
+    RevTree newTree = null;
+    RevTree oldTree = null;
+    final ObjectId id = git.getRepository().resolve( commitId );
+    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
+      RevObject obj = rw.parseAny( id );
+      RevCommit commit = (RevCommit) obj;
+      newTree = commit.getTree();
+      if ( commit.getParentCount() != 0 ) {
+        RevCommit parentCommit = rw.parseCommit( commit.getParent( 0 ).getId() );
+        oldTree = parentCommit.getTree();
+      }
+    }
 
     OutputStream out = new ByteArrayOutputStream();
     DiffFormatter formatter = new DiffFormatter( out );
@@ -288,19 +306,5 @@ public class UIGit extends XulEventSourceAdapter {
     formatter.format( oldTree, newTree );
     formatter.close();
     return out.toString();
-  }
-
-  private AbstractTreeIterator getTreeIterator( String name ) throws IOException {
-    final ObjectId id = git.getRepository().resolve( name );
-    if ( id == null ) {
-      return new EmptyTreeIterator();
-    }
-    final CanonicalTreeParser p = new CanonicalTreeParser();
-    try ( ObjectReader or = git.getRepository().newObjectReader();
-        RevWalk rw = new RevWalk( git.getRepository() ) ) {
-      p.reset( or, rw.parseTree( id ) );
-    }
-
-    return p;
   }
 }
