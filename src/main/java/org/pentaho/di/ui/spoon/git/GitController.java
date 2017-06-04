@@ -415,22 +415,7 @@ public class GitController extends AbstractXulEventHandler {
   public void pull() {
     try {
       PullResult pullResult = uiGit.pull();
-      FetchResult fetchResult = pullResult.getFetchResult();
-      MergeResult mergeResult = pullResult.getMergeResult();
-      if ( pullResult.isSuccessful() ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-        fireSourceChanged();
-      } else {
-        String msg = mergeResult.getMergeStatus().toString();
-        if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
-          uiGit.resetHard();
-        } else if ( mergeResult.getFailingPaths().size() != 0 ) {
-          for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
-            msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
-          }
-        }
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
-      }
+      processPullResult( pullResult );
     } catch ( TransportException e ) {
       if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
         pullWithUsernamePassword();
@@ -453,27 +438,37 @@ public class GitController extends AbstractXulEventHandler {
       String username = dialog.getUsername();
       String password = dialog.getPassword();
       try {
-        uiGit.pull( username, password );
-        fireSourceChanged();
+        PullResult pullResult = uiGit.pull( username, password );
+        processPullResult( pullResult );
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
       }
     }
   }
 
+  private void processPullResult( PullResult pullResult ) throws Exception {
+    FetchResult fetchResult = pullResult.getFetchResult();
+    MergeResult mergeResult = pullResult.getMergeResult();
+    if ( pullResult.isSuccessful() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+      fireSourceChanged();
+    } else {
+      String msg = mergeResult.getMergeStatus().toString();
+      if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
+        uiGit.resetHard();
+      } else if ( mergeResult.getFailingPaths().size() != 0 ) {
+        for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
+          msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
+        }
+      }
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
+    }
+  }
+
   public void push() {
     try {
       Iterable<PushResult> resultIterable = uiGit.push();
-      PushResult result = resultIterable.iterator().next();
-      String fullBranch = uiGit.getFullBranch();
-      RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
-      if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
-            update.getStatus().toString() );
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
-            update.getStatus().toString() );
-      }
+      processPushResult( resultIterable );
     } catch ( TransportException e ) {
       if ( e instanceof TransportException && !uiGit.hasRemote() ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
@@ -494,11 +489,24 @@ public class GitController extends AbstractXulEventHandler {
       String username = dialog.getUsername();
       String password = dialog.getPassword();
       try {
-        uiGit.push( username, password );
-        fireSourceChanged();
+        Iterable<PushResult> resultIterable = uiGit.push( username, password );
+        processPushResult( resultIterable );
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
       }
+    }
+  }
+
+  private void processPushResult( Iterable<PushResult> resultIterable ) throws Exception {
+    PushResult result = resultIterable.iterator().next();
+    String fullBranch = uiGit.getFullBranch();
+    RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
+    if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
+          update.getStatus().toString() );
+    } else {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+          update.getStatus().toString() );
     }
   }
 
