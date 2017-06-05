@@ -9,4 +9,13 @@
       command="spoon.loadPerspective('010-git')" />
   </menupopup>
 
+  <menupopup id="tools-popup">
+    <menu id="spoon-tools-menu-git" label="Git">
+      <menupopup id="spoon-tools-menu-git-popup">
+
+        <menuitem label="Clone Repository" command="gitSpoonMenuController.cloneRepo()" />
+
+      </menupopup>
+    </menu>
+  </menupopup>
 </overlay>
