@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <overlay id="label-test" title="Flow Test"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-  xmlns:HTML="http://www.w3.org/Profiles/XHTML-transitional" height="600" width="800" onload="modeler.init()"
+  xmlns:HTML="http://www.w3.org/Profiles/XHTML-transitional" height="600" width="800"
     xmlns:pen="http://www.pentaho.org/2008/xul" >
     
   <menupopup id="view-perspectives-popup">
@@ -13,7 +13,7 @@
     <menu id="spoon-tools-menu-git" label="Git">
       <menupopup id="spoon-tools-menu-git-popup">
 
-        <menuitem label="Clone Repository" command="gitSpoonMenuController.cloneRepo()" />
+        <menuitem label="Clone Repository" command="gitController.cloneRepo()" />
 
       </menupopup>
     </menu>
