@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.0 - 2017-06-05
+### Added
+- Users can switch between branches
+
 ## 0.2.2 - 2017-06-04
 ### Added
 - Pull/push with username and password
