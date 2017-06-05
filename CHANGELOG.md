@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.2 - 2017-06-04
+### Added
+- Pull/push with username and password
+
 ## 0.2.1 - 2017-05-31
 ### Changed
 - Do not show diff when WIP (work-in-progress) is selected for the sake of performance
