@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
@@ -328,6 +329,13 @@ public class UIGit extends XulEventSourceAdapter {
     formatter.format( oldTree, newTree );
     formatter.close();
     return out.toString();
+  }
+
+  public static Git cloneRepo( String directory, String uri ) throws Exception {
+    CloneCommand cmd = Git.cloneRepository();
+    cmd.setDirectory( new File( directory ) );
+    cmd.setURI( uri );
+    return cmd.call();
   }
 
   public void checkout( String branch ) throws Exception {
