@@ -1,10 +1,14 @@
 package org.pentaho.di.ui.spoon.git;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.eclipse.jface.window.Window;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.util.FileUtils;
 import org.pentaho.di.ui.spoon.ISpoonMenuController;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.git.dialog.CloneRepositoryDialog;
@@ -40,12 +44,24 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
     CloneRepositoryDialog dialog = new CloneRepositoryDialog( Spoon.getInstance().getShell() );
     if ( dialog.open() == Window.OK ) {
       String url = dialog.getURL();
+      String directory = null;
       try {
         URIish uri = new URIish( url );
-        String directory = dialog.getDirectory() + File.separator + uri.getHumanishName();
-        UIGit.cloneRepo( directory, url );
-      } catch ( URISyntaxException e1 ) {
-        e1.printStackTrace();
+        directory = dialog.getDirectory() + File.separator + uri.getHumanishName();
+        Git git = UIGit.cloneRepo( directory, url );
+        git.close();
+      } catch ( URISyntaxException e ) {
+        e.printStackTrace();
+      } catch ( TransportException e ) {
+        if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
+          try {
+            FileUtils.delete( new File( directory ), FileUtils.RECURSIVE );
+          } catch ( IOException e1 ) {
+            e1.printStackTrace();
+          }
+        } else {
+          e.printStackTrace();
+        }
       } catch ( Exception e ) {
         e.printStackTrace();
       }
