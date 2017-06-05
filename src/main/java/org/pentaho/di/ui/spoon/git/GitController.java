@@ -38,7 +38,6 @@ import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
-import org.pentaho.di.ui.spoon.ISpoonMenuController;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
@@ -57,7 +56,6 @@ import org.pentaho.ui.xul.components.XulTextbox;
 import org.pentaho.ui.xul.containers.XulBox;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.dnd.DropEvent;
-import org.pentaho.ui.xul.dom.Document;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
 import org.pentaho.ui.xul.swt.custom.DialogConstant;
@@ -66,7 +64,7 @@ import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
 
 import com.google.common.annotations.VisibleForTesting;
 
-public class GitController extends AbstractXulEventHandler implements ISpoonMenuController {
+public class GitController extends AbstractXulEventHandler {
 
   private static final Class<?> PKG = RepositoryExplorer.class;
 
@@ -604,9 +602,6 @@ public class GitController extends AbstractXulEventHandler implements ISpoonMenu
     }
   }
 
-  public void cloneRepo() {
-  }
-
   private void showMessageBox( String title, String message ) {
     try {
       XulMessageBox messageBox = (XulMessageBox) document.createElement( "messagebox" );
@@ -627,10 +622,5 @@ public class GitController extends AbstractXulEventHandler implements ISpoonMenu
   @VisibleForTesting
   Repository getRepository() {
     return Spoon.getInstance().rep;
-  }
-
-  @Override
-  public void updateMenu( Document doc ) {
-    // Nothing to do for now
   }
 }
