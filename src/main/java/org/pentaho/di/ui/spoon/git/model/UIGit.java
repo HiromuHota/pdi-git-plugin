@@ -338,6 +338,15 @@ public class UIGit extends XulEventSourceAdapter {
     return cmd.call();
   }
 
+  public static Git cloneRepo( String directory, String uri, String username, String password ) throws Exception {
+    CloneCommand cmd = Git.cloneRepository();
+    cmd.setDirectory( new File( directory ) );
+    cmd.setURI( uri );
+    CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
+    cmd.setCredentialsProvider( credentialsProvider );
+    return cmd.call();
+  }
+
   public void checkout( String branch ) throws Exception {
     git.checkout().setName( branch ).call();
   }
