@@ -45,6 +45,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
         directory = dialog.getDirectory() + File.separator + uri.getHumanishName();
         Git git = UIGit.cloneRepo( directory, url );
         git.close();
+        showMessageBox( "Success", "Success" );
       } catch ( Exception e ) {
         if ( e instanceof TransportException
             && e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
@@ -64,6 +65,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
       try {
         Git git = UIGit.cloneRepo( directory, url, username, password );
         git.close();
+        showMessageBox( "Success", "Success" );
       } catch ( Exception e ) {
         showMessageBox( "Error", e.getLocalizedMessage() );
       }

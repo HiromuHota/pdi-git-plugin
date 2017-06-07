@@ -53,7 +53,7 @@ public class GitSpoonMenuControllerTest extends RepositoryTestCase {
 
     controller.cloneRepo();
 
-    verify( controller, never() ).showMessageBox( anyString(), anyString() );
+    verify( controller ).showMessageBox( eq( "Success" ), anyString() );
   }
 
   @Test
