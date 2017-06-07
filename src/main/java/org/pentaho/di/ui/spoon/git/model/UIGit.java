@@ -44,6 +44,7 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
+import org.eclipse.jgit.util.FileUtils;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
@@ -335,7 +336,18 @@ public class UIGit extends XulEventSourceAdapter {
     CloneCommand cmd = Git.cloneRepository();
     cmd.setDirectory( new File( directory ) );
     cmd.setURI( uri );
-    return cmd.call();
+    try {
+      Git git = cmd.call();
+      return git;
+    } catch ( Exception e ) {
+      try {
+        FileUtils.delete( new File( directory ), FileUtils.RECURSIVE );
+        throw e;
+      } catch ( IOException e1 ) {
+        e1.printStackTrace();
+      }
+      return null;
+    }
   }
 
   public static Git cloneRepo( String directory, String uri, String username, String password ) throws Exception {

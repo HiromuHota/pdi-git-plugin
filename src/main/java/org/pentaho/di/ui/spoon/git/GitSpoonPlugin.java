@@ -13,9 +13,11 @@ import org.pentaho.ui.xul.XulException;
 public class GitSpoonPlugin implements SpoonPluginInterface, SpoonLifecycleListener {
 
   private GitPerspective perspective;
+  private GitSpoonMenuController gitSpoonMenuController;
 
   public GitSpoonPlugin() throws XulException {
     this.perspective = new GitPerspective();
+    this.gitSpoonMenuController = new GitSpoonMenuController();
   }
 
   @Override
@@ -28,7 +30,7 @@ public class GitSpoonPlugin implements SpoonPluginInterface, SpoonLifecycleListe
     container.registerClassLoader( getClass().getClassLoader() );
     if ( category.equals( "spoon" ) ) {
       container.loadOverlay( "org/pentaho/di/ui/spoon/git/xul/git_spoon_overlays.xul" );
-      container.addEventHandler( GitSpoonMenuController.getInstance() );
+      container.addEventHandler( gitSpoonMenuController );
     }
   }
 

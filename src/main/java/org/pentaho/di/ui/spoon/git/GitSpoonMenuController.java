@@ -18,20 +18,9 @@ import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.dom.Document;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 
+import com.google.common.annotations.VisibleForTesting;
+
 public class GitSpoonMenuController extends AbstractXulEventHandler implements ISpoonMenuController {
-
-  private static GitSpoonMenuController instance = null;
-
-  private GitSpoonMenuController() {
-  }
-
-  public static GitSpoonMenuController getInstance() {
-    if ( instance == null ) {
-      instance = new GitSpoonMenuController();
-      Spoon.getInstance().addSpoonMenuController( instance );
-    }
-    return instance;
-  }
 
   @Override
   public void updateMenu( Document doc ) {
@@ -43,7 +32,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   public void cloneRepo() {
-    CloneRepositoryDialog dialog = new CloneRepositoryDialog( getShell() );
+    CloneRepositoryDialog dialog = getCloneRepositoryDialog();
     if ( dialog.open() == Window.OK ) {
       if ( !new File( dialog.getDirectory() ).exists() ) {
         showMessageBox( "Error", dialog.getDirectory() + " does not exist" );
@@ -57,11 +46,6 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
         Git git = UIGit.cloneRepo( directory, url );
         git.close();
       } catch ( Exception e ) {
-        try {
-          FileUtils.delete( new File( directory ), FileUtils.RECURSIVE );
-        } catch ( IOException e1 ) {
-          e1.printStackTrace();
-        }
         if ( e instanceof TransportException
             && e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
           cloneRepoWithUsernamePassword( directory, url );
@@ -73,7 +57,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   public void cloneRepoWithUsernamePassword( String directory, String url ) {
-    UsernamePasswordDialog dialog = new UsernamePasswordDialog( getShell() );
+    UsernamePasswordDialog dialog = getUsernamePasswordDialog();
     if ( dialog.open() == Window.OK ) {
       String username = dialog.getUsername();
       String password = dialog.getPassword();
@@ -81,17 +65,13 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
         Git git = UIGit.cloneRepo( directory, url, username, password );
         git.close();
       } catch ( Exception e ) {
-        try {
-          FileUtils.delete( new File( directory ), FileUtils.RECURSIVE );
-        } catch ( IOException e1 ) {
-          e1.printStackTrace();
-        }
         showMessageBox( "Error", e.getLocalizedMessage() );
       }
     }
   }
 
-  private void showMessageBox( String title, String message ) {
+  @VisibleForTesting
+  void showMessageBox( String title, String message ) {
     try {
       XulMessageBox messageBox = (XulMessageBox) document.createElement( "messagebox" );
       messageBox.setTitle( title );
@@ -100,6 +80,16 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
     } catch ( XulException e ) {
       e.printStackTrace();
     }
+  }
+
+  @VisibleForTesting
+  CloneRepositoryDialog getCloneRepositoryDialog() {
+    return new CloneRepositoryDialog( getShell() );
+  }
+
+  @VisibleForTesting
+  UsernamePasswordDialog getUsernamePasswordDialog() {
+    return new UsernamePasswordDialog( getShell() );
   }
 
   Shell getShell() {

@@ -283,7 +283,7 @@ public class GitControllerTest {
     }
   }
 
-  private static class XulMessageBoxMock extends MessageDialogBase implements XulMessageBox {
+  static class XulMessageBoxMock extends MessageDialogBase implements XulMessageBox {
     private final XulDialogCallback.Status status;
 
     public XulMessageBoxMock( XulDialogCallback.Status status ) {
