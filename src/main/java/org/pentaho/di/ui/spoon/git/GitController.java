@@ -37,7 +37,6 @@ import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
-import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
@@ -66,7 +65,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 public class GitController extends AbstractXulEventHandler {
 
-  private static final Class<?> PKG = RepositoryExplorer.class;
+  private static final Class<?> PKG = GitController.class;
 
   private UIGit uiGit = new UIGit();
   private String path;
