@@ -3,6 +3,7 @@ package org.pentaho.di.ui.spoon.git;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Composite;
@@ -11,6 +12,7 @@ import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveImageProvider;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveListener;
+import org.pentaho.di.ui.spoon.XulSpoonResourceBundle;
 import org.pentaho.di.ui.xul.KettleXulLoader;
 import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.XulException;
@@ -24,6 +26,7 @@ import org.pentaho.ui.xul.swt.tags.SwtDeck;
 public class GitPerspective implements SpoonPerspectiveImageProvider {
 
   private static Class<?> PKG = GitPerspective.class;
+  private ResourceBundle resourceBundle = new XulSpoonResourceBundle( PKG );
 
   final String PERSPECTIVE_ID = "010-git"; //$NON-NLS-1$
   final String PERSPECTIVE_NAME = "gitPerspective"; //$NON-NLS-1$
@@ -36,7 +39,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     // Loading Xul Document
     KettleXulLoader loader = new KettleXulLoader();
     loader.registerClassLoader( getClass().getClassLoader() );
-    container = loader.loadXul( "org/pentaho/di/ui/spoon/git/xul/git_perspective.xul" );
+    container = loader.loadXul( "org/pentaho/di/ui/spoon/git/xul/git_perspective.xul", resourceBundle );
 
     // Adding Event Handlers
     controller = new GitController();

@@ -2,8 +2,8 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:pen="http://www.pentaho.org/2008/xul" id="git-perspective" title="Git" orient="vertical" height="600" width="800" onload="gitController.init()">
   <vbox flex="1">
     <hbox>
-            <button id="pull" label="Pull" onclick="gitController.pull()" flex="1" image="org/pentaho/di/ui/spoon/git/images/9x9_arrow_down.svg" disabled="true" width="100"/>
-            <button id="push" label="Push" onclick="gitController.push()" flex="1" image="org/pentaho/di/ui/spoon/git/images/9x9_arrow_up.svg" disabled="true" width="100"/>
+            <button id="pull" label="${Git.Pull}" onclick="gitController.pull()" flex="1" image="org/pentaho/di/ui/spoon/git/images/9x9_arrow_down.svg" disabled="true" width="100"/>
+            <button id="push" label="${Git.Push}" onclick="gitController.push()" flex="1" image="org/pentaho/di/ui/spoon/git/images/9x9_arrow_up.svg" disabled="true" width="100"/>
     </hbox>
   <splitter flex="1" orient="HORIZONTAL">
     <vbox flex="2">
@@ -13,7 +13,7 @@
         <button id="browseButton" onclick="gitController.editPath()" image="org/pentaho/di/ui/spoon/git/images/Edit.svg" disabled="true"/>
       </hbox>
       <hbox>
-        <label value="Branch:" />
+        <label value="${Git.Branch}" />
         <box id="boxBranch" flex="1"/>
         <label value="Remote (origin):" />
         <label id="remote" flex="1"/>
@@ -36,11 +36,11 @@
           <label id="commit-message-label" value="Commit Message:"/>
           <textbox id="commit-message" multiline="true" rows="5" value="" flex="1"/>
           <hbox>
-            <label id="author-name-label" value="Author:"/>
+            <label id="author-name-label" value="${Git.Author}"/>
             <textbox id="author-name" value="" flex="1"/>
           </hbox>
           <hbox>
-            <button id="commit" label="Commit" onclick="gitController.commit()" flex="1" disabled="true"/>
+            <button id="commit" label="${Git.Commit}" onclick="gitController.commit()" flex="1" disabled="true"/>
           </hbox>
         </vbox>
       </splitter>
