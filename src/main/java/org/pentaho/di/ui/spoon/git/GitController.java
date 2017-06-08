@@ -117,7 +117,6 @@ public class GitController extends AbstractXulEventHandler {
   private void createBindings() {
     XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
     XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
-    XulLabel branchLabel = (XulLabel) document.getElementById( "branch" );
     XulLabel remoteLabel = (XulLabel) document.getElementById( "remote" );
     XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
     XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );

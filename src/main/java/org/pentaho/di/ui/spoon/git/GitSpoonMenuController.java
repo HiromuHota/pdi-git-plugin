@@ -1,13 +1,11 @@
 package org.pentaho.di.ui.spoon.git;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.transport.URIish;
-import org.eclipse.jgit.util.FileUtils;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.ui.spoon.ISpoonMenuController;
 import org.pentaho.di.ui.spoon.Spoon;
