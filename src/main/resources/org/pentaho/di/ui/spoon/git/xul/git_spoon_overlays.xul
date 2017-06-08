@@ -13,7 +13,7 @@
     <menu id="spoon-tools-menu-git" label="Git">
       <menupopup id="spoon-tools-menu-git-popup">
 
-        <menuitem label="Clone Repository" command="gitSpoonMenuController.cloneRepo()" />
+        <menuitem label="${Git.Clone}" command="gitSpoonMenuController.cloneRepo()" />
 
       </menupopup>
     </menu>

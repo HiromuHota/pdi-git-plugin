@@ -8,14 +8,14 @@
   <splitter flex="1" orient="HORIZONTAL">
     <vbox flex="2">
       <hbox>
-        <label value="Directory:" />
+        <label value="${Git.Directory}:" />
         <label id="path" flex="1"/>
         <button id="browseButton" onclick="gitController.editPath()" image="org/pentaho/di/ui/spoon/git/images/Edit.svg" disabled="true"/>
       </hbox>
       <hbox>
-        <label value="${Git.Branch}" />
+        <label value="${Git.Branch}:" />
         <box id="boxBranch" flex="1"/>
-        <label value="Remote (origin):" />
+        <label value="${Git.Remote} (origin):" />
         <label id="remote" flex="1"/>
         <button id="remoteButton" onclick="gitController.editRemote()" image="org/pentaho/di/ui/spoon/git/images/Edit.svg" disabled="true"/>
       </hbox>
@@ -33,10 +33,10 @@
           <pen:include src="org/pentaho/di/ui/spoon/git/xul/git_staged-table.xul" ignoreroot="true" />
         </hbox>
         <vbox flex="1">
-          <label id="commit-message-label" value="Commit Message:"/>
+          <label id="commit-message-label" value="${Git.CommitMessage}:"/>
           <textbox id="commit-message" multiline="true" rows="5" value="" flex="1"/>
           <hbox>
-            <label id="author-name-label" value="${Git.Author}"/>
+            <label id="author-name-label" value="${Git.Author}:"/>
             <textbox id="author-name" value="" flex="1"/>
           </hbox>
           <hbox>
@@ -49,10 +49,10 @@
   </vbox>
 
   <menupopup id="unstagedContextMenu">
-    <menuitem label="Add to Index" command="gitController.addToIndex()"/>
+    <menuitem label="${Git.ContextMenu.AddToIndex}" command="gitController.addToIndex()"/>
   </menupopup>
   <menupopup id="stagedContextMenu">
-    <menuitem label="Remove from Index" command="gitController.removeFromIndex()"/>
+    <menuitem label="${Git.ContextMenu.RemoveFromIndex}" command="gitController.removeFromIndex()"/>
   </menupopup>
 
 </window>
