@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git;
+package org.pentaho.di.ui.spoon.git.dialog;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -17,7 +17,7 @@ public class UsernamePasswordDialog extends Dialog {
   private String username;
   private String password;
 
-  protected UsernamePasswordDialog( Shell parentShell ) {
+  public UsernamePasswordDialog( Shell parentShell ) {
     super( parentShell );
   }
 

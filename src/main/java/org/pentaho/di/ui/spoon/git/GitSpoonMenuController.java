@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.ui.spoon.ISpoonMenuController;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.git.dialog.CloneRepositoryDialog;
+import org.pentaho.di.ui.spoon.git.dialog.UsernamePasswordDialog;
 import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.components.XulMessageBox;

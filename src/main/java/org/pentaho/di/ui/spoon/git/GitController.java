@@ -41,6 +41,7 @@ import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
+import org.pentaho.di.ui.spoon.git.dialog.UsernamePasswordDialog;
 import org.pentaho.di.ui.spoon.git.model.UIFile;
 import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulException;
