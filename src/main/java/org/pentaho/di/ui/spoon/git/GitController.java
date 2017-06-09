@@ -44,6 +44,7 @@ import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
 import org.pentaho.di.ui.spoon.git.dialog.DeleteBranchDialog;
+import org.pentaho.di.ui.spoon.git.dialog.MergeBranchDialog;
 import org.pentaho.di.ui.spoon.git.dialog.UsernamePasswordDialog;
 import org.pentaho.di.ui.spoon.git.model.UIFile;
 import org.pentaho.di.ui.spoon.git.model.UIGit;
@@ -652,30 +653,29 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void merge() throws XulException {
-    XulPromptBox promptBox = (XulPromptBox) document.createElement( "promptbox" );
-    promptBox.setTitle( BaseMessages.getString( PKG, "Git.Merge" ) );
-    promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
-    promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.MergeBranch" ) );
-    promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
-      if ( status.equals( Status.ACCEPT ) ) {
-        try {
-          MergeResult result = uiGit.mergeBranch( value );
-          if ( result.getMergeStatus().isSuccessful() ) {
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-            fireSourceChanged();
-            setBranches();
-          } else {
-            if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
-              uiGit.resetHard();
-            }
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
+    MergeBranchDialog dialog = new MergeBranchDialog( getShell() );
+    List<String> branches = uiGit.getBranches();
+    branches.remove( uiGit.getBranch() );
+    dialog.setBranches( branches );
+    if ( dialog.open() == Window.OK ) {
+      String branch = dialog.getSelectedBranch();
+      String mergeStrategy = dialog.getSelectedMergeStrategy();
+      try {
+        MergeResult result = uiGit.mergeBranch( branch, mergeStrategy );
+        if ( result.getMergeStatus().isSuccessful() ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+          fireSourceChanged();
+          setBranches();
+        } else {
+          if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
+            uiGit.resetHard();
           }
-        } catch ( Exception e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
         }
+      } catch ( Exception e ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
       }
-    } );
-    promptBox.open();
+    }
   }
 
   public void editPath() throws IllegalArgumentException, InvocationTargetException, XulException {

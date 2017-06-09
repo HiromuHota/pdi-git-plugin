@@ -34,6 +34,7 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.UserConfig;
+import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -415,9 +416,14 @@ public class UIGit extends XulEventSourceAdapter {
   }
 
   public MergeResult mergeBranch( String value ) throws Exception {
+    return mergeBranch( value, MergeStrategy.RECURSIVE.getName() );
+  }
+
+  public MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception {
     Ref ref = git.getRepository().exactRef( Constants.R_HEADS + value );
     return git.merge()
         .include( ref )
+        .setStrategy( MergeStrategy.get( mergeStrategy ) )
         .call();
   }
 }
