@@ -100,10 +100,44 @@ public class UIGit extends XulEventSourceAdapter {
     this.git = git;
   }
 
+  /**
+   * Get the author name as defined in the .git
+   * @return
+   */
   public String getAuthorName() {
     Config config = git.getRepository().getConfig();
     return config.get( UserConfig.KEY ).getAuthorName()
         + " <" + config.get( UserConfig.KEY ).getAuthorEmail() + ">";
+  }
+
+  /**
+   * Get the author name for a commit
+   * @param commitId
+   * @return
+   * @throws Exception
+   */
+  public String getAuthorName( String commitId ) throws Exception {
+    final ObjectId id = git.getRepository().resolve( commitId );
+    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
+      RevObject obj = rw.parseAny( id );
+      RevCommit commit = (RevCommit) obj;
+      PersonIdent author = commit.getAuthorIdent();
+      final StringBuilder r = new StringBuilder();
+      r.append( author.getName() );
+      r.append( " <" ); //$NON-NLS-1$
+      r.append( author.getEmailAddress() );
+      r.append( "> " ); //$NON-NLS-1$
+      return r.toString();
+    }
+  }
+
+  public String getCommitMessage( String commitId ) throws Exception {
+    final ObjectId id = git.getRepository().resolve( commitId );
+    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
+      RevObject obj = rw.parseAny( id );
+      RevCommit commit = (RevCommit) obj;
+      return commit.getFullMessage();
+    }
   }
 
   /**

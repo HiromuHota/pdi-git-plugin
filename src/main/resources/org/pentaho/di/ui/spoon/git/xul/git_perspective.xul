@@ -34,7 +34,7 @@
         </hbox>
         <vbox flex="1">
           <label id="commit-message-label" value="${Git.CommitMessage}:"/>
-          <textbox id="commit-message" multiline="true" rows="5" value="" flex="1"/>
+          <textbox id="commit-message" multiline="true" value="" flex="1"/>
           <hbox>
             <label id="author-name-label" value="${Git.Author}:"/>
             <textbox id="author-name" value="" flex="1"/>

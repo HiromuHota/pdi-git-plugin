@@ -85,6 +85,8 @@ public class GitController extends AbstractXulEventHandler {
   private XulButton commitButton;
   private XulButton pullButton;
   private XulButton pushButton;
+  private XulTextbox authorNameTextbox;
+  private XulTextbox commitMessageTextbox;
 
   private BindingFactory bf = new SwtBindingFactory();
   private Binding remoteBinding;
@@ -119,8 +121,8 @@ public class GitController extends AbstractXulEventHandler {
     XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
     XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
     XulLabel remoteLabel = (XulLabel) document.getElementById( "remote" );
-    XulTextbox authorName = (XulTextbox) document.getElementById( "author-name" );
-    XulTextbox commitMessage = (XulTextbox) document.getElementById( "commit-message" );
+    authorNameTextbox = (XulTextbox) document.getElementById( "author-name" );
+    commitMessageTextbox = (XulTextbox) document.getElementById( "commit-message" );
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
@@ -136,8 +138,8 @@ public class GitController extends AbstractXulEventHandler {
     bf.createBinding( stagedTable, "selectedItems", this, "selectedStagedObjects" );
 
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
-    bf.createBinding( this, "authorName", authorName, "value" );
-    bf.createBinding( this, "commitMessage", commitMessage, "value" );
+    bf.createBinding( this, "authorName", authorNameTextbox, "value" );
+    bf.createBinding( this, "commitMessage", commitMessageTextbox, "value" );
   }
 
   public void setActive() {
@@ -154,8 +156,11 @@ public class GitController extends AbstractXulEventHandler {
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
+    commitMessageTextbox.setReadonly( false );
+    authorNameTextbox.setReadonly( false );
 
     setAuthorName( uiGit.getAuthorName() );
+    setCommitMessage( "" );
 
     try {
       fireSourceChanged();
@@ -369,9 +374,18 @@ public class GitController extends AbstractXulEventHandler {
     if ( selectedRevisions.size() != 0 ) {
       if ( getSelectedRevisions().get( 0 ).getName().equals( "" ) ) { //When WIP is selected
         setDiff( "" );
+        setAuthorName( uiGit.getAuthorName() );
+        authorNameTextbox.setReadonly( false );
+        setCommitMessage( "" );
+        commitMessageTextbox.setReadonly( false );
       } else {
         // TODO Should show diff for multiple commits
-        setDiff( uiGit.show( getSelectedRevisions().get( 0 ).getName() ) );
+        String commitId = getSelectedRevisions().get( 0 ).getName();
+        setDiff( uiGit.show( commitId ) );
+        setAuthorName( uiGit.getAuthorName( commitId ) );
+        authorNameTextbox.setReadonly( true );
+        setCommitMessage( uiGit.getCommitMessage( commitId ) );
+        commitMessageTextbox.setReadonly( true );
       }
     }
   }
