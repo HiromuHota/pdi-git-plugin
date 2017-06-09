@@ -378,6 +378,7 @@ public class GitController extends AbstractXulEventHandler {
         authorNameTextbox.setReadonly( false );
         setCommitMessage( "" );
         commitMessageTextbox.setReadonly( false );
+        commitButton.setDisabled( false );
       } else {
         // TODO Should show diff for multiple commits
         String commitId = getSelectedRevisions().get( 0 ).getName();
@@ -386,6 +387,7 @@ public class GitController extends AbstractXulEventHandler {
         authorNameTextbox.setReadonly( true );
         setCommitMessage( uiGit.getCommitMessage( commitId ) );
         commitMessageTextbox.setReadonly( true );
+        commitButton.setDisabled( true );
       }
     }
   }
