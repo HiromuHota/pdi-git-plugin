@@ -407,8 +407,11 @@ public class UIGit extends XulEventSourceAdapter {
     return git.branchCreate().setName( value ).call();
   }
 
-  public List<String> deleteBranch( String value ) throws Exception {
-    return git.branchDelete().setBranchNames( value ).call();
+  public List<String> deleteBranch( String name, boolean force ) throws Exception {
+    return git.branchDelete()
+        .setBranchNames( name )
+        .setForce( force )
+        .call();
   }
 
   public MergeResult mergeBranch( String value ) throws Exception {

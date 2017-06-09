@@ -43,6 +43,7 @@ import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
+import org.pentaho.di.ui.spoon.git.dialog.DeleteBranchDialog;
 import org.pentaho.di.ui.spoon.git.dialog.UsernamePasswordDialog;
 import org.pentaho.di.ui.spoon.git.model.UIFile;
 import org.pentaho.di.ui.spoon.git.model.UIGit;
@@ -633,21 +634,21 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void deleteBranch() throws XulException {
-    XulPromptBox promptBox = (XulPromptBox) document.createElement( "promptbox" );
-    promptBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.DeleteBranch" ) );
-    promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
-    promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.DeleteBranch" ) );
-    promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
-      if ( status.equals( Status.ACCEPT ) ) {
-        try {
-          uiGit.deleteBranch( value );
-          setBranches();
-        } catch ( Exception e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
-        }
+    DeleteBranchDialog dialog = new DeleteBranchDialog( getShell() );
+    List<String> branches = uiGit.getBranches();
+    branches.remove( uiGit.getBranch() );
+    dialog.setBranches( branches );
+    if ( dialog.open() == Window.OK ) {
+      String branch = dialog.getSelectedBranch();
+      boolean isForce = dialog.isForce();
+      try {
+        uiGit.deleteBranch( branch, isForce );
+        setBranches();
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+      } catch ( Exception e ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
       }
-    } );
-    promptBox.open();
+    }
   }
 
   public void merge() throws XulException {
