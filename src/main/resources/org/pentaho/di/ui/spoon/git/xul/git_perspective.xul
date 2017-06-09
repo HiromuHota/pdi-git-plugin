@@ -54,5 +54,8 @@
   <menupopup id="stagedContextMenu">
     <menuitem label="${Git.ContextMenu.RemoveFromIndex}" command="gitController.removeFromIndex()"/>
   </menupopup>
+  <menupopup id="revisionContextMenu">
+    <menuitem label="${Git.ContextMenu.Checkout}" command="gitController.checkout()"/>
+  </menupopup>
 
 </window>

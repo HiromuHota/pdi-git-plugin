@@ -2,7 +2,7 @@
 <window id="dummyRootElement" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   xmlns:pen="http://www.pentaho.org/2008/xul">
 
-  <tree id="revision-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" treeLines="false">
+  <tree id="revision-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" context="revisionContextMenu" treeLines="false">
     <treecols>
       <treecol id="revision-label-col" flex="1" label="Id" pen:binding="name" pen:childrenbinding="children"/>
       <treecol id="revision-comment-col" flex="6" label="Message" pen:binding="comment"/>

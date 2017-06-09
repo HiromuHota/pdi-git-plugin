@@ -393,7 +393,12 @@ public class UIGit extends XulEventSourceAdapter {
     return cmd.call();
   }
 
-  public void checkout( String branch ) throws Exception {
-    git.checkout().setName( branch ).call();
+  /**
+   * Checkout a branch or commit
+   * @param name
+   * @throws Exception
+   */
+  public void checkout( String name ) throws Exception {
+    git.checkout().setName( name ).call();
   }
 }

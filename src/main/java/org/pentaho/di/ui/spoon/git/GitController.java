@@ -233,12 +233,17 @@ public class GitController extends AbstractXulEventHandler {
           }
           try {
             fireSourceChanged();
+            setBranches();
           } catch ( Exception e1 ) {
             e1.printStackTrace();
           }
         }
       } );
     }
+    setBranches();
+  }
+
+  private void setBranches() {
     comboBranch.removeAll();
     if ( uiGit.isOpen() ) {
       String current = uiGit.getBranch();
@@ -475,6 +480,17 @@ public class GitController extends AbstractXulEventHandler {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           "Malformed author name" );
     }
+  }
+
+  public void checkout() throws XulException, IllegalArgumentException, InvocationTargetException {
+    String commitId = getSelectedRevisions().get( 0 ).getName();
+    try {
+      uiGit.checkout( commitId );
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
+    fireSourceChanged();
+    setBranches();
   }
 
   public void pull() {
