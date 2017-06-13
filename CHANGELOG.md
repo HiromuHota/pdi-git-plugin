@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.3.1 - 2017-06-13
+### Added
+- Japanese translation
+- Users can clone a remote repository (from the menu Tools > Git)
+- Users can checkout a particular commit (thru a context menu on a commit)
+- Users can create / delete a branch
+- Users can merge a branch into the current one
+
 ## 0.3.0 - 2017-06-05
 ### Added
 - Users can switch between branches

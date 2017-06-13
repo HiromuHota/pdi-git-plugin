@@ -27,16 +27,20 @@ Switch to the Git perspective
 ## Working with files
 
 Stage changed files by drag & drop, write a good commit message, change the author name if necessary, and finally <b>Commit</b>.
+Right-click on a commit pops up a context menu, where you can choose **checkout** to checkout that particular commit.
 
 ## Remote
 
+**Tools > Git > Clone Repository** allows you to clone a remote repository to the local file system.
 Currently only `origin` can be set and it is always the source of <b>Pull</b> and the target of <b>Push</b>.
 <b>Pull</b> is equivalent of `git fetch; git merge --ff`.
 If an error (e.g., merge conflict) happens, the operation will be just cancelled.
 
 ## Branches
 
-Currently, changing branches is not implemented, but you can do so using other Git clients.
+Users can switch between branches.
+Users can create / delete a branch.
+Users can merge a branch into the current one.
 
 # How to compile
 
