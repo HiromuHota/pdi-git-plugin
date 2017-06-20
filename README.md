@@ -36,6 +36,26 @@ Currently only `origin` can be set and it is always the source of <b>Pull</b> an
 <b>Pull</b> is equivalent of `git fetch; git merge --ff`.
 If an error (e.g., merge conflict) happens, the operation will be just cancelled.
 
+### When pushing, I get an "UnknownHostKey" error
+
+This happens when connecting to the remote repository via SSH.
+Please add the host to `~/.ssh/known_hosts`
+
+### The remote host has been added, but I still get an "UnknownHostKey" error
+
+This could happen for example when the remote host is Gerrit.
+The remote host will be added by executing `$ ssh -p 29418 hiromu@localhost`
+
+```
+[localhost]:29418 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAFgEc3BqPijHvVs5KoXLLoBaYtBlW8c8v+wpHEPpKObAF0lSG2qt764zFUE1eRlb/thq8RdNxHQ8l+i4VLTlR8=
+```
+
+However, JSch (Java library for SSH and used in the Git plugin) prefers **ssh-rsa** over **ecdsa-sha2-nistp256**. Hence, add the remote host like below.
+
+```
+[localhost]:29418 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVoiADWyjer2MRMZYAl1Ws/0zj9VyqMgYQxgNL+xcFGz4cO4AZIaL5L6TlNaU5bOF3WeCFgDLMrMioUoWS/0yLE5Q9mXwE2/5V3fEKDgMfuO+xvEGoh/xZb0GqhCeioG63+clqrXM8DvYfqzMmUg8ksPejEYeQpSrTkg0S5RE9AEB/+qvNnipye7M+9Nutr2lSE+GRhRfFNITCXLIAN6ukoKis+xVZgCMXFSnS41PlhQ/mLNJdA1bMxjm1/58iJsdF44iD+cuM/mFvLoAnXeAbOkkj8jyM136vAvO45M5c+a6Z8k4X7Q/CxsZ2IowWfUshg0jsjerzANUPCaoP9VJX
+```
+
 ## Branches
 
 Users can switch between branches.

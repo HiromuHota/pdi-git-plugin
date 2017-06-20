@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jgit.api.MergeResult;
@@ -230,12 +231,10 @@ public class GitControllerTest {
     when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     doReturn( true ).when( uiGit ).hasRemote();
     PushResult result = mock( PushResult.class );
-    List<PushResult> results = Arrays.asList( result );
     RemoteRefUpdate update = mock( RemoteRefUpdate.class );
     when( update.getStatus() ).thenReturn( Status.OK );
-    when( result.getRemoteUpdate( anyString() ) ).thenReturn( update );
-    when( uiGit.getFullBranch() ).thenReturn( "refs/heads/master" );
-    when( uiGit.push() ).thenReturn( results );
+    when( result.getRemoteUpdates() ).thenReturn( Arrays.asList( update ) );
+    when( uiGit.push() ).thenReturn( Collections.singletonList( result ) );
 
     controller.push();
 

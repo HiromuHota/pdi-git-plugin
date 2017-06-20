@@ -598,15 +598,16 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   private void processPushResult( Iterable<PushResult> resultIterable ) throws Exception {
-    PushResult result = resultIterable.iterator().next();
-    String fullBranch = uiGit.getFullBranch();
-    RemoteRefUpdate update = result.getRemoteUpdate( fullBranch );
-    if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
-          update.getStatus().toString() );
-    } else {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
-          update.getStatus().toString() );
+    PushResult result = resultIterable.iterator().next(); // should be only one element (remote=origin)
+    for ( RemoteRefUpdate update : result.getRemoteUpdates() ) {
+      if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
+            update.getStatus().toString() );
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+            update.getStatus().toString() + "\n"
+            + update.getMessage() );
+      }
     }
   }
 
