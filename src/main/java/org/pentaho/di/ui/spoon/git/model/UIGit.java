@@ -41,10 +41,12 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.HttpTransport;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.transport.http.apache.HttpClientConnectionFactory;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FileUtils;
 import org.pentaho.di.repository.ObjectRevision;
@@ -56,6 +58,17 @@ import org.pentaho.ui.xul.XulEventSourceAdapter;
 import com.google.common.annotations.VisibleForTesting;
 
 public class UIGit extends XulEventSourceAdapter {
+
+  static {
+    /**
+     * Use Apache HTTP Client instead of Sun HTTP client.
+     * This resolves the issue that Git commands (e.g., push, clone) via http(s) do not work in EE.
+     * This issue is caused by the fact that weka plugins (namely, knowledge-flow, weka-forecasting, and weka-scoring)
+     * calls java.net.Authenticator.setDefault().
+     * See here https://bugs.eclipse.org/bugs/show_bug.cgi?id=296201 for more details.
+     */
+    HttpTransport.setConnectionFactory( new HttpClientConnectionFactory() );
+  }
 
   private Git git;
 
