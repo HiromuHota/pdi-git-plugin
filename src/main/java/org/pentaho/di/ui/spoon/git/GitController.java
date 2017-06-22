@@ -335,7 +335,7 @@ public class GitController extends AbstractXulEventHandler {
             setPath( baseDirectory );
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           } catch ( Exception e ) {
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), BaseMessages.getString( PKG, e.getLocalizedMessage() ) );
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), BaseMessages.getString( PKG, e.getMessage() ) );
           }
         }
       } );
@@ -524,7 +524,7 @@ public class GitController extends AbstractXulEventHandler {
       }
     } catch ( Exception e ) {
       if ( uiGit.hasRemote() ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       } else {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
             "Please setup a remote" );
@@ -541,7 +541,7 @@ public class GitController extends AbstractXulEventHandler {
         PullResult pullResult = uiGit.pull( username, password );
         processPullResult( pullResult );
       } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
   }
@@ -576,10 +576,10 @@ public class GitController extends AbstractXulEventHandler {
       } else if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
         pushWithUsernamePassword();
       } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     } catch ( Exception e ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
@@ -592,7 +592,7 @@ public class GitController extends AbstractXulEventHandler {
         Iterable<PushResult> resultIterable = uiGit.push( username, password );
         processPushResult( resultIterable );
       } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
   }
@@ -628,7 +628,7 @@ public class GitController extends AbstractXulEventHandler {
           fireSourceChanged();
           setBranches();
         } catch ( Exception e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
         }
       }
     } );
@@ -648,7 +648,7 @@ public class GitController extends AbstractXulEventHandler {
         setBranches();
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
       } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
   }
@@ -674,7 +674,7 @@ public class GitController extends AbstractXulEventHandler {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
         }
       } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getLocalizedMessage() );
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
   }
