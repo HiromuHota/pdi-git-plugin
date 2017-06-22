@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.2 - 2017-06-22
+### Fixed
+- Use Apache HTTP Client instead of Sun HTTP client. This fixes the communication with a remote repository via HTTP(S) in EE.
+
 ## 0.3.1 - 2017-06-13
 ### Added
 - Japanese translation
