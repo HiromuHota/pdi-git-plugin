@@ -3,8 +3,6 @@ package org.pentaho.di.ui.spoon.git.model;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -162,13 +160,13 @@ public class UIGitTest extends RepositoryTestCase {
 
     // put some file in the source repo and sync
     File sourceFile = new File( db2.getWorkTree(), "SomeFile.txt" );
-    writeToFile( sourceFile, "Hello world" );
+    FileUtils.writeStringToFile( sourceFile, "Hello world" );
     git2.add().addFilepattern( "SomeFile.txt" ).call();
     git2.commit().setMessage( "Initial commit for source" ).call();
     PullResult pullResult = git.pull().call();
 
     // change the source file
-    writeToFile( sourceFile, "Another change" );
+    FileUtils.writeStringToFile( sourceFile, "Another change" );
     git2.add().addFilepattern( "SomeFile.txt" ).call();
     git2.commit().setMessage( "Some change in remote" ).call();
     git2.close();
@@ -189,19 +187,19 @@ public class UIGitTest extends RepositoryTestCase {
 
     // put some file in the source repo and sync
     File sourceFile = new File( db2.getWorkTree(), "SomeFile.txt" );
-    writeToFile( sourceFile, "Hello world" );
+    FileUtils.writeStringToFile( sourceFile, "Hello world" );
     git2.add().addFilepattern( "SomeFile.txt" ).call();
     git2.commit().setMessage( "Initial commit for source" ).call();
     PullResult pullResult = git.pull().call();
 
     // change the source file
-    writeToFile( sourceFile, "Another change" );
+    FileUtils.writeStringToFile( sourceFile, "Another change" );
     git2.add().addFilepattern( "SomeFile.txt" ).call();
     RevCommit sourceCommit = git2.commit().setMessage( "Some change in remote" ).call();
     git2.close();
 
     File targetFile = new File( db.getWorkTree(), "OtherFile.txt" );
-    writeToFile( targetFile, "Unconflicting change" );
+    FileUtils.writeStringToFile( targetFile, "Unconflicting change" );
     git.add().addFilepattern( "OtherFile.txt" ).call();
     RevCommit targetCommit = git.commit().setMessage( "Unconflicting change in local" ).call();
 
@@ -339,24 +337,11 @@ public class UIGitTest extends RepositoryTestCase {
     git.commit().setMessage( "initial commit" ).call();
 
     // Add some change
-    writeToFile( file, "Change" );
+    FileUtils.writeStringToFile( file, "Change" );
     assertEquals( "Change", FileUtils.readFileToString( file ) );
 
     uiGit.checkoutPath( file.getName() );
 
     assertEquals( "Hello world", FileUtils.readFileToString( file ) );
-  }
-
-  private static void writeToFile( File actFile, String string ) throws IOException {
-    FileOutputStream fos = null;
-    try {
-      fos = new FileOutputStream( actFile );
-      fos.write( string.getBytes( "UTF-8" ) );
-      fos.close();
-    } finally {
-      if ( fos != null ) {
-        fos.close();
-      }
-    }
   }
 }
