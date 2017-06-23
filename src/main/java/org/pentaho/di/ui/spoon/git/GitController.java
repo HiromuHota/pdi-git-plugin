@@ -512,6 +512,19 @@ public class GitController extends AbstractXulEventHandler {
     setBranches();
   }
 
+  /**
+   * Discard changes to selected unstaged files.
+   * Equivalent to <tt>git checkout -- &lt;paths&gt;</tt>
+   * @throws Exception
+   */
+  public void discard() throws Exception {
+    List<UIFile> contents = getSelectedUnstagedObjects();
+    for ( UIFile content : contents ) {
+      uiGit.checkoutPath( content.getName() );
+    }
+    fireSourceChanged();
+  }
+
   public void pull() {
     try {
       PullResult pullResult = uiGit.pull();

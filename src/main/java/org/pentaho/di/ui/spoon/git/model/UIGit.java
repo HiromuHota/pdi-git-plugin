@@ -439,4 +439,8 @@ public class UIGit extends XulEventSourceAdapter {
         .setStrategy( MergeStrategy.get( mergeStrategy ) )
         .call();
   }
+
+  public Ref checkoutPath( String path ) throws Exception {
+    return git.checkout().addPath( path ).call();
+  }
 }

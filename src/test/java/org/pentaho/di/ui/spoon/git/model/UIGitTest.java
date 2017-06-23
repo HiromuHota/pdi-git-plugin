@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
@@ -316,6 +317,7 @@ public class UIGitTest extends RepositoryTestCase {
     assertTrue( diff.contains( "Second commit" ) );
   }
 
+  @Test
   public void testCheckout() throws Exception {
     // commit something
     writeTrashFile( "Test.txt", "Hello world" );
@@ -327,6 +329,22 @@ public class UIGitTest extends RepositoryTestCase {
     assertEquals( "master", uiGit.getBranch() );
     uiGit.checkout( "develop" );
     assertEquals( "develop", uiGit.getBranch() );
+  }
+
+  @Test
+  public void testCheckoutPath() throws Exception {
+    // commit something
+    File file = writeTrashFile( "Test.txt", "Hello world" );
+    git.add().addFilepattern( "Test.txt" ).call();
+    git.commit().setMessage( "initial commit" ).call();
+
+    // Add some change
+    writeToFile( file, "Change" );
+    assertEquals( "Change", FileUtils.readFileToString( file ) );
+
+    uiGit.checkoutPath( file.getName() );
+
+    assertEquals( "Hello world", FileUtils.readFileToString( file ) );
   }
 
   private static void writeToFile( File actFile, String string ) throws IOException {
