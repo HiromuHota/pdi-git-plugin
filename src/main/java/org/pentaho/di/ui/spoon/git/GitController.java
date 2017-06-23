@@ -520,7 +520,7 @@ public class GitController extends AbstractXulEventHandler {
       if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
         pullWithUsernamePassword();
       } else {
-        e.printStackTrace();
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     } catch ( Exception e ) {
       if ( uiGit.hasRemote() ) {

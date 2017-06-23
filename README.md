@@ -36,6 +36,14 @@ Currently only `origin` can be set and it is always the source of <b>Pull</b> an
 <b>Pull</b> is equivalent of `git fetch; git merge --ff`.
 If an error (e.g., merge conflict) happens, the operation will be just cancelled.
 
+## Branches
+
+Users can switch between branches.
+Users can create / delete a branch.
+Users can merge a branch into the current one.
+
+## FAQ
+
 ### When pushing, I get an "UnknownHostKey" error
 
 This happens when connecting to the remote repository via SSH.
@@ -56,11 +64,25 @@ However, JSch (Java library for SSH and used in the Git plugin) prefers **ssh-rs
 [localhost]:29418 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVoiADWyjer2MRMZYAl1Ws/0zj9VyqMgYQxgNL+xcFGz4cO4AZIaL5L6TlNaU5bOF3WeCFgDLMrMioUoWS/0yLE5Q9mXwE2/5V3fEKDgMfuO+xvEGoh/xZb0GqhCeioG63+clqrXM8DvYfqzMmUg8ksPejEYeQpSrTkg0S5RE9AEB/+qvNnipye7M+9Nutr2lSE+GRhRfFNITCXLIAN6ukoKis+xVZgCMXFSnS41PlhQ/mLNJdA1bMxjm1/58iJsdF44iD+cuM/mFvLoAnXeAbOkkj8jyM136vAvO45M5c+a6Z8k4X7Q/CxsZ2IowWfUshg0jsjerzANUPCaoP9VJX
 ```
 
-## Branches
+### When behind proxy
 
-Users can switch between branches.
-Users can create / delete a branch.
-Users can merge a branch into the current one.
+Define *System Properties* (not environment variables) like below in spoon.sh
+
+```
+OPT="$OPT -Dhttp.proxyHost=localhost -Dhttp.proxyPort=3128 -Dhttps.proxyHost=localhost -Dhttps.proxyPort=3128"
+```
+
+or in Spoon.bat
+
+```
+set OPT=%OPT% "-Dhttp.proxyHost=10.0.2.2" "-Dhttp.proxyPort=3128" "-Dhttps.proxyHost=10.0.2.2" "-Dhttps.proxyPort=3128"
+```
+
+The host and port should be replaced according to your proxy server.
+
+### I got "407 Proxy Authentication Required" error
+
+Proxy Authentication is currently not supported.
 
 # How to compile
 
