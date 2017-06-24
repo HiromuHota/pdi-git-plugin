@@ -344,4 +344,21 @@ public class UIGitTest extends RepositoryTestCase {
 
     assertEquals( "Hello world", FileUtils.readFileToString( file ) );
   }
+
+  @Test
+  public void testCreateDeleteBranch() throws Exception {
+    // commit something
+    writeTrashFile( "Test.txt", "Hello world" );
+    git.add().addFilepattern( "Test.txt" ).call();
+    git.commit().setMessage( "initial commit" ).call();
+
+    // create a branch
+    Ref ref = uiGit.createBranch( "test" );
+    assertEquals( Constants.R_HEADS + "test", ref.getName() );
+
+    // delete the branch
+    List<String> deleted = uiGit.deleteBranch( "test", true );
+    assertEquals( 1, deleted.size() );
+    assertEquals( Constants.R_HEADS + "test", deleted.get( 0 ) );
+  }
 }
