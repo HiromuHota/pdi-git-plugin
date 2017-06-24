@@ -141,7 +141,7 @@ public class UIGit extends XulEventSourceAdapter {
       r.append( author.getName() );
       r.append( " <" ); //$NON-NLS-1$
       r.append( author.getEmailAddress() );
-      r.append( "> " ); //$NON-NLS-1$
+      r.append( ">" ); //$NON-NLS-1$
       return r.toString();
     }
   }

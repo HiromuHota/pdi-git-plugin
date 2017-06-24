@@ -16,6 +16,7 @@ import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.junit.RepositoryTestCase;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryState;
@@ -120,6 +121,21 @@ public class UIGitTest extends RepositoryTestCase {
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
     cmd.setUri( uri );
     return cmd.call();
+  }
+
+  @Test
+  public void testCommit() throws Exception {
+    writeTrashFile( "Test.txt", "Hello world" );
+    uiGit.add( "Test.txt" );
+    PersonIdent author = new PersonIdent( "author", "author@example.com" );
+    String message = "Initial commit";
+
+    RevCommit commit = uiGit.commit( author, message );
+
+    assertEquals( author, commit.getAuthorIdent() );
+    assertEquals( message, commit.getFullMessage() );
+    assertEquals( message, uiGit.getCommitMessage( commit.getName() ) );
+    assertEquals( "author <author@example.com>", uiGit.getAuthorName( commit.getName() ) );
   }
 
   @Test
