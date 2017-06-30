@@ -1,9 +1,13 @@
 package org.pentaho.di.ui.spoon.git;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import org.apache.commons.vfs2.FileObject;
 import org.eclipse.jface.resource.JFaceResources;
@@ -12,6 +16,7 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -31,12 +36,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.core.ConstUI;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
@@ -366,6 +374,82 @@ public class GitController extends AbstractXulEventHandler {
       uiGit.reset( content.getName() );
     }
     fireSourceChanged();
+  }
+
+  public void openFile() {
+    String baseDirectory = determineBaseDirectory();
+    getSelectedUnstagedObjects().stream()
+      .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
+      .forEach( content -> {
+        String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
+        try ( InputStream xmlStream = new FileInputStream( new File( filePath ) ) ) {
+          EngineMetaInterface meta = null;
+          Consumer<EngineMetaInterface> c = null;
+          if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
+            meta = new TransMeta( xmlStream, null, true, null, null );
+            c = meta0 -> Spoon.getInstance().addTransGraph( (TransMeta) meta0 );
+          } else if ( filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
+            meta = new JobMeta( xmlStream, null, null );
+            c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
+          }
+          meta.clearChanged();
+          meta.setFilename( filePath );
+          c.accept( meta );
+          Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
+        } catch ( Exception e ) {
+          e.printStackTrace();
+        }
+      } );
+  }
+
+  public void diff() {
+    String baseDirectory = determineBaseDirectory();
+    getSelectedUnstagedObjects().stream()
+      .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
+      .forEach( content -> {
+        String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
+        EngineMetaInterface metaOld = null, metaNew = null;
+        Consumer<EngineMetaInterface> c = null;
+        try {
+          InputStream xmlStreamOld = uiGit.open( content.getName(), Constants.HEAD );
+          String commitIdOld = uiGit.getCommitId( Constants.HEAD );
+          InputStream xmlStreamNew = new FileInputStream( new File( filePath ) );
+          if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
+            // Use temporary metaOld_ because metaOld will be modified before the 2nd comparison
+            metaOld = new TransMeta( xmlStreamOld, null, true, null, null );
+            metaNew = new TransMeta( xmlStreamNew, null, true, null, null );
+            metaOld = PdiDiff.compareSteps( (TransMeta) metaOld, (TransMeta) metaNew, true );
+            metaNew = PdiDiff.compareSteps( (TransMeta) metaNew, (TransMeta) metaOld, false );
+            ( (TransMeta) metaOld ).setTransversion( "git: " + commitIdOld );
+            ( (TransMeta) metaNew ).setTransversion( "git: WORKINGTREE" );
+            c = meta -> Spoon.getInstance().addTransGraph( (TransMeta) meta );
+          } else if ( filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
+            metaOld = new JobMeta( xmlStreamOld, null, null );
+            metaNew = new JobMeta( xmlStreamNew, null, null );
+            metaOld = PdiDiff.compareJobEntries( (JobMeta) metaOld, (JobMeta) metaNew, true );
+            metaNew = PdiDiff.compareJobEntries( (JobMeta) metaNew, (JobMeta) metaOld, false );
+            ( (JobMeta) metaOld ).setJobversion( "git: " + commitIdOld );
+            ( (JobMeta) metaNew ).setJobversion( "git: WORKINGTREE" );
+            c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
+          }
+          xmlStreamOld.close();
+          xmlStreamNew.close();
+
+          metaOld.clearChanged();
+          metaOld.setName( metaOld.getName() + " (HEAD->Working tree)" );
+          metaOld.setFilename( filePath );
+          c.accept( metaOld );
+          metaNew.clearChanged();
+          metaNew.setName( metaNew.getName() + " (Working tree->HEAD)" );
+          metaNew.setFilename( filePath );
+          c.accept( metaNew );
+          Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
+        } catch ( MissingObjectException e ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "New file" );
+        } catch ( Exception e ) {
+          e.printStackTrace();
+        }
+      } );
   }
 
   public void onDropToStaged( DropEvent event ) throws Exception {

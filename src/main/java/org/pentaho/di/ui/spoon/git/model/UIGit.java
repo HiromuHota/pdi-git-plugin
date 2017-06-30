@@ -29,6 +29,8 @@ import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.ObjectStream;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -47,6 +49,7 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.http.apache.HttpClientConnectionFactory;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FileUtils;
 import org.pentaho.di.repository.ObjectRevision;
@@ -153,6 +156,17 @@ public class UIGit extends XulEventSourceAdapter {
       RevCommit commit = (RevCommit) obj;
       return commit.getFullMessage();
     }
+  }
+
+  /**
+   * Get SHA-1 commit Id
+   * @param revstr: (e.g., HEAD, SHA-1)
+   * @return
+   * @throws Exception
+   */
+  public String getCommitId( String revstr ) throws Exception {
+    final ObjectId id = git.getRepository().resolve( revstr );
+    return id.getName();
   }
 
   /**
@@ -379,6 +393,22 @@ public class UIGit extends XulEventSourceAdapter {
     formatter.format( oldTree, newTree );
     formatter.close();
     return out.toString();
+  }
+
+  public ObjectStream open( String file, String commitId ) throws Exception {
+    ObjectId id = git.getRepository().resolve( commitId );
+    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
+      RevObject obj = rw.parseAny( id );
+      RevCommit commit = (RevCommit) obj;
+      RevTree tree = commit.getTree();
+      try ( TreeWalk tw = new TreeWalk( git.getRepository() ) ) {
+        tw.addTree( tree );
+        tw.setFilter( PathFilter.create( file ) );
+        tw.next();
+        ObjectLoader loader = git.getRepository().open( tw.getObjectId( 0 ) );
+        return loader.openStream();
+      }
+    }
   }
 
   public static Git cloneRepo( String directory, String uri ) throws Exception {
