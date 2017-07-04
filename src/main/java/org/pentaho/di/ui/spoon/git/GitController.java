@@ -518,11 +518,25 @@ public class GitController extends AbstractXulEventHandler {
    * @throws Exception
    */
   public void discard() throws Exception {
-    List<UIFile> contents = getSelectedUnstagedObjects();
-    for ( UIFile content : contents ) {
-      uiGit.checkoutPath( content.getName() );
-    }
-    fireSourceChanged();
+    XulConfirmBox confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
+    confirmBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.Discard" ) );
+    confirmBox.setMessage( "Are you sure?" );
+    confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+    confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
+    confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
+      if ( returnCode.equals( Status.ACCEPT ) ) {
+        try {
+          List<UIFile> contents = getSelectedUnstagedObjects();
+          for ( UIFile content : contents ) {
+            uiGit.checkoutPath( content.getName() );
+          }
+          fireSourceChanged();
+        } catch ( Exception e ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+        }
+      }
+    } );
+    confirmBox.open();
   }
 
   public void pull() {
