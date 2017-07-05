@@ -4,7 +4,12 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Composite;
 import org.pentaho.di.core.EngineMetaInterface;
@@ -18,6 +23,7 @@ import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.XulOverlay;
 import org.pentaho.ui.xul.XulRunner;
+import org.pentaho.ui.xul.containers.XulMenupopup;
 import org.pentaho.ui.xul.containers.XulVbox;
 import org.pentaho.ui.xul.impl.XulEventHandler;
 import org.pentaho.ui.xul.swt.SwtXulRunner;
@@ -59,6 +65,26 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     box = deck.createVBoxCard();
     getUI().setParent( (Composite) box.getManagedObject() );
     getUI().layout();
+
+    /**
+     * Hack: setAccelerator 'CTRL(CMD) + D' to "Data Integration" menu
+     */
+    int mask = 'D';
+    if ( System.getProperty( "KETTLE_CONTEXT_PATH" ) == null ) { // Spoon
+      boolean isMac = System.getProperty( "os.name" ).toLowerCase().indexOf( "mac" ) >= 0;
+      mask += isMac ? SWT.COMMAND : SWT.CTRL;
+    } else { // webSpoon
+      mask += SWT.CTRL;
+    }
+    int keyCode = mask;
+    XulMenupopup menuPopup = (XulMenupopup) Spoon.getInstance().getXulDomContainer().getDocumentRoot().getElementById( "view-perspectives-popup" );
+    MenuManager menuMgr = (MenuManager) menuPopup.getManagedObject();
+    // No guarantee that "Data Integration" gets "menuitem-0" as its ID, but looks ok so far
+    Stream.of( menuMgr.getItems() )
+      .filter( menu -> menu.getId().equals( "menuitem-0" ) ).findFirst().ifPresent( menu -> {
+        IAction action = ( (ActionContributionItem) menu ).getAction();
+        action.setAccelerator( keyCode );
+      } );
   }
 
   @Override
