@@ -335,7 +335,7 @@ public class GitController extends AbstractXulEventHandler {
             setPath( baseDirectory );
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           } catch ( Exception e ) {
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), BaseMessages.getString( PKG, e.getMessage() ) );
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
           }
         }
       } );
@@ -629,11 +629,11 @@ public class GitController extends AbstractXulEventHandler {
     for ( RemoteRefUpdate update : result.getRemoteUpdates() ) {
       if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
-            update.getStatus().toString() );
+            BaseMessages.getString( PKG, "Dialog.Success" ) );
       } else {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
-            update.getStatus().toString() + "\n"
-            + update.getMessage() );
+            update.getStatus().toString()
+            + ( update.getMessage() == null ? "" : "\n" + update.getMessage() ) );
       }
     }
   }
