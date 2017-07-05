@@ -79,12 +79,12 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>4.6.1.201703071140-r</version>
+      <version>${dependency.jgit.revision}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit.http.apache</artifactId>
-      <version>4.6.1.201703071140-r</version>
+      <version>${dependency.jgit.revision}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
@@ -105,7 +105,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit.junit</artifactId>
-      <version>4.6.1.201703071140-r</version>
+      <version>${dependency.jgit.revision}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -118,6 +118,7 @@
   <properties>
     <dependency.pentaho-metadata.revision>7.0.0.0-25</dependency.pentaho-metadata.revision>
     <dependency.kettle.revision>7.0.0.0-25</dependency.kettle.revision>
+    <dependency.jgit.revision>4.6.1.201703071140-r</dependency.jgit.revision>
   </properties>
   <repositories>
     <repository>
