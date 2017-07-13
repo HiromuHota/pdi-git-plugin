@@ -34,17 +34,17 @@ public class DrawDiffOnJobEntryExtensionPoint implements ExtensionPointInterface
         if ( jobMeta.getJobversion() == null ? false : jobMeta.getJobversion().startsWith( "git" ) ) {
           String status = je.getAttribute( ATTR_GIT, ATTR_STATUS );
           Point n = je.getLocation();
-          EImage image = null;
+          String location = "org/pentaho/di/ui/spoon/git/images/";
           if ( status.equals( REMOVED ) ) {
-            image = EImage.FALSE;
+            location += "removed.svg";
           } else if ( status.equals( CHANGED ) ) {
-            image = EImage.STEP_ERROR;
+            location += "changed.svg";
           } else if ( status.equals( ADDED ) ) {
-            image = EImage.TRUE;
+            location += "added.svg";
           } else { // Unchanged
             return;
           }
-          gc.drawImage( image, ( n.x + iconsize ) - ( BasePainter.MINI_ICON_SIZE / 2 ), n.y - ( BasePainter.MINI_ICON_SIZE / 2 ) );
+          gc.drawImage( location, getClass().getClassLoader(), ( n.x + iconsize ) - ( BasePainter.MINI_ICON_SIZE / 2 ), n.y - ( BasePainter.MINI_ICON_SIZE / 2 ) );
         } else {
           je.getAttributesMap().remove( ATTR_GIT );
         }
