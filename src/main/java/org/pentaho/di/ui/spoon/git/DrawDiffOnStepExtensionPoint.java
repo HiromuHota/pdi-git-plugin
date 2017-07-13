@@ -27,6 +27,7 @@ public class DrawDiffOnStepExtensionPoint implements ExtensionPointInterface {
     }
     int iconsize = PropsUI.getInstance().getIconSize();
     TransPainter painter = (TransPainter) object;
+    Point offset = painter.getOffset();
     GCInterface gc = painter.getGc();
     TransMeta transMeta = painter.getTransMeta();
     transMeta.getSteps().stream().filter( step -> step.getAttribute( ATTR_GIT, ATTR_STATUS ) != null )
@@ -45,7 +46,7 @@ public class DrawDiffOnStepExtensionPoint implements ExtensionPointInterface {
           } else { // Unchanged
             return;
           }
-          gc.drawImage( location, getClass().getClassLoader(), ( n.x + iconsize ) - ( BasePainter.MINI_ICON_SIZE / 2 ), n.y - ( BasePainter.MINI_ICON_SIZE / 2 ) );
+          gc.drawImage( location, getClass().getClassLoader(), ( n.x + iconsize + offset.x ) - ( BasePainter.MINI_ICON_SIZE / 2 ), n.y + offset.y - ( BasePainter.MINI_ICON_SIZE / 2 ) );
         } else {
           step.getAttributesMap().remove( ATTR_GIT );
         }

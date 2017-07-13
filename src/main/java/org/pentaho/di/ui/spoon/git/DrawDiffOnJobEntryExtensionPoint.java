@@ -27,6 +27,7 @@ public class DrawDiffOnJobEntryExtensionPoint implements ExtensionPointInterface
     }
     int iconsize = PropsUI.getInstance().getIconSize();
     JobPainter painter = (JobPainter) object;
+    Point offset = painter.getOffset();
     GCInterface gc = painter.getGc();
     JobMeta jobMeta = painter.getJobMeta();
     jobMeta.getJobCopies().stream().filter( je -> je.getAttribute( ATTR_GIT, ATTR_STATUS ) != null )
@@ -44,7 +45,7 @@ public class DrawDiffOnJobEntryExtensionPoint implements ExtensionPointInterface
           } else { // Unchanged
             return;
           }
-          gc.drawImage( location, getClass().getClassLoader(), ( n.x + iconsize ) - ( BasePainter.MINI_ICON_SIZE / 2 ), n.y - ( BasePainter.MINI_ICON_SIZE / 2 ) );
+          gc.drawImage( location, getClass().getClassLoader(), ( n.x + iconsize + offset.x ) - ( BasePainter.MINI_ICON_SIZE / 2 ), n.y + offset.y - ( BasePainter.MINI_ICON_SIZE / 2 ) );
         } else {
           je.getAttributesMap().remove( ATTR_GIT );
         }
