@@ -1,5 +1,14 @@
 # Change Log
 
+## 0.4.0 - 2017-07-13
+### Added
+- "Discard changes in working tree" to the context menu
+- setAccelerator for "Data Integration" menu (CTRL+D)
+- Visual diff
+
+### Fixed
+- Improve messages (e.g., "null" -> empty string)
+
 ## 0.3.2 - 2017-06-22
 ### Fixed
 - Use Apache HTTP Client instead of Sun HTTP client. This fixes the communication with a remote repository via HTTP(S) in EE.
