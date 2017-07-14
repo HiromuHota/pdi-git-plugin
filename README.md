@@ -29,6 +29,28 @@ Switch to the Git perspective
 Stage changed files by drag & drop, write a good commit message, change the author name if necessary, and finally <b>Commit</b>.
 Right-click on a commit pops up a context menu, where you can choose **checkout** to checkout that particular commit.
 
+### Diff
+
+Texual diff will be displayed in the bottom left corner:
+
+- When a commit is selected in the commit history, or
+- When <i>WIP</i> (work-in-progress) is selected in the commit history and an unstaged/untracked files is selected
+
+Visual diff can be displayed by right-clicking on a unstaged/untracked file, then choose **Visual diff**.
+This opens up two tabs: **HEAD -> Working tree** and **Working tree -> HEAD** in the Data Integration perspective.
+
+- HEAD -> Working tree: the difference you see when looking from HEAD (the last committed version) to the working tree (the current, uncommitted version)
+- Working tree -> HEAD:	 vice versa
+
+The difference is represented by the small icon superimposed on the top-right corner on the steps/job entries.
+Each icon means as follows:
+
+- <img src="src/main/resources/org/pentaho/di/ui/spoon/git/images/added.png" width="16">: Added
+- <img src="src/main/resources/org/pentaho/di/ui/spoon/git/images/changed.png" width="16">: Changed
+- <img src="src/main/resources/org/pentaho/di/ui/spoon/git/images/removed.png" width="16">: Removed
+
+Note that even just a x-y location change of step/job entry is recognized as a changed one.
+
 ## Remote
 
 **Tools > Git > Clone Repository** allows you to clone a remote repository to the local file system.
