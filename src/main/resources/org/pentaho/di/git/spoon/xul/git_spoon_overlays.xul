@@ -12,9 +12,15 @@
   <menupopup id="tools-popup">
     <menu id="spoon-tools-menu-git" label="Git">
       <menupopup id="spoon-tools-menu-git-popup">
-
-        <menuitem label="${Git.Clone}" command="gitSpoonMenuController.cloneRepo()" />
-
+        <menu id="spoon-tools-menu-git-repository" label="${Git.Menu.Repository}">
+          <menupopup id="spoon-tools-menu-git-repository-popup">
+            <menuitem label="${Git.Open}" />
+            <menuitem label="${Git.Add}" />
+            <menuitem label="${Git.Remove}" />
+            <menuitem label="${Git.Edit}" />
+            <menuitem label="${Git.Clone}" command="gitSpoonMenuController.cloneRepo()" />
+          </menupopup>
+        </menu>
       </menupopup>
     </menu>
   </menupopup>
