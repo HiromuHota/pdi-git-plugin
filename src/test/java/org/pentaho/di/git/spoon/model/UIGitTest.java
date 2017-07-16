@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git.model;
+package org.pentaho.di.git.spoon.model;
 
 import static org.junit.Assert.*;
 

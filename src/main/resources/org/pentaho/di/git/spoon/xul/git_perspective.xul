@@ -2,8 +2,8 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:pen="http://www.pentaho.org/2008/xul" id="git-perspective" title="Git" orient="vertical" height="600" width="800" onload="gitController.init()">
   <vbox flex="1">
     <hbox>
-            <button id="pull" label="${Git.Pull}" onclick="gitController.pull()" flex="1" image="org/pentaho/di/ui/spoon/git/images/9x9_arrow_down.svg" disabled="true" width="100"/>
-            <button id="push" label="${Git.Push}" onclick="gitController.push()" flex="1" image="org/pentaho/di/ui/spoon/git/images/9x9_arrow_up.svg" disabled="true" width="100"/>
+            <button id="pull" label="${Git.Pull}" onclick="gitController.pull()" flex="1" image="org/pentaho/di/git/spoon/images/9x9_arrow_down.svg" disabled="true" width="100"/>
+            <button id="push" label="${Git.Push}" onclick="gitController.push()" flex="1" image="org/pentaho/di/git/spoon/images/9x9_arrow_up.svg" disabled="true" width="100"/>
       <button id="branchButton" label="${Git.Branch}" onclick="gitController.branch()"  flex="1" disabled="true" width="100"/>
       <button id="mergeButton" label="${Git.Merge}" onclick="gitController.merge()" flex="1" disabled="true" width="100"/>
     </hbox>
@@ -12,27 +12,27 @@
       <hbox>
         <label value="${Git.Directory}:" />
         <label id="path" flex="1"/>
-        <button id="browseButton" onclick="gitController.editPath()" image="org/pentaho/di/ui/spoon/git/images/Edit.svg" disabled="true"/>
+        <button id="browseButton" onclick="gitController.editPath()" image="org/pentaho/di/git/spoon/images/Edit.svg" disabled="true"/>
       </hbox>
       <hbox>
         <label value="${Git.Branch}:" />
         <box id="boxBranch" flex="1"/>
         <label value="${Git.Remote} (origin):" />
         <label id="remote" flex="1"/>
-        <button id="remoteButton" onclick="gitController.editRemote()" image="org/pentaho/di/ui/spoon/git/images/Edit.svg" disabled="true"/>
+        <button id="remoteButton" onclick="gitController.editRemote()" image="org/pentaho/di/git/spoon/images/Edit.svg" disabled="true"/>
       </hbox>
       <splitter flex="1" orient="VERTICAL">
-        <pen:include src="org/pentaho/di/ui/spoon/git/xul/git_revision-table.xul" ignoreroot="true" />
+        <pen:include src="org/pentaho/di/git/spoon/xul/git_revision-table.xul" ignoreroot="true" />
         <textbox id="diff" multiline="true" readonly="true" flex="2"/>
       </splitter>
     </vbox>
     <vbox flex="1">
       <splitter flex="1" orient="VERTICAL">
         <hbox flex="1">
-          <pen:include src="org/pentaho/di/ui/spoon/git/xul/git_unstaged-table.xul" ignoreroot="true" />
+          <pen:include src="org/pentaho/di/git/spoon/xul/git_unstaged-table.xul" ignoreroot="true" />
         </hbox>
         <hbox flex="1">
-          <pen:include src="org/pentaho/di/ui/spoon/git/xul/git_staged-table.xul" ignoreroot="true" />
+          <pen:include src="org/pentaho/di/git/spoon/xul/git_staged-table.xul" ignoreroot="true" />
         </hbox>
         <vbox flex="1">
           <label id="commit-message-label" value="${Git.CommitMessage}:"/>

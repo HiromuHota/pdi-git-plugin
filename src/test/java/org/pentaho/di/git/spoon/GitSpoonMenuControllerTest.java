@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git;
+package org.pentaho.di.git.spoon;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -13,8 +13,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.Spy;
-import org.pentaho.di.ui.spoon.git.dialog.CloneRepositoryDialog;
-import org.pentaho.di.ui.spoon.git.dialog.UsernamePasswordDialog;
+import org.pentaho.di.git.spoon.dialog.CloneRepositoryDialog;
+import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 
 @RunWith( MockitoJUnitRunner.class )
 public class GitSpoonMenuControllerTest extends RepositoryTestCase {

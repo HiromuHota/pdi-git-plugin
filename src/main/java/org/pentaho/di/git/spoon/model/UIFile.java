@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git.model;
+package org.pentaho.di.git.spoon.model;
 
 import org.apache.commons.io.FilenameUtils;
 import org.pentaho.ui.xul.XulEventSourceAdapter;

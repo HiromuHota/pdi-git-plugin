@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git;
+package org.pentaho.di.git.spoon;
 
 import java.io.File;
 
@@ -7,11 +7,11 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.widgets.Shell;
+import org.pentaho.di.git.spoon.dialog.CloneRepositoryDialog;
+import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
+import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.ui.spoon.ISpoonMenuController;
 import org.pentaho.di.ui.spoon.Spoon;
-import org.pentaho.di.ui.spoon.git.dialog.CloneRepositoryDialog;
-import org.pentaho.di.ui.spoon.git.dialog.UsernamePasswordDialog;
-import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.dom.Document;

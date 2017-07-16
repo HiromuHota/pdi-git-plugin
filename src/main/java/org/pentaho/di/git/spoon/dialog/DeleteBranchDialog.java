@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git.dialog;
+package org.pentaho.di.git.spoon.dialog;
 
 import java.util.List;
 
@@ -14,8 +14,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.pentaho.di.git.spoon.GitController;
 import org.pentaho.di.i18n.BaseMessages;
-import org.pentaho.di.ui.spoon.git.GitController;
 
 public class DeleteBranchDialog extends Dialog {
 

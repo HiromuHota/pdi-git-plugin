@@ -1,7 +1,7 @@
-package org.pentaho.di.ui.spoon.git;
+package org.pentaho.di.git.spoon;
 
 import static org.junit.Assert.*;
-import static org.pentaho.di.ui.spoon.git.PdiDiff.*;
+import static org.pentaho.di.git.spoon.PdiDiff.*;
 
 import java.io.File;
 import java.io.FileInputStream;

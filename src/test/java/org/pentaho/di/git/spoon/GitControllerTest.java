@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git;
+package org.pentaho.di.git.spoon;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -17,6 +17,7 @@ import org.eclipse.jgit.api.PullResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.EngineMetaInterface;
+import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryMeta;
@@ -25,7 +26,6 @@ import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
-import org.pentaho.di.ui.spoon.git.model.UIGit;
 import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.components.XulMessageBox;

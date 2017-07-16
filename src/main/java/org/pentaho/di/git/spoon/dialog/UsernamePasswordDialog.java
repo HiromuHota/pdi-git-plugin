@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git.dialog;
+package org.pentaho.di.git.spoon.dialog;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;

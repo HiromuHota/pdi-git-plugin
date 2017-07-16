@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git;
+package org.pentaho.di.git.spoon;
 
 import java.util.Map;
 import java.util.Optional;

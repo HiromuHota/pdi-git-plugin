@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git;
+package org.pentaho.di.git.spoon;
 
 import java.util.ResourceBundle;
 
@@ -35,7 +35,7 @@ public class GitSpoonPlugin implements SpoonPluginInterface, SpoonLifecycleListe
   public void applyToContainer( String category, XulDomContainer container ) throws XulException {
     container.registerClassLoader( getClass().getClassLoader() );
     if ( category.equals( "spoon" ) ) {
-      container.loadOverlay( "org/pentaho/di/ui/spoon/git/xul/git_spoon_overlays.xul", resourceBundle );
+      container.loadOverlay( "org/pentaho/di/git/spoon/xul/git_spoon_overlays.xul", resourceBundle );
       container.addEventHandler( gitSpoonMenuController );
     }
   }

@@ -1,4 +1,4 @@
-package org.pentaho.di.ui.spoon.git;
+package org.pentaho.di.git.spoon;
 
 import java.io.InputStream;
 import java.util.List;
@@ -45,7 +45,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     // Loading Xul Document
     KettleXulLoader loader = new KettleXulLoader();
     loader.registerClassLoader( getClass().getClassLoader() );
-    container = loader.loadXul( "org/pentaho/di/ui/spoon/git/xul/git_perspective.xul", resourceBundle );
+    container = loader.loadXul( "org/pentaho/di/git/spoon/xul/git_perspective.xul", resourceBundle );
 
     // Adding Event Handlers
     controller = new GitController();
