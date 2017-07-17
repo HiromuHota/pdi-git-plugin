@@ -33,7 +33,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
@@ -93,7 +92,6 @@ public class GitController extends AbstractXulEventHandler {
   private XulTree revisionTable;
   private XulTree unstagedTable;
   private XulTree stagedTable;
-  private XulButton browseButton;
   private XulButton remoteButton;
   private XulButton commitButton;
   private XulButton pullButton;
@@ -129,7 +127,6 @@ public class GitController extends AbstractXulEventHandler {
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
     stagedTable = (XulTree) document.getElementById( "staged-table" );
-    browseButton = (XulButton) document.getElementById( "browseButton" );
     remoteButton = (XulButton) document.getElementById( "remoteButton" );
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
@@ -165,7 +162,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setActive() {
-    browseButton.setDisabled( false );
     remoteButton.setDisabled( false );
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
@@ -720,16 +716,6 @@ public class GitController extends AbstractXulEventHandler {
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
-    }
-  }
-
-  public void editPath() throws IllegalArgumentException, InvocationTargetException, XulException {
-    DirectoryDialog dialog = new DirectoryDialog( getShell(), SWT.OPEN );
-    if ( dialog.open() != null ) {
-      uiGit.closeGit();
-      setPath( null );
-      openGit( dialog.getFilterPath() );
-      fireSourceChanged();
     }
   }
 

@@ -13,7 +13,6 @@
       <hbox>
         <label value="${Git.Directory}:" />
         <label id="path" flex="1"/>
-        <button id="browseButton" onclick="gitController.editPath()" image="org/pentaho/di/git/spoon/images/Edit.svg" disabled="true"/>
       </hbox>
       <hbox>
         <label value="${Git.Branch}:" />
