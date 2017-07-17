@@ -83,7 +83,8 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   public void cloneRepo() {
-    CloneRepositoryDialog dialog = getCloneRepositoryDialog();
+    GitRepository repo = new GitRepository();
+    CloneRepositoryDialog dialog = getCloneRepositoryDialog( repo );
     if ( dialog.open() == Window.OK ) {
       if ( !new File( dialog.getDirectory() ).exists() ) {
         showMessageBox( "Error", dialog.getDirectory() + " does not exist" );
@@ -93,9 +94,10 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
       String directory = null;
       try {
         URIish uri = new URIish( url );
-        directory = dialog.getDirectory() + File.separator + uri.getHumanishName();
+        directory = dialog.getDirectory() + File.separator + dialog.getCloneAs();
         Git git = UIGit.cloneRepo( directory, url );
         git.close();
+        saveRepository( repo );
         showMessageBox( "Success", "Success" );
       } catch ( Exception e ) {
         if ( e instanceof TransportException
@@ -136,13 +138,20 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   @VisibleForTesting
-  CloneRepositoryDialog getCloneRepositoryDialog() {
-    return new CloneRepositoryDialog( getShell() );
+  CloneRepositoryDialog getCloneRepositoryDialog( GitRepository repo ) {
+    return new CloneRepositoryDialog( getShell(), repo );
   }
 
   @VisibleForTesting
   UsernamePasswordDialog getUsernamePasswordDialog() {
     return new UsernamePasswordDialog( getShell() );
+  }
+
+  @VisibleForTesting
+  void saveRepository( GitRepository repo ) throws MetaStoreException {
+    IMetaStore metaStore = Spoon.getInstance().getMetaStore();
+    MetaStoreFactory<GitRepository> repoFactory = new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
+    repoFactory.saveElement( repo );
   }
 
   Shell getShell() {

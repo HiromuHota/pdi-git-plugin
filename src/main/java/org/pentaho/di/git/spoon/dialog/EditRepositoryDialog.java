@@ -23,8 +23,9 @@ public class EditRepositoryDialog extends Dialog {
   private Text nameText;
   private Text descText;
   private Text directoryText;
+  private String directory;
 
-  private GitRepository repo;
+  protected GitRepository repo;
 
   public EditRepositoryDialog( Shell parentShell, GitRepository repo ) {
     super( parentShell );
@@ -41,7 +42,6 @@ public class EditRepositoryDialog extends Dialog {
     Label nameLabel = new Label( comp, SWT.RIGHT );
     nameLabel.setText( "Name: " );
     nameText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    nameText.setLayoutData( new GridData( GridData.FILL_HORIZONTAL ) );
     nameText.setText( Const.NVL( repo.getName(), "" ) );
     GridData gridData = new GridData();
     gridData.horizontalAlignment = GridData.FILL;
@@ -55,7 +55,7 @@ public class EditRepositoryDialog extends Dialog {
     descText.setText( Const.NVL( repo.getDescription(), "" ) );
 
     Label directoryLabel = new Label( comp, SWT.RIGHT );
-    directoryLabel.setText( "Path: " );
+    directoryLabel.setText( "Directory: " );
     directoryText = new Text( comp, SWT.SINGLE | SWT.BORDER );
     directoryText.setLayoutData( new GridData( GridData.FILL_HORIZONTAL ) );
     directoryText.setText( Const.NVL( repo.getDirectory(), "" ) );
@@ -79,6 +79,7 @@ public class EditRepositoryDialog extends Dialog {
     repo.setName( nameText.getText() );
     repo.setDescription( descText.getText() );
     repo.setDirectory( directoryText.getText() );
+    directory = directoryText.getText();
     super.okPressed();
   }
 
@@ -86,5 +87,9 @@ public class EditRepositoryDialog extends Dialog {
   public Point getInitialSize() {
     Point point = super.getInitialSize();
     return new Point( 500, point.y );
+  }
+
+  public String getDirectory() {
+    return directory;
   }
 }
