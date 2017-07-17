@@ -8,7 +8,6 @@ import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.gui.BasePainter;
 import org.pentaho.di.core.gui.GCInterface;
 import org.pentaho.di.core.gui.Point;
-import org.pentaho.di.core.gui.PrimitiveGCInterface.EImage;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.JobPainter;

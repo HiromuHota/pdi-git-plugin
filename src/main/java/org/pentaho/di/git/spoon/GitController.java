@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-import org.apache.commons.vfs2.FileObject;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.MergeResult;
@@ -39,7 +38,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
-import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
 import org.pentaho.di.git.spoon.dialog.MergeBranchDialog;
 import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
@@ -48,19 +46,13 @@ import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.repository.Repository;
-import org.pentaho.di.repository.filerep.KettleFileRepository;
-import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.core.ConstUI;
 import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
-import org.pentaho.di.ui.spoon.SpoonPerspective;
-import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
 import org.pentaho.metastore.api.IMetaStore;
-import org.pentaho.metastore.api.exceptions.MetaStoreException;
 import org.pentaho.metastore.persist.MetaStoreFactory;
 import org.pentaho.metastore.util.PentahoDefaults;
 import org.pentaho.ui.xul.XulException;
@@ -173,15 +165,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setActive() {
-//    openGit();
-//    addWidgets();
-    if ( !uiGit.isOpen() ) {
-      return;
-    }
-
-    if ( getRepository() == null ) { // when not connected to a repository
-      browseButton.setDisabled( false );
-    }
+    browseButton.setDisabled( false );
     remoteButton.setDisabled( false );
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
@@ -194,35 +178,6 @@ public class GitController extends AbstractXulEventHandler {
 
     setAuthorName( uiGit.getAuthorName() );
     setCommitMessage( "" );
-
-    try {
-      fireSourceChanged();
-    } catch ( Exception e ) {
-      e.printStackTrace();
-    }
-  }
-
-  public void setInactive() {
-    if ( !uiGit.isOpen() ) {
-      return; // No thing to do
-    }
-
-    browseButton.setDisabled( true );
-    remoteButton.setDisabled( true );
-    commitButton.setDisabled( true );
-    pullButton.setDisabled( true );
-    pushButton.setDisabled( true );
-    branchButton.setDisabled( true );
-    mergeButton.setDisabled( true );
-
-//    uiGit.closeGit();
-    setPath( null );
-
-    try {
-      fireSourceChanged();
-    } catch ( Exception e ) {
-      e.printStackTrace();
-    }
   }
 
   public void openGit() {
@@ -240,8 +195,11 @@ public class GitController extends AbstractXulEventHandler {
       }
       GitRepository repo = repoFactory.loadElement( name );
       openGit( repo.getDirectory() );
-      setActive();
-    } catch ( MetaStoreException e ) {
+      if ( isOpen() ) {
+        setActive();
+        fireSourceChanged();
+      }
+    } catch ( Exception e ) {
       e.printStackTrace();
     }
   }
@@ -304,49 +262,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   @VisibleForTesting
-  String determineBaseDirectory() {
-    if ( getRepository() != null ) { // when connected to a repository
-      if ( getRepository().getRepositoryMeta().getId().equals( KettleFileRepositoryMeta.REPOSITORY_TYPE_ID ) ) {
-        return ( (KettleFileRepository) getRepository() ).getRepositoryMeta().getBaseDirectory();
-      } else {
-        return null; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
-      }
-    } else { // when not connected to a repository
-      // Get the active Kettle file
-      EngineMetaInterface meta = getActiveMeta();
-      if ( meta == null ) { // no file is opened.
-        return null;
-      } else if ( meta.getFilename() == null ) { // not saved yet
-        return null;
-      } else {
-        // Find the git repository for this file
-        String fileName = meta.getFilename();
-        try {
-          FileObject f = KettleVFS.getFileObject( fileName );
-          return uiGit.findGitRepository( f.getURL().toString() );
-        } catch ( Exception e ) {
-          return null;
-        }
-      }
-    }
-  }
-
-  @VisibleForTesting
-  EngineMetaInterface getActiveMeta() {
-    // Get the data integration perspective
-    List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
-    SpoonPerspective mainSpoonPerspective = null;
-    for ( SpoonPerspective perspective : perspectives ) {
-      if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
-        mainSpoonPerspective = perspective;
-        break;
-      }
-    }
-    // Get the active Kettle file
-    return mainSpoonPerspective.getActiveMeta();
-  }
-
-  @VisibleForTesting
   void initGit( final String baseDirectory ) {
     try {
       XulConfirmBox confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
@@ -395,7 +310,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void openFile() {
-    String baseDirectory = determineBaseDirectory();
+    String baseDirectory = uiGit.getDirectory();
     getSelectedUnstagedObjects().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
@@ -421,7 +336,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void diff() {
-    String baseDirectory = determineBaseDirectory();
+    String baseDirectory = uiGit.getDirectory();
     getSelectedUnstagedObjects().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
@@ -865,11 +780,6 @@ public class GitController extends AbstractXulEventHandler {
   @VisibleForTesting
   void setUIGit( UIGit uiGit ) {
     this.uiGit = uiGit;
-  }
-
-  @VisibleForTesting
-  Repository getRepository() {
-    return Spoon.getInstance().rep;
   }
 
   public boolean isOpen() {

@@ -74,6 +74,11 @@ public class UIGit extends XulEventSourceAdapter {
   }
 
   private Git git;
+  private String directory;
+
+  public String getDirectory() {
+    return directory;
+  }
 
   /**
    * Find a Git repository by scanning up the file system tree
@@ -305,10 +310,12 @@ public class UIGit extends XulEventSourceAdapter {
 
   public void initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {
     git = Git.init().setDirectory( new File( baseDirectory ) ).call();
+    directory = baseDirectory;
   }
 
   public void openGit( String baseDirectory ) throws IOException {
     git = Git.open( new File( baseDirectory ) );
+    directory = baseDirectory;
   }
 
   public void closeGit() {
