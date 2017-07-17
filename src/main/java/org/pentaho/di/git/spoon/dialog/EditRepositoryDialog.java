@@ -41,23 +41,23 @@ public class EditRepositoryDialog extends Dialog {
 
     Label nameLabel = new Label( comp, SWT.RIGHT );
     nameLabel.setText( "Name: " );
+    nameLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
     nameText = new Text( comp, SWT.SINGLE | SWT.BORDER );
     nameText.setText( Const.NVL( repo.getName(), "" ) );
-    GridData gridData = new GridData();
-    gridData.horizontalAlignment = GridData.FILL;
-    gridData.horizontalSpan = 2;
-    nameText.setLayoutData( gridData );
+    nameText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
 
     Label descLabel = new Label( comp, SWT.RIGHT );
     descLabel.setText( "Description: " );
+    descLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
     descText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    descText.setLayoutData( gridData );
+    descText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
     descText.setText( Const.NVL( repo.getDescription(), "" ) );
 
     Label directoryLabel = new Label( comp, SWT.RIGHT );
     directoryLabel.setText( "Directory: " );
+    directoryLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
     directoryText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    directoryText.setLayoutData( new GridData( GridData.FILL_HORIZONTAL ) );
+    directoryText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false ) );
     directoryText.setText( Const.NVL( repo.getDirectory(), "" ) );
 
     Button directoryButton = new Button( comp, SWT.PUSH );

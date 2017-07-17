@@ -34,16 +34,15 @@ public class CloneRepositoryDialog extends EditRepositoryDialog {
 
     Label urlLabel = new Label( comp, SWT.RIGHT );
     urlLabel.setText( "Source URL: " );
+    urlLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
     urlText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    GridData gridData = new GridData();
-    gridData.horizontalAlignment = GridData.FILL;
-    gridData.horizontalSpan = 2;
-    urlText.setLayoutData( gridData );
+    urlText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
 
     Label cloneAsLabel = new Label( comp, SWT.RIGHT );
     cloneAsLabel.setText( "Clone As: " );
+    cloneAsLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
     cloneAsText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    cloneAsText.setLayoutData( gridData );
+    cloneAsText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
 
     urlText.addModifyListener( event -> {
       String url = ( (Text) event.widget ).getText();
