@@ -2,6 +2,7 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:pen="http://www.pentaho.org/2008/xul" id="git-perspective" title="Git" orient="vertical" height="600" width="800" onload="gitController.init()">
   <vbox flex="1">
     <hbox>
+      <button id="openButton" label="${Git.Open}" onclick="gitController.openGit()" flex="1" width="100"/>
             <button id="pull" label="${Git.Pull}" onclick="gitController.pull()" flex="1" image="org/pentaho/di/git/spoon/images/9x9_arrow_down.svg" disabled="true" width="100"/>
             <button id="push" label="${Git.Push}" onclick="gitController.push()" flex="1" image="org/pentaho/di/git/spoon/images/9x9_arrow_up.svg" disabled="true" width="100"/>
       <button id="branchButton" label="${Git.Branch}" onclick="gitController.branch()"  flex="1" disabled="true" width="100"/>

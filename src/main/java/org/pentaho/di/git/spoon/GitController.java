@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
@@ -42,6 +43,7 @@ import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
 import org.pentaho.di.git.spoon.dialog.MergeBranchDialog;
 import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
+import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
@@ -51,11 +53,16 @@ import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.core.ConstUI;
+import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.ui.spoon.SpoonPerspective;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
+import org.pentaho.metastore.api.IMetaStore;
+import org.pentaho.metastore.api.exceptions.MetaStoreException;
+import org.pentaho.metastore.persist.MetaStoreFactory;
+import org.pentaho.metastore.util.PentahoDefaults;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
@@ -137,6 +144,7 @@ public class GitController extends AbstractXulEventHandler {
     pushButton = (XulButton) document.getElementById( "push" );
 
     createBindings();
+    addWidgets();
   }
 
   private void createBindings() {
@@ -165,8 +173,8 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setActive() {
-    openGit();
-    addWidgets();
+//    openGit();
+//    addWidgets();
     if ( !uiGit.isOpen() ) {
       return;
     }
@@ -207,7 +215,7 @@ public class GitController extends AbstractXulEventHandler {
     branchButton.setDisabled( true );
     mergeButton.setDisabled( true );
 
-    uiGit.closeGit();
+//    uiGit.closeGit();
     setPath( null );
 
     try {
@@ -217,9 +225,25 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  private void openGit() {
-    String baseDirectory = determineBaseDirectory();
-    openGit( baseDirectory );
+  public void openGit() {
+    IMetaStore metaStore = Spoon.getInstance().getMetaStore();
+    MetaStoreFactory<GitRepository> repoFactory = new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
+
+    try {
+      List<String> names = repoFactory.getElementNames();
+      Collections.sort( names );
+      EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Repository", "Select the repository to open..." );
+      String name = esd.open();
+
+      if ( name == null ) {
+        return;
+      }
+      GitRepository repo = repoFactory.loadElement( name );
+      openGit( repo.getDirectory() );
+      setActive();
+    } catch ( MetaStoreException e ) {
+      e.printStackTrace();
+    }
   }
 
   private void openGit( String baseDirectory ) {
@@ -227,6 +251,7 @@ public class GitController extends AbstractXulEventHandler {
       uiGit.openGit( baseDirectory );
       setPath( baseDirectory );
       setDiff( "" );
+      setBranches();
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
     } catch ( NullPointerException e ) {
@@ -258,16 +283,9 @@ public class GitController extends AbstractXulEventHandler {
               currentIndex++;
             }
           }
-          try {
-            fireSourceChanged();
-            setBranches();
-          } catch ( Exception e1 ) {
-            e1.printStackTrace();
-          }
         }
       } );
     }
-    setBranches();
   }
 
   private void setBranches() {
@@ -852,5 +870,9 @@ public class GitController extends AbstractXulEventHandler {
   @VisibleForTesting
   Repository getRepository() {
     return Spoon.getInstance().rep;
+  }
+
+  public boolean isOpen() {
+    return uiGit.isOpen();
   }
 }

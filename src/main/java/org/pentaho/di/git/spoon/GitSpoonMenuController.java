@@ -55,7 +55,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
 
     List<String> names = repoFactory.getElementNames();
     Collections.sort( names );
-    EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Repository", "Select the repository to edit..." );
+    EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Repository", "Select the repository to remove..." );
     String name = esd.open();
 
     if ( name != null ) {
