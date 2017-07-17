@@ -15,9 +15,9 @@
         <menu id="spoon-tools-menu-git-repository" label="${Git.Menu.Repository}">
           <menupopup id="spoon-tools-menu-git-repository-popup">
             <menuitem label="${Git.Open}" />
-            <menuitem label="${Git.Add}" />
-            <menuitem label="${Git.Remove}" />
-            <menuitem label="${Git.Edit}" />
+            <menuitem label="${Git.Add}" command="gitSpoonMenuController.addRepo()" />
+            <menuitem label="${Git.Remove}" command="gitSpoonMenuController.removeRepo()" />
+            <menuitem label="${Git.Edit}" command="gitSpoonMenuController.editRepo()" />
             <menuitem label="${Git.Clone}" command="gitSpoonMenuController.cloneRepo()" />
           </menupopup>
         </menu>
