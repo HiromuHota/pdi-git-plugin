@@ -12,7 +12,6 @@
       <hbox>
         <label value="${Git.Repository}:" />
         <label id="path" flex="1"/>
-        <button id="openButton" onclick="gitController.openGit()" image="org/pentaho/di/git/spoon/images/Edit.svg"/>
         <label value="${Git.Branch}:" />
         <box id="boxBranch" flex="1"/>
       </hbox>

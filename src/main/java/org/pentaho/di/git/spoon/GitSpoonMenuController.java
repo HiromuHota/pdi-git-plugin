@@ -36,6 +36,10 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
     this.gitController = gitController;
   }
 
+  public void openRepo() {
+    gitController.openGit();
+  }
+
   public void editRemote() {
     gitController.editRemote();
   }
