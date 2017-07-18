@@ -187,7 +187,7 @@ public class GitController extends AbstractXulEventHandler {
         return;
       }
       GitRepository repo = repoFactory.loadElement( name );
-      openGit( repo.getDirectory() );
+      openGit( repo );
       if ( isOpen() ) {
         setActive();
         fireSourceChanged();
@@ -197,14 +197,16 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  private void openGit( String baseDirectory ) {
+  private void openGit( GitRepository repo ) {
+    String baseDirectory = repo.getDirectory();
     try {
       uiGit.openGit( baseDirectory );
-      setPath( baseDirectory );
+      setPath( repo.getName() );
       setDiff( "" );
       setBranches();
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
+      setPath( repo.getName() );
     } catch ( NullPointerException e ) {
       return;
     } catch ( Exception e ) {
@@ -266,7 +268,6 @@ public class GitController extends AbstractXulEventHandler {
         if ( returnCode == Status.ACCEPT ) {
           try {
             uiGit.initGit( baseDirectory );
-            setPath( baseDirectory );
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           } catch ( Exception e ) {
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );

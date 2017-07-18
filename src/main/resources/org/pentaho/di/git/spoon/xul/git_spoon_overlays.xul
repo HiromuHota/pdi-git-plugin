@@ -12,7 +12,7 @@
   <menupopup id="tools-popup">
     <menu id="menu-git" label="Git">
       <menupopup id="menu-git-popup">
-        <menu id="menu-git-repository" label="${Git.Menu.Repository}">
+        <menu id="menu-git-repository" label="${Git.Repository}">
           <menupopup id="menu-git-repository-popup">
             <menuitem label="${Git.Add}" command="gitSpoonMenuController.addRepo()" />
             <menuitem label="${Git.Remove}" command="gitSpoonMenuController.removeRepo()" />
@@ -20,7 +20,7 @@
             <menuitem label="${Git.Clone}" command="gitSpoonMenuController.cloneRepo()" />
           </menupopup>
         </menu>
-        <menu id="menu-git-remote" label="${Git.Menu.Remote}">
+        <menu id="menu-git-remote" label="${Git.Remote}">
           <menupopup id="menu-git-remote-popup">
             <menuitem id="menu-git-remote-setting" label="Setting" command="gitSpoonMenuController.editRemote()" disabled="true"/>
           </menupopup>
