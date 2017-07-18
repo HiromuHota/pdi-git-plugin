@@ -54,6 +54,7 @@ import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.metastore.api.IMetaStore;
 import org.pentaho.metastore.persist.MetaStoreFactory;
 import org.pentaho.metastore.util.PentahoDefaults;
+import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
@@ -92,7 +93,6 @@ public class GitController extends AbstractXulEventHandler {
   private XulTree revisionTable;
   private XulTree unstagedTable;
   private XulTree stagedTable;
-  private XulButton remoteButton;
   private XulButton commitButton;
   private XulButton pullButton;
   private XulButton pushButton;
@@ -102,7 +102,6 @@ public class GitController extends AbstractXulEventHandler {
   private XulTextbox commitMessageTextbox;
 
   private BindingFactory bf = new SwtBindingFactory();
-  private Binding remoteBinding;
   private Binding revisionBinding;
   private Binding unstagedBinding;
   private Binding stagedBinding;
@@ -127,7 +126,6 @@ public class GitController extends AbstractXulEventHandler {
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
     stagedTable = (XulTree) document.getElementById( "staged-table" );
-    remoteButton = (XulButton) document.getElementById( "remoteButton" );
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
     pushButton = (XulButton) document.getElementById( "push" );
@@ -139,7 +137,6 @@ public class GitController extends AbstractXulEventHandler {
   private void createBindings() {
     XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
     XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
-    XulLabel remoteLabel = (XulLabel) document.getElementById( "remote" );
     authorNameTextbox = (XulTextbox) document.getElementById( "author-name" );
     commitMessageTextbox = (XulTextbox) document.getElementById( "commit-message" );
 
@@ -147,7 +144,6 @@ public class GitController extends AbstractXulEventHandler {
     bf.setBindingType( Binding.Type.ONE_WAY );
     bf.createBinding( this, "path", pathLabel, "value" );
     bf.createBinding( this, "diff", diffText, "value" );
-    remoteBinding = bf.createBinding( uiGit, "remote", remoteLabel, "value" );
     revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( uiGit, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( uiGit, "stagedObjects", stagedTable, "elements" );
@@ -162,7 +158,8 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setActive() {
-    remoteButton.setDisabled( false );
+    XulDomContainer mainSpoonContainer = Spoon.getInstance().getXulDomContainer();
+    mainSpoonContainer.getDocumentRoot().getElementById( "menu-git-remote-setting" ).setDisabled( false );
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
@@ -283,7 +280,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
-    remoteBinding.fireSourceChanged();
     revisionBinding.fireSourceChanged();
     unstagedBinding.fireSourceChanged();
     stagedBinding.fireSourceChanged();

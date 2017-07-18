@@ -10,14 +10,19 @@
   </menupopup>
 
   <menupopup id="tools-popup">
-    <menu id="spoon-tools-menu-git" label="Git">
-      <menupopup id="spoon-tools-menu-git-popup">
-        <menu id="spoon-tools-menu-git-repository" label="${Git.Menu.Repository}">
-          <menupopup id="spoon-tools-menu-git-repository-popup">
+    <menu id="menu-git" label="Git">
+      <menupopup id="menu-git-popup">
+        <menu id="menu-git-repository" label="${Git.Menu.Repository}">
+          <menupopup id="menu-git-repository-popup">
             <menuitem label="${Git.Add}" command="gitSpoonMenuController.addRepo()" />
             <menuitem label="${Git.Remove}" command="gitSpoonMenuController.removeRepo()" />
             <menuitem label="${Git.Edit}" command="gitSpoonMenuController.editRepo()" />
             <menuitem label="${Git.Clone}" command="gitSpoonMenuController.cloneRepo()" />
+          </menupopup>
+        </menu>
+        <menu id="menu-git-remote" label="${Git.Menu.Remote}">
+          <menupopup id="menu-git-remote-popup">
+            <menuitem id="menu-git-remote-setting" label="Setting" command="gitSpoonMenuController.editRemote()" disabled="true"/>
           </menupopup>
         </menu>
       </menupopup>

@@ -13,13 +13,8 @@
       <hbox>
         <label value="${Git.Directory}:" />
         <label id="path" flex="1"/>
-      </hbox>
-      <hbox>
         <label value="${Git.Branch}:" />
         <box id="boxBranch" flex="1"/>
-        <label value="${Git.Remote} (origin):" />
-        <label id="remote" flex="1"/>
-        <button id="remoteButton" onclick="gitController.editRemote()" image="org/pentaho/di/git/spoon/images/Edit.svg" disabled="true"/>
       </hbox>
       <splitter flex="1" orient="VERTICAL">
         <pen:include src="org/pentaho/di/git/spoon/xul/git_revision-table.xul" ignoreroot="true" />

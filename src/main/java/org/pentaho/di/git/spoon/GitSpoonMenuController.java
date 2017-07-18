@@ -30,6 +30,16 @@ import com.google.common.annotations.VisibleForTesting;
 
 public class GitSpoonMenuController extends AbstractXulEventHandler implements ISpoonMenuController {
 
+  private GitController gitController;
+
+  public void setGitController( GitController gitController ) {
+    this.gitController = gitController;
+  }
+
+  public void editRemote() {
+    gitController.editRemote();
+  }
+
   @Override
   public void updateMenu( Document doc ) {
   }

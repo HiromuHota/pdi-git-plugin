@@ -24,6 +24,7 @@ public class GitSpoonPlugin implements SpoonPluginInterface, SpoonLifecycleListe
   public GitSpoonPlugin() throws XulException {
     this.perspective = new GitPerspective();
     this.gitSpoonMenuController = new GitSpoonMenuController();
+    gitSpoonMenuController.setGitController( perspective.getController() );
   }
 
   @Override

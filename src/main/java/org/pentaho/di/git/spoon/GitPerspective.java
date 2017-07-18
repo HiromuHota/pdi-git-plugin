@@ -154,4 +154,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     return null;
   }
 
+  public GitController getController() {
+    return this.controller;
+  }
 }
