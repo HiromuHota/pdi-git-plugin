@@ -1,21 +1,20 @@
 <?xml version="1.0"?>
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:pen="http://www.pentaho.org/2008/xul" id="git-perspective" title="Git" orient="vertical" height="600" width="800" onload="gitController.init()">
   <vbox flex="1">
+  <splitter flex="1" orient="HORIZONTAL">
+    <vbox flex="2">
     <hbox>
     <toolbar id="git-toolbar" mode="full">
       <toolbarbutton id="pull" tooltiptext="${Git.Pull}" onclick="gitController.pull()" image="org/pentaho/di/git/spoon/images/pull.svg" disabled="true"/>
       <toolbarbutton id="push" tooltiptext="${Git.Push}" onclick="gitController.push()" image="org/pentaho/di/git/spoon/images/push.svg" disabled="true"/>
       <toolbarbutton id="branch" tooltiptext="${Git.Branch}" image="org/pentaho/di/git/spoon/images/branch.svg" disabled="true" menu="branchContextMenu"/>
+      <toolbarseparator />
     </toolbar>
+    <label value="${Git.Repository}:" />
+    <label id="path" flex="1"/>
+    <label value="${Git.Branch}:" />
+    <box id="boxBranch" flex="1"/>
     </hbox>
-  <splitter flex="1" orient="HORIZONTAL">
-    <vbox flex="2">
-      <hbox>
-        <label value="${Git.Repository}:" />
-        <label id="path" flex="1"/>
-        <label value="${Git.Branch}:" />
-        <box id="boxBranch" flex="1"/>
-      </hbox>
       <splitter flex="1" orient="VERTICAL">
         <pen:include src="org/pentaho/di/git/spoon/xul/git_revision-table.xul" ignoreroot="true" />
         <textbox id="diff" multiline="true" readonly="true" flex="2"/>
