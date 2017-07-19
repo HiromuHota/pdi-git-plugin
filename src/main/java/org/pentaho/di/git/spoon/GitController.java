@@ -97,7 +97,6 @@ public class GitController extends AbstractXulEventHandler {
   private XulButton pullButton;
   private XulButton pushButton;
   private XulButton branchButton;
-  private XulButton mergeButton;
   private XulTextbox authorNameTextbox;
   private XulTextbox commitMessageTextbox;
 
@@ -117,18 +116,13 @@ public class GitController extends AbstractXulEventHandler {
     Text text = (Text) diffText.getManagedObject();
     text.setFont( JFaceResources.getFont( JFaceResources.TEXT_FONT ) );
 
-    // ToolTip
-    branchButton = (SwtButton) document.getElementById( "branchButton" );
-    branchButton.setTooltiptext( BaseMessages.getString( PKG, "Git.ToolTip.Branch" ) );
-    mergeButton = (SwtButton) document.getElementById( "mergeButton" );
-    mergeButton.setTooltiptext( BaseMessages.getString( PKG, "Git.ToolTip.Merge" ) );
-
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
     stagedTable = (XulTree) document.getElementById( "staged-table" );
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
     pushButton = (XulButton) document.getElementById( "push" );
+    branchButton = (XulButton) document.getElementById( "branch" );
 
     createBindings();
     addWidgets();
@@ -164,7 +158,6 @@ public class GitController extends AbstractXulEventHandler {
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
     branchButton.setDisabled( false );
-    mergeButton.setDisabled( false );
 
     commitMessageTextbox.setReadonly( false );
     authorNameTextbox.setReadonly( false );
@@ -646,10 +639,6 @@ public class GitController extends AbstractXulEventHandler {
             + ( update.getMessage() == null ? "" : "\n" + update.getMessage() ) );
       }
     }
-  }
-
-  public void branch() {
-    ConstUI.displayMenu( (XulMenupopup) document.getElementById( "branchContextMenu" ), (Control) branchButton.getManagedObject() );
   }
 
   public void createBranch() throws XulException {

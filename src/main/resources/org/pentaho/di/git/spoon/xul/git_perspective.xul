@@ -2,10 +2,11 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:pen="http://www.pentaho.org/2008/xul" id="git-perspective" title="Git" orient="vertical" height="600" width="800" onload="gitController.init()">
   <vbox flex="1">
     <hbox>
-            <button id="pull" label="${Git.Pull}" onclick="gitController.pull()" flex="1" image="org/pentaho/di/git/spoon/images/9x9_arrow_down.svg" disabled="true" width="100"/>
-            <button id="push" label="${Git.Push}" onclick="gitController.push()" flex="1" image="org/pentaho/di/git/spoon/images/9x9_arrow_up.svg" disabled="true" width="100"/>
-      <button id="branchButton" label="${Git.Branch}" onclick="gitController.branch()"  flex="1" disabled="true" width="100"/>
-      <button id="mergeButton" label="${Git.Merge}" onclick="gitController.merge()" flex="1" disabled="true" width="100"/>
+    <toolbar id="git-toolbar" mode="full">
+      <toolbarbutton id="pull" tooltiptext="${Git.Pull}" onclick="gitController.pull()" image="org/pentaho/di/git/spoon/images/pull.svg" disabled="true"/>
+      <toolbarbutton id="push" tooltiptext="${Git.Push}" onclick="gitController.push()" image="org/pentaho/di/git/spoon/images/push.svg" disabled="true"/>
+      <toolbarbutton id="branch" tooltiptext="${Git.Branch}" image="org/pentaho/di/git/spoon/images/branch.svg" disabled="true" menu="branchContextMenu"/>
+    </toolbar>
     </hbox>
   <splitter flex="1" orient="HORIZONTAL">
     <vbox flex="2">
@@ -46,6 +47,7 @@
 
   <menupopup id="branchContextMenu">
     <menuitem label="${Git.ContextMenu.CreateBranch}" command="gitController.createBranch()"/>
+    <menuitem label="${Git.ContextMenu.MergeBranch}" command="gitController.merge()"/>
     <menuitem label="${Git.ContextMenu.DeleteBranch}" command="gitController.deleteBranch()"/>
   </menupopup>
   <menupopup id="unstagedContextMenu">
