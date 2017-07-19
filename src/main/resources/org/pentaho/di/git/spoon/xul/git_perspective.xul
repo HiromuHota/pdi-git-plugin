@@ -5,15 +5,14 @@
     <vbox flex="2">
     <hbox>
     <toolbar id="git-toolbar" mode="full">
-      <toolbarbutton id="pull" tooltiptext="${Git.Pull}" onclick="gitController.pull()" image="org/pentaho/di/git/spoon/images/pull.svg" disabled="true"/>
-      <toolbarbutton id="push" tooltiptext="${Git.Push}" onclick="gitController.push()" image="org/pentaho/di/git/spoon/images/push.svg" disabled="true"/>
-      <toolbarbutton id="branch" tooltiptext="${Git.Branch}" image="org/pentaho/di/git/spoon/images/branch.svg" disabled="true" menu="branchContextMenu"/>
+      <toolbarbutton id="pull" label="${Git.Pull}" onclick="gitController.pull()" image="org/pentaho/di/git/spoon/images/pull.svg" disabled="true"/>
+      <toolbarbutton id="push" label="${Git.Push}" onclick="gitController.push()" image="org/pentaho/di/git/spoon/images/push.svg" disabled="true"/>
+      <toolbarbutton id="branch" label="${Git.Branch}" image="org/pentaho/di/git/spoon/images/branch.svg" disabled="true" menu="branchContextMenu"/>
       <toolbarseparator />
     </toolbar>
-    <label value="${Git.Repository}:" />
-    <label id="path" flex="1"/>
-    <label value="${Git.Branch}:" />
-    <box id="boxBranch" flex="1"/>
+    <label id="path"/>
+    <label value="/"/>
+    <box id="boxBranch"/>
     </hbox>
       <splitter flex="1" orient="VERTICAL">
         <pen:include src="org/pentaho/di/git/spoon/xul/git_revision-table.xul" ignoreroot="true" />
