@@ -25,12 +25,6 @@ import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
@@ -44,6 +38,7 @@ import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
@@ -56,7 +51,6 @@ import org.pentaho.ui.xul.components.XulLabel;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
-import org.pentaho.ui.xul.containers.XulBox;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.dnd.DropEvent;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
@@ -92,11 +86,10 @@ public class GitController extends AbstractXulEventHandler {
   private XulTextbox commitMessageTextbox;
 
   private BindingFactory bf = new SwtBindingFactory();
+  private Binding pathBinding;
   private Binding revisionBinding;
   private Binding unstagedBinding;
   private Binding stagedBinding;
-
-  private CCombo comboBranch;
 
   public GitController() {
     setName( "gitController" );
@@ -116,7 +109,6 @@ public class GitController extends AbstractXulEventHandler {
     branchButton = (XulButton) document.getElementById( "branch" );
 
     createBindings();
-    addWidgets();
   }
 
   private void createBindings() {
@@ -127,7 +119,7 @@ public class GitController extends AbstractXulEventHandler {
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
-    bf.createBinding( this, "path", pathLabel, "value" );
+    pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
     bf.createBinding( this, "diff", diffText, "value" );
     revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( uiGit, "unstagedObjects", unstagedTable, "elements" );
@@ -165,54 +157,11 @@ public class GitController extends AbstractXulEventHandler {
       e.printStackTrace();
     }
     setActive();
-    setPath( repo.getName() );
-    setBranches();
+    setPath( "Repository: " + repo.getName() + "　/　branch: " + uiGit.getBranch() );
     setDiff( "" );
     setAuthorName( uiGit.getAuthorName() );
     setCommitMessage( "" );
     fireSourceChanged();
-  }
-
-  private void addWidgets() {
-    XulBox boxBranch = (XulBox) document.getElementById( "boxBranch" );
-    ( (Composite) boxBranch.getManagedObject() ).setLayout( new FillLayout() );
-    if ( comboBranch == null ) {
-      comboBranch = new CCombo( (Composite) boxBranch.getManagedObject(), SWT.DROP_DOWN );
-      comboBranch.addSelectionListener( new SelectionAdapter() {
-        @Override
-        public void widgetSelected( SelectionEvent e ) {
-          String branch = ( (CCombo) e.getSource() ).getText();
-          try {
-            uiGit.checkout( branch );
-          } catch ( Exception e1 ) {
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e1.getMessage() );
-            String current = uiGit.getBranch();
-            int currentIndex = 0;
-            for ( String branch2 : uiGit.getBranches() ) {
-              if ( current.equals( branch2 ) ) {
-                comboBranch.select( currentIndex );
-              }
-              currentIndex++;
-            }
-          }
-        }
-      } );
-    }
-  }
-
-  private void setBranches() {
-    comboBranch.removeAll();
-    if ( uiGit.isOpen() ) {
-      String current = uiGit.getBranch();
-      int currentIndex = 0;
-      for ( String branch : uiGit.getBranches() ) {
-        comboBranch.add( branch );
-        if ( current.equals( branch ) ) {
-          currentIndex = comboBranch.getItemCount() - 1;
-        }
-      }
-      comboBranch.select( currentIndex );
-    }
   }
 
   @VisibleForTesting
@@ -241,6 +190,7 @@ public class GitController extends AbstractXulEventHandler {
 
   protected void fireSourceChanged() {
     try {
+      pathBinding.fireSourceChanged();
       revisionBinding.fireSourceChanged();
       unstagedBinding.fireSourceChanged();
       stagedBinding.fireSourceChanged();
@@ -483,7 +433,6 @@ public class GitController extends AbstractXulEventHandler {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     fireSourceChanged();
-    setBranches();
   }
 
   /**
@@ -612,6 +561,13 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
+  public void checkoutBranch() throws Exception {
+    List<String> names = uiGit.getBranches();
+    EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
+    String name = esd.open();
+    uiGit.checkout( name );
+  }
+
   public void createBranch() throws XulException {
     XulPromptBox promptBox = (XulPromptBox) document.createElement( "promptbox" );
     promptBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.CreateBranch" ) );
@@ -623,7 +579,6 @@ public class GitController extends AbstractXulEventHandler {
           uiGit.createBranch( value );
           uiGit.checkout( value );
           fireSourceChanged();
-          setBranches();
         } catch ( Exception e ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
         }
@@ -642,7 +597,6 @@ public class GitController extends AbstractXulEventHandler {
       boolean isForce = dialog.isForce();
       try {
         uiGit.deleteBranch( branch, isForce );
-        setBranches();
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -663,7 +617,6 @@ public class GitController extends AbstractXulEventHandler {
         if ( result.getMergeStatus().isSuccessful() ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           fireSourceChanged();
-          setBranches();
         } else {
           if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
             uiGit.resetHard();
