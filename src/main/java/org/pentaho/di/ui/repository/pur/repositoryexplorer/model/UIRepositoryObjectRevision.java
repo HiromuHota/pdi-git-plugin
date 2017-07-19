@@ -53,7 +53,7 @@ public class UIRepositoryObjectRevision extends XulEventSourceAdapter implements
     Date date = getCreationDate();
     String str = null;
     if ( date != null ) {
-      SimpleDateFormat sdf = new SimpleDateFormat( "d MMM yyyy HH:mm:ss z" );
+      SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssZ" );
       str = sdf.format( date );
     }
     return str;
