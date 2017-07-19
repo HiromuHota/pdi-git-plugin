@@ -39,6 +39,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
 
   private XulDomContainer container;
   private GitController controller;
+  private GitSpoonMenuController gitSpoonMenuController;
   private XulVbox box;
 
   public GitPerspective() throws XulException {
@@ -52,7 +53,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     container.addEventHandler( controller );
     controller.setXulDomContainer( container );
 
-    GitSpoonMenuController gitSpoonMenuController = new GitSpoonMenuController();
+    gitSpoonMenuController = new GitSpoonMenuController();
     gitSpoonMenuController.setGitController( controller );
     container.loadOverlay( "org/pentaho/di/git/spoon/xul/git_perspective_overlays.xul", resourceBundle );
     container.addEventHandler( gitSpoonMenuController );
@@ -125,7 +126,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
       // To nothing
     }
     if ( active && !controller.isOpen() ) {
-      controller.openGit();
+      gitSpoonMenuController.openRepo();
     }
   }
 

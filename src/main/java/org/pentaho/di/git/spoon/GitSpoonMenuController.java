@@ -37,11 +37,23 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   public void openRepo() {
-    gitController.openGit();
-  }
+    IMetaStore metaStore = Spoon.getInstance().getMetaStore();
+    MetaStoreFactory<GitRepository> repoFactory = new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
 
-  public void editRemote() {
-    gitController.editRemote();
+    try {
+      List<String> names = repoFactory.getElementNames();
+      Collections.sort( names );
+      EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Repository", "Select the repository to open..." );
+      String name = esd.open();
+
+      if ( name == null ) {
+        return;
+      }
+      GitRepository repo = repoFactory.loadElement( name );
+      gitController.openGit( repo );
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
   }
 
   @Override

@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
@@ -45,13 +44,9 @@ import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
-import org.pentaho.metastore.api.IMetaStore;
-import org.pentaho.metastore.persist.MetaStoreFactory;
-import org.pentaho.metastore.util.PentahoDefaults;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
@@ -66,6 +61,7 @@ import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.dnd.DropEvent;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
+import org.pentaho.ui.xul.swt.SwtElement;
 import org.pentaho.ui.xul.swt.custom.DialogConstant;
 import org.pentaho.ui.xul.util.XulDialogCallback.Status;
 import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
@@ -160,31 +156,7 @@ public class GitController extends AbstractXulEventHandler {
     setCommitMessage( "" );
   }
 
-  public void openGit() {
-    IMetaStore metaStore = Spoon.getInstance().getMetaStore();
-    MetaStoreFactory<GitRepository> repoFactory = new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
-
-    try {
-      List<String> names = repoFactory.getElementNames();
-      Collections.sort( names );
-      EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Repository", "Select the repository to open..." );
-      String name = esd.open();
-
-      if ( name == null ) {
-        return;
-      }
-      GitRepository repo = repoFactory.loadElement( name );
-      openGit( repo );
-      if ( isOpen() ) {
-        setActive();
-        fireSourceChanged();
-      }
-    } catch ( Exception e ) {
-      e.printStackTrace();
-    }
-  }
-
-  private void openGit( GitRepository repo ) {
+  public void openGit( GitRepository repo ) {
     String baseDirectory = repo.getDirectory();
     try {
       uiGit.openGit( baseDirectory );
@@ -199,6 +171,8 @@ public class GitController extends AbstractXulEventHandler {
     } catch ( Exception e ) {
       e.printStackTrace();
     }
+    setActive();
+    fireSourceChanged();
   }
 
   private void addWidgets() {
@@ -267,10 +241,14 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
-    revisionBinding.fireSourceChanged();
-    unstagedBinding.fireSourceChanged();
-    stagedBinding.fireSourceChanged();
+  protected void fireSourceChanged() {
+    try {
+      revisionBinding.fireSourceChanged();
+      unstagedBinding.fireSourceChanged();
+      stagedBinding.fireSourceChanged();
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
   }
 
   public void addToIndex() throws Exception {
@@ -446,6 +424,7 @@ public class GitController extends AbstractXulEventHandler {
   public void setPath( String path ) {
     this.path = "".equals( path ) ? null : path;
     firePropertyChange( "path", null, path );
+    ( (SwtElement) document.getElementById( "path" ).getParent() ).layout();
   }
 
   public String getDiff() {

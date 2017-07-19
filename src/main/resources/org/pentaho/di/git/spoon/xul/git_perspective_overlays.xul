@@ -16,7 +16,7 @@
         </menu>
         <menu id="menu-git-remote" label="${Git.Remote}">
           <menupopup id="menu-git-remote-popup">
-            <menuitem id="menu-git-remote-setting" label="Setting" command="gitSpoonMenuController.editRemote()" disabled="true"/>
+            <menuitem id="menu-git-remote-setting" label="Setting" command="gitController.editRemote()" disabled="true"/>
           </menupopup>
         </menu>
       </menupopup>
