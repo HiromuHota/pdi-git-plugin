@@ -151,27 +151,25 @@ public class GitController extends AbstractXulEventHandler {
 
     commitMessageTextbox.setReadonly( false );
     authorNameTextbox.setReadonly( false );
-
-    setAuthorName( uiGit.getAuthorName() );
-    setCommitMessage( "" );
   }
 
   public void openGit( GitRepository repo ) {
     String baseDirectory = repo.getDirectory();
     try {
       uiGit.openGit( baseDirectory );
-      setPath( repo.getName() );
-      setDiff( "" );
-      setBranches();
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
-      setPath( repo.getName() );
     } catch ( NullPointerException e ) {
       return;
     } catch ( Exception e ) {
       e.printStackTrace();
     }
     setActive();
+    setPath( repo.getName() );
+    setBranches();
+    setDiff( "" );
+    setAuthorName( uiGit.getAuthorName() );
+    setCommitMessage( "" );
     fireSourceChanged();
   }
 
