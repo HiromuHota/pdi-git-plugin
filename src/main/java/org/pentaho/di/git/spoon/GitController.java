@@ -68,6 +68,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private UIGit uiGit = new UIGit();
   private String path;
+  private String branch;
   private String diff;
   private String authorName;
   private String commitMessage;
@@ -86,7 +87,6 @@ public class GitController extends AbstractXulEventHandler {
   private XulTextbox commitMessageTextbox;
 
   private BindingFactory bf = new SwtBindingFactory();
-  private Binding pathBinding;
   private Binding revisionBinding;
   private Binding unstagedBinding;
   private Binding stagedBinding;
@@ -113,13 +113,15 @@ public class GitController extends AbstractXulEventHandler {
 
   private void createBindings() {
     XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
+    XulLabel branchLabel = (XulLabel) document.getElementById( "branchLabel" );
     XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
     authorNameTextbox = (XulTextbox) document.getElementById( "author-name" );
     commitMessageTextbox = (XulTextbox) document.getElementById( "commit-message" );
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
-    pathBinding = bf.createBinding( this, "path", pathLabel, "value" );
+    bf.createBinding( this, "path", pathLabel, "value" );
+    bf.createBinding( this, "branch", branchLabel, "value" );
     bf.createBinding( this, "diff", diffText, "value" );
     revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( uiGit, "unstagedObjects", unstagedTable, "elements" );
@@ -157,7 +159,8 @@ public class GitController extends AbstractXulEventHandler {
       e.printStackTrace();
     }
     setActive();
-    setPath( "Repository: " + repo.getName() + "　/　branch: " + uiGit.getBranch() );
+    setPath( repo.getName() );
+    setBranch( uiGit.getBranch() );
     setDiff( "" );
     setAuthorName( uiGit.getAuthorName() );
     setCommitMessage( "" );
@@ -190,7 +193,6 @@ public class GitController extends AbstractXulEventHandler {
 
   protected void fireSourceChanged() {
     try {
-      pathBinding.fireSourceChanged();
       revisionBinding.fireSourceChanged();
       unstagedBinding.fireSourceChanged();
       stagedBinding.fireSourceChanged();
@@ -373,6 +375,16 @@ public class GitController extends AbstractXulEventHandler {
     this.path = "".equals( path ) ? null : path;
     firePropertyChange( "path", null, path );
     ( (SwtElement) document.getElementById( "path" ).getParent() ).layout();
+  }
+
+  public String getBranch() {
+    return this.branch;
+  }
+
+  public void setBranch( String branch ) {
+    this.branch = branch;
+    firePropertyChange( "branch", null, branch );
+    ( (SwtElement) document.getElementById( "branchLabel" ).getParent() ).layout();
   }
 
   public String getDiff() {
@@ -565,7 +577,10 @@ public class GitController extends AbstractXulEventHandler {
     List<String> names = uiGit.getBranches();
     EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
     String name = esd.open();
-    uiGit.checkout( name );
+    if ( name != null ) {
+      uiGit.checkout( name );
+      setBranch( name );
+    }
   }
 
   public void createBranch() throws XulException {

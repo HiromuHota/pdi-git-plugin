@@ -13,7 +13,10 @@
       <toolbarbutton id="branch" label="${Git.Branch}" image="org/pentaho/di/git/spoon/images/branch.svg" disabled="true" menu="branchContextMenu"/>
       <toolbarseparator />
     </toolbar>
+    <label value="${Git.Repository}: "/>
     <label id="path"/>
+    <label value="${Git.Branch}: "/>
+    <label id="branchLabel"/>
     </hbox>
       <splitter flex="1" orient="VERTICAL">
         <pen:include src="org/pentaho/di/git/spoon/xul/git_revision-table.xul" ignoreroot="true" />
