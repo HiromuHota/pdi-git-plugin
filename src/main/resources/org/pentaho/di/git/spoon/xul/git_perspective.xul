@@ -5,7 +5,8 @@
     <vbox flex="2">
     <hbox>
     <toolbar id="git-toolbar" mode="full">
-      <toolbarbutton id="git" label="Git" image="org/pentaho/di/git/spoon/images/repository.svg" menu="menu-git-popup"/>
+      <toolbarbutton id="git" label="${Git.Repository}" image="org/pentaho/di/git/spoon/images/repository.svg" menu="menu-git-repository-popup"/>
+      <toolbarbutton id="config" label="Config" image="org/pentaho/di/git/spoon/images/context_menu.svg" onclick="gitController.editRemote()"/>
       <toolbarbutton id="pull" label="${Git.Pull}" onclick="gitController.pull()" image="org/pentaho/di/git/spoon/images/pull.svg" disabled="true"/>
       <toolbarbutton id="push" label="${Git.Push}" onclick="gitController.push()" image="org/pentaho/di/git/spoon/images/push.svg" disabled="true"/>
       <toolbarbutton id="branch" label="${Git.Branch}" image="org/pentaho/di/git/spoon/images/branch.svg" disabled="true" menu="branchContextMenu"/>
@@ -44,7 +45,16 @@
   </splitter>
   </vbox>
 
-  <menupopup id="menu-git-popup"/>
+          <menupopup id="menu-git-repository-popup">
+            <menuitem label="${Git.Open}" command="gitSpoonMenuController.openRepo()" />
+            <menuitem label="${Git.Add}" command="gitSpoonMenuController.addRepo()" />
+            <menuitem label="${Git.Remove}" command="gitSpoonMenuController.removeRepo()" />
+            <menuitem label="${Git.Edit}" command="gitSpoonMenuController.editRepo()" />
+            <menuitem label="${Git.Clone}" command="gitSpoonMenuController.cloneRepo()" />
+          </menupopup>
+          <menupopup id="menu-git-remote-popup">
+            <menuitem id="menu-git-remote-setting" label="Setting" command="gitController.editRemote()" disabled="true"/>
+          </menupopup>
   <menupopup id="branchContextMenu">
     <menuitem label="${Git.ContextMenu.CreateBranch}" command="gitController.createBranch()"/>
     <menuitem label="${Git.ContextMenu.MergeBranch}" command="gitController.merge()"/>
