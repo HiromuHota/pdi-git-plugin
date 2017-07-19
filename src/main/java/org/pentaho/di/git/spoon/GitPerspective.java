@@ -52,6 +52,11 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     container.addEventHandler( controller );
     controller.setXulDomContainer( container );
 
+    GitSpoonMenuController gitSpoonMenuController = new GitSpoonMenuController();
+    gitSpoonMenuController.setGitController( controller );
+    container.loadOverlay( "org/pentaho/di/git/spoon/xul/git_perspective_overlays.xul", resourceBundle );
+    container.addEventHandler( gitSpoonMenuController );
+
     final XulRunner runner = new SwtXulRunner();
     runner.addContainer( container );
     runner.initialize(); //calls any onload events
