@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
@@ -188,7 +189,7 @@ public class UIGit extends XulEventSourceAdapter {
   public List<String> getBranches() {
     List<String> branches = new ArrayList<String>();
     try {
-      for ( Ref ref : git.branchList().call() ) {
+      for ( Ref ref : git.branchList().setListMode( ListMode.ALL ).call() ) {
         branches.add( Repository.shortenRefName( ref.getName() ) );
       }
     } catch ( Exception e ) {
