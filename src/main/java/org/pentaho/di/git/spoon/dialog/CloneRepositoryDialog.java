@@ -1,30 +1,28 @@
 package org.pentaho.di.git.spoon.dialog;
 
+import java.io.File;
+import java.net.URISyntaxException;
 
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.pentaho.di.git.spoon.model.GitRepository;
 
-public class CloneRepositoryDialog extends Dialog {
+public class CloneRepositoryDialog extends EditRepositoryDialog {
 
   private Text urlText;
-  private Text directoryText;
   private String url;
-  private String directory;
+  private Text cloneAsText;
+  private String cloneAs;
 
-  public CloneRepositoryDialog( Shell parentShell ) {
-    super( parentShell );
+  public CloneRepositoryDialog( Shell parentShell, GitRepository repo ) {
+    super( parentShell, repo );
   }
 
   @Override
@@ -36,52 +34,43 @@ public class CloneRepositoryDialog extends Dialog {
 
     Label urlLabel = new Label( comp, SWT.RIGHT );
     urlLabel.setText( "Source URL: " );
+    urlLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
     urlText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    urlText.setLayoutData( new GridData( GridData.FILL_HORIZONTAL ) );
-//    urlText.setSize( new Point( 500, 10 ) ); // Does not work
-    GridData gridData = new GridData();
-    gridData.horizontalAlignment = GridData.FILL;
-    gridData.horizontalSpan = 2;
-    urlText.setLayoutData( gridData );
+    urlText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
 
-    Label directoryLabel = new Label( comp, SWT.RIGHT );
-    directoryLabel.setText( "Destination Path: " );
+    Label cloneAsLabel = new Label( comp, SWT.RIGHT );
+    cloneAsLabel.setText( "Clone As: " );
+    cloneAsLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
+    cloneAsText = new Text( comp, SWT.SINGLE | SWT.BORDER );
+    cloneAsText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
 
-    directoryText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    directoryText.setLayoutData( new GridData( GridData.FILL_HORIZONTAL ) );
-
-    Button directoryButton = new Button( comp, SWT.PUSH );
-    directoryButton.setText( "Browse" );
-    directoryButton.addSelectionListener( new SelectionAdapter() {
-      @Override
-      public void widgetSelected( SelectionEvent e ) {
-        DirectoryDialog dialog = new DirectoryDialog( getShell(), SWT.OPEN );
-        if ( dialog.open() != null ) {
-          directoryText.setText( dialog.getFilterPath() );
-        }
+    urlText.addModifyListener( event -> {
+      String url = ( (Text) event.widget ).getText();
+      URIish uri;
+      try {
+        uri = new URIish( url );
+        cloneAsText.setText( uri.getHumanishName() );
+      } catch ( URISyntaxException e ) {
+        e.printStackTrace();
       }
     } );
+
     return comp;
   }
 
   @Override
   protected void okPressed() {
     url = urlText.getText();
-    directory = directoryText.getText();
+    cloneAs = cloneAsText.getText();
     super.okPressed();
+    repo.setDirectory( getDirectory() + File.separator + cloneAs );
   }
 
   public String getURL() {
     return url;
   }
 
-  public String getDirectory() {
-    return directory;
-  }
-
-  @Override
-  public Point getInitialSize() {
-    Point point = super.getInitialSize();
-    return new Point( 500, point.y );
+  public String getCloneAs() {
+    return cloneAs;
   }
 }

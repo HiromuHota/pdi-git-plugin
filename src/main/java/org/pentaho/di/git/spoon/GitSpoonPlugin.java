@@ -19,11 +19,9 @@ public class GitSpoonPlugin implements SpoonPluginInterface, SpoonLifecycleListe
   private ResourceBundle resourceBundle = new XulSpoonResourceBundle( PKG );
 
   private GitPerspective perspective;
-  private GitSpoonMenuController gitSpoonMenuController;
 
   public GitSpoonPlugin() throws XulException {
     this.perspective = new GitPerspective();
-    this.gitSpoonMenuController = new GitSpoonMenuController();
   }
 
   @Override
@@ -36,7 +34,6 @@ public class GitSpoonPlugin implements SpoonPluginInterface, SpoonLifecycleListe
     container.registerClassLoader( getClass().getClassLoader() );
     if ( category.equals( "spoon" ) ) {
       container.loadOverlay( "org/pentaho/di/git/spoon/xul/git_spoon_overlays.xul", resourceBundle );
-      container.addEventHandler( gitSpoonMenuController );
     }
   }
 

@@ -39,6 +39,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
 
   private XulDomContainer container;
   private GitController controller;
+  private GitSpoonMenuController gitSpoonMenuController;
   private XulVbox box;
 
   public GitPerspective() throws XulException {
@@ -49,8 +50,10 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
 
     // Adding Event Handlers
     controller = new GitController();
+    gitSpoonMenuController = new GitSpoonMenuController();
+    gitSpoonMenuController.setGitController( controller );
     container.addEventHandler( controller );
-    controller.setXulDomContainer( container );
+    container.addEventHandler( gitSpoonMenuController );
 
     final XulRunner runner = new SwtXulRunner();
     runner.addContainer( container );
@@ -120,9 +123,12 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
       // To nothing
     }
     if ( active ) {
-      controller.setActive();
-    } else {
-      controller.setInactive();
+      if ( !controller.isOpen() ) {
+        gitSpoonMenuController.openRepo();
+      }
+      if ( controller.isOpen() ) {
+        controller.fireSourceChanged();
+      }
     }
   }
 
@@ -156,4 +162,7 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     return null;
   }
 
+  public GitController getController() {
+    return this.controller;
+  }
 }

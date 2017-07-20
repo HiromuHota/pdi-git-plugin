@@ -15,6 +15,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.Spy;
 import org.pentaho.di.git.spoon.dialog.CloneRepositoryDialog;
 import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
+import org.pentaho.di.git.spoon.model.GitRepository;
 
 @RunWith( MockitoJUnitRunner.class )
 public class GitSpoonMenuControllerTest extends RepositoryTestCase {
@@ -25,6 +26,8 @@ public class GitSpoonMenuControllerTest extends RepositoryTestCase {
   private CloneRepositoryDialog cloneRepositoryDialog;
   @Mock
   private UsernamePasswordDialog usernamePasswordDialog;
+  @Mock
+  private GitRepository repo;
 
   @Rule
   public TemporaryFolder dstFolder = new TemporaryFolder();
@@ -32,8 +35,9 @@ public class GitSpoonMenuControllerTest extends RepositoryTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    doReturn( cloneRepositoryDialog ).when( controller ).getCloneRepositoryDialog();
+    doReturn( cloneRepositoryDialog ).when( controller ).getCloneRepositoryDialog( any( GitRepository.class ) );
     doReturn( usernamePasswordDialog ).when( controller ).getUsernamePasswordDialog();
+    doNothing().when( controller ).saveRepository( any( GitRepository.class ) );
     doNothing().when( controller ).showMessageBox( anyString(), anyString() );
   }
 

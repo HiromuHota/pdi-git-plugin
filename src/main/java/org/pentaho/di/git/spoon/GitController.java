@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-import org.apache.commons.vfs2.FileObject;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.MergeResult;
@@ -26,36 +25,23 @@ import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
-import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
 import org.pentaho.di.git.spoon.dialog.MergeBranchDialog;
 import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
+import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.repository.Repository;
-import org.pentaho.di.repository.filerep.KettleFileRepository;
-import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.ui.core.ConstUI;
+import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
-import org.pentaho.di.ui.spoon.SpoonPerspective;
-import org.pentaho.di.ui.spoon.SpoonPerspectiveManager;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
@@ -65,14 +51,12 @@ import org.pentaho.ui.xul.components.XulLabel;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
-import org.pentaho.ui.xul.containers.XulBox;
-import org.pentaho.ui.xul.containers.XulMenupopup;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.dnd.DropEvent;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
+import org.pentaho.ui.xul.swt.SwtElement;
 import org.pentaho.ui.xul.swt.custom.DialogConstant;
-import org.pentaho.ui.xul.swt.tags.SwtButton;
 import org.pentaho.ui.xul.util.XulDialogCallback.Status;
 import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
 
@@ -84,6 +68,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private UIGit uiGit = new UIGit();
   private String path;
+  private String branch;
   private String diff;
   private String authorName;
   private String commitMessage;
@@ -94,23 +79,17 @@ public class GitController extends AbstractXulEventHandler {
   private XulTree revisionTable;
   private XulTree unstagedTable;
   private XulTree stagedTable;
-  private XulButton browseButton;
-  private XulButton remoteButton;
   private XulButton commitButton;
   private XulButton pullButton;
   private XulButton pushButton;
   private XulButton branchButton;
-  private XulButton mergeButton;
   private XulTextbox authorNameTextbox;
   private XulTextbox commitMessageTextbox;
 
   private BindingFactory bf = new SwtBindingFactory();
-  private Binding remoteBinding;
   private Binding revisionBinding;
   private Binding unstagedBinding;
   private Binding stagedBinding;
-
-  private CCombo comboBranch;
 
   public GitController() {
     setName( "gitController" );
@@ -121,36 +100,29 @@ public class GitController extends AbstractXulEventHandler {
     Text text = (Text) diffText.getManagedObject();
     text.setFont( JFaceResources.getFont( JFaceResources.TEXT_FONT ) );
 
-    // ToolTip
-    branchButton = (SwtButton) document.getElementById( "branchButton" );
-    branchButton.setTooltiptext( BaseMessages.getString( PKG, "Git.ToolTip.Branch" ) );
-    mergeButton = (SwtButton) document.getElementById( "mergeButton" );
-    mergeButton.setTooltiptext( BaseMessages.getString( PKG, "Git.ToolTip.Merge" ) );
-
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
     stagedTable = (XulTree) document.getElementById( "staged-table" );
-    browseButton = (XulButton) document.getElementById( "browseButton" );
-    remoteButton = (XulButton) document.getElementById( "remoteButton" );
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
     pushButton = (XulButton) document.getElementById( "push" );
+    branchButton = (XulButton) document.getElementById( "branch" );
 
     createBindings();
   }
 
   private void createBindings() {
     XulLabel pathLabel = (XulLabel) document.getElementById( "path" );
+    XulLabel branchLabel = (XulLabel) document.getElementById( "branchLabel" );
     XulTextbox diffText = (XulTextbox) document.getElementById( "diff" );
-    XulLabel remoteLabel = (XulLabel) document.getElementById( "remote" );
     authorNameTextbox = (XulTextbox) document.getElementById( "author-name" );
     commitMessageTextbox = (XulTextbox) document.getElementById( "commit-message" );
 
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
     bf.createBinding( this, "path", pathLabel, "value" );
+    bf.createBinding( this, "branch", branchLabel, "value" );
     bf.createBinding( this, "diff", diffText, "value" );
-    remoteBinding = bf.createBinding( uiGit, "remote", remoteLabel, "value" );
     revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( uiGit, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( uiGit, "stagedObjects", stagedTable, "elements" );
@@ -165,68 +137,20 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setActive() {
-    openGit();
-    addWidgets();
-    if ( !uiGit.isOpen() ) {
-      return;
-    }
-
-    if ( getRepository() == null ) { // when not connected to a repository
-      browseButton.setDisabled( false );
-    }
-    remoteButton.setDisabled( false );
+    document.getElementById( "config" ).setDisabled( false );
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
     branchButton.setDisabled( false );
-    mergeButton.setDisabled( false );
 
     commitMessageTextbox.setReadonly( false );
     authorNameTextbox.setReadonly( false );
-
-    setAuthorName( uiGit.getAuthorName() );
-    setCommitMessage( "" );
-
-    try {
-      fireSourceChanged();
-    } catch ( Exception e ) {
-      e.printStackTrace();
-    }
   }
 
-  public void setInactive() {
-    if ( !uiGit.isOpen() ) {
-      return; // No thing to do
-    }
-
-    browseButton.setDisabled( true );
-    remoteButton.setDisabled( true );
-    commitButton.setDisabled( true );
-    pullButton.setDisabled( true );
-    pushButton.setDisabled( true );
-    branchButton.setDisabled( true );
-    mergeButton.setDisabled( true );
-
-    uiGit.closeGit();
-    setPath( null );
-
-    try {
-      fireSourceChanged();
-    } catch ( Exception e ) {
-      e.printStackTrace();
-    }
-  }
-
-  private void openGit() {
-    String baseDirectory = determineBaseDirectory();
-    openGit( baseDirectory );
-  }
-
-  private void openGit( String baseDirectory ) {
+  public void openGit( GitRepository repo ) {
+    String baseDirectory = repo.getDirectory();
     try {
       uiGit.openGit( baseDirectory );
-      setPath( baseDirectory );
-      setDiff( "" );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
     } catch ( NullPointerException e ) {
@@ -234,98 +158,13 @@ public class GitController extends AbstractXulEventHandler {
     } catch ( Exception e ) {
       e.printStackTrace();
     }
-  }
-
-  private void addWidgets() {
-    XulBox boxBranch = (XulBox) document.getElementById( "boxBranch" );
-    ( (Composite) boxBranch.getManagedObject() ).setLayout( new FillLayout() );
-    if ( comboBranch == null ) {
-      comboBranch = new CCombo( (Composite) boxBranch.getManagedObject(), SWT.DROP_DOWN );
-      comboBranch.addSelectionListener( new SelectionAdapter() {
-        @Override
-        public void widgetSelected( SelectionEvent e ) {
-          String branch = ( (CCombo) e.getSource() ).getText();
-          try {
-            uiGit.checkout( branch );
-          } catch ( Exception e1 ) {
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e1.getMessage() );
-            String current = uiGit.getBranch();
-            int currentIndex = 0;
-            for ( String branch2 : uiGit.getBranches() ) {
-              if ( current.equals( branch2 ) ) {
-                comboBranch.select( currentIndex );
-              }
-              currentIndex++;
-            }
-          }
-          try {
-            fireSourceChanged();
-            setBranches();
-          } catch ( Exception e1 ) {
-            e1.printStackTrace();
-          }
-        }
-      } );
-    }
-    setBranches();
-  }
-
-  private void setBranches() {
-    comboBranch.removeAll();
-    if ( uiGit.isOpen() ) {
-      String current = uiGit.getBranch();
-      int currentIndex = 0;
-      for ( String branch : uiGit.getBranches() ) {
-        comboBranch.add( branch );
-        if ( current.equals( branch ) ) {
-          currentIndex = comboBranch.getItemCount() - 1;
-        }
-      }
-      comboBranch.select( currentIndex );
-    }
-  }
-
-  @VisibleForTesting
-  String determineBaseDirectory() {
-    if ( getRepository() != null ) { // when connected to a repository
-      if ( getRepository().getRepositoryMeta().getId().equals( KettleFileRepositoryMeta.REPOSITORY_TYPE_ID ) ) {
-        return ( (KettleFileRepository) getRepository() ).getRepositoryMeta().getBaseDirectory();
-      } else {
-        return null; // PentahoEnterpriseRepository and KettleDatabaseRepository are not supported.
-      }
-    } else { // when not connected to a repository
-      // Get the active Kettle file
-      EngineMetaInterface meta = getActiveMeta();
-      if ( meta == null ) { // no file is opened.
-        return null;
-      } else if ( meta.getFilename() == null ) { // not saved yet
-        return null;
-      } else {
-        // Find the git repository for this file
-        String fileName = meta.getFilename();
-        try {
-          FileObject f = KettleVFS.getFileObject( fileName );
-          return uiGit.findGitRepository( f.getURL().toString() );
-        } catch ( Exception e ) {
-          return null;
-        }
-      }
-    }
-  }
-
-  @VisibleForTesting
-  EngineMetaInterface getActiveMeta() {
-    // Get the data integration perspective
-    List<SpoonPerspective> perspectives = SpoonPerspectiveManager.getInstance().getPerspectives();
-    SpoonPerspective mainSpoonPerspective = null;
-    for ( SpoonPerspective perspective : perspectives ) {
-      if ( perspective.getId().equals( MainSpoonPerspective.ID ) ) {
-        mainSpoonPerspective = perspective;
-        break;
-      }
-    }
-    // Get the active Kettle file
-    return mainSpoonPerspective.getActiveMeta();
+    setActive();
+    setPath( repo.getName() );
+    setBranch( uiGit.getBranch() );
+    setDiff( "" );
+    setAuthorName( uiGit.getAuthorName() );
+    setCommitMessage( "" );
+    fireSourceChanged();
   }
 
   @VisibleForTesting
@@ -340,7 +179,6 @@ public class GitController extends AbstractXulEventHandler {
         if ( returnCode == Status.ACCEPT ) {
           try {
             uiGit.initGit( baseDirectory );
-            setPath( baseDirectory );
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           } catch ( Exception e ) {
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -353,11 +191,14 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  protected void fireSourceChanged() throws IllegalArgumentException, InvocationTargetException, XulException {
-    remoteBinding.fireSourceChanged();
-    revisionBinding.fireSourceChanged();
-    unstagedBinding.fireSourceChanged();
-    stagedBinding.fireSourceChanged();
+  protected void fireSourceChanged() {
+    try {
+      revisionBinding.fireSourceChanged();
+      unstagedBinding.fireSourceChanged();
+      stagedBinding.fireSourceChanged();
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
   }
 
   public void addToIndex() throws Exception {
@@ -377,7 +218,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void openFile() {
-    String baseDirectory = determineBaseDirectory();
+    String baseDirectory = uiGit.getDirectory();
     getSelectedUnstagedObjects().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
@@ -403,7 +244,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void diff() {
-    String baseDirectory = determineBaseDirectory();
+    String baseDirectory = uiGit.getDirectory();
     getSelectedUnstagedObjects().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
@@ -533,6 +374,17 @@ public class GitController extends AbstractXulEventHandler {
   public void setPath( String path ) {
     this.path = "".equals( path ) ? null : path;
     firePropertyChange( "path", null, path );
+    ( (SwtElement) document.getElementById( "path" ).getParent() ).layout();
+  }
+
+  public String getBranch() {
+    return this.branch;
+  }
+
+  public void setBranch( String branch ) {
+    this.branch = branch;
+    firePropertyChange( "branch", null, branch );
+    ( (SwtElement) document.getElementById( "branchLabel" ).getParent() ).layout();
   }
 
   public String getDiff() {
@@ -593,7 +445,6 @@ public class GitController extends AbstractXulEventHandler {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     fireSourceChanged();
-    setBranches();
   }
 
   /**
@@ -722,8 +573,14 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  public void branch() {
-    ConstUI.displayMenu( (XulMenupopup) document.getElementById( "branchContextMenu" ), (Control) branchButton.getManagedObject() );
+  public void checkoutBranch() throws Exception {
+    List<String> names = uiGit.getBranches();
+    EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
+    String name = esd.open();
+    if ( name != null ) {
+      uiGit.checkout( name );
+      setBranch( name );
+    }
   }
 
   public void createBranch() throws XulException {
@@ -736,8 +593,8 @@ public class GitController extends AbstractXulEventHandler {
         try {
           uiGit.createBranch( value );
           uiGit.checkout( value );
+          setBranch( value );
           fireSourceChanged();
-          setBranches();
         } catch ( Exception e ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
         }
@@ -756,7 +613,6 @@ public class GitController extends AbstractXulEventHandler {
       boolean isForce = dialog.isForce();
       try {
         uiGit.deleteBranch( branch, isForce );
-        setBranches();
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -777,7 +633,6 @@ public class GitController extends AbstractXulEventHandler {
         if ( result.getMergeStatus().isSuccessful() ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           fireSourceChanged();
-          setBranches();
         } else {
           if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
             uiGit.resetHard();
@@ -787,16 +642,6 @@ public class GitController extends AbstractXulEventHandler {
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
-    }
-  }
-
-  public void editPath() throws IllegalArgumentException, InvocationTargetException, XulException {
-    DirectoryDialog dialog = new DirectoryDialog( getShell(), SWT.OPEN );
-    if ( dialog.open() != null ) {
-      uiGit.closeGit();
-      setPath( null );
-      openGit( dialog.getFilterPath() );
-      fireSourceChanged();
     }
   }
 
@@ -849,8 +694,7 @@ public class GitController extends AbstractXulEventHandler {
     this.uiGit = uiGit;
   }
 
-  @VisibleForTesting
-  Repository getRepository() {
-    return Spoon.getInstance().rep;
+  public boolean isOpen() {
+    return uiGit.isOpen();
   }
 }
