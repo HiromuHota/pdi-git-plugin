@@ -122,8 +122,13 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     } catch ( SWTException e ) {
       // To nothing
     }
-    if ( active && !controller.isOpen() ) {
-      gitSpoonMenuController.openRepo();
+    if ( active ) {
+      if ( !controller.isOpen() ) {
+        gitSpoonMenuController.openRepo();
+      }
+      if ( controller.isOpen() ) {
+        controller.fireSourceChanged();
+      }
     }
   }
 

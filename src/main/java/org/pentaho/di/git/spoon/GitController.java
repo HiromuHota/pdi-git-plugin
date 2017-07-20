@@ -137,7 +137,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void setActive() {
-    document.getElementById( "menu-git-remote-setting" ).setDisabled( false );
+    document.getElementById( "config" ).setDisabled( false );
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
@@ -593,6 +593,7 @@ public class GitController extends AbstractXulEventHandler {
         try {
           uiGit.createBranch( value );
           uiGit.checkout( value );
+          setBranch( value );
           fireSourceChanged();
         } catch ( Exception e ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );

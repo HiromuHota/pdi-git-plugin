@@ -125,6 +125,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
         git.close();
         saveRepository( repo );
         showMessageBox( "Success", "Success" );
+        gitController.openGit( repo );
       } catch ( Exception e ) {
         if ( e instanceof TransportException
             && e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
