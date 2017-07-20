@@ -1,11 +1,6 @@
 # Overview
 
-The Git plugin allows you to manage versions of Kettle files without leaving Spoon.
-Local filesystem (whether or not connected as a File Repository) is supported, but neither Pentaho Repository nor Database Repository is.
-
-# System requirements
-
-It's been tested with PDI (CE) of 6.1, 7.0, and 7.1; but it should run on the corresponding version of EE.
+The Git plugin allows you to manage versions of local Kettle files without leaving Spoon.
 
 # How to install
 
@@ -19,10 +14,22 @@ To uninstall, just remove the `pdi-git-plugin` folder.
 # How to use
 
 The Git plugin is provided as a <i>perspective</i> (See [Using Perspectives](https://help.pentaho.com/Documentation/7.1/0L0/0Y0/020)).
-Switch to the Git perspective
+**View > Perspectives > Git** takes you to the Git perspective.
 
-- Whenever you want when connected to a File Repository
-- Only when a Transformation/Job is opened, saved at least once before, and focused when not connected to a File Repository
+## Repository
+
+When you switch to the Git perspective, you will be asked to choose a Git repository out of a list to open.
+To add a repository to the list, go to
+<img src="src/main/resources/org/pentaho/di/git/spoon/images/repository.png" width="16">
+**Repository > Add**.
+
+The information of repositories will be stored in `$HOME/.pentaho/metastore/pentaho/Git Repository/`.
+
+### Config
+
+<img src="src/main/resources/org/pentaho/di/git/spoon/images/context_menu.png" width="16">
+**Config** allows you to configure the opened repository.
+Currently, a remote repository named "origin" can be set.
 
 ## Working with files
 
@@ -45,24 +52,31 @@ This opens up two tabs: **HEAD -> Working tree** and **Working tree -> HEAD** in
 The difference is represented by the small icon superimposed on the top-right corner on the steps/job entries.
 Each icon means as follows:
 
-- <img src="src/main/resources/org/pentaho/di/ui/spoon/git/images/added.png" width="16">: Added
-- <img src="src/main/resources/org/pentaho/di/ui/spoon/git/images/changed.png" width="16">: Changed
-- <img src="src/main/resources/org/pentaho/di/ui/spoon/git/images/removed.png" width="16">: Removed
+- <img src="src/main/resources/org/pentaho/di/git/spoon/images/added.png" width="16">: Added
+- <img src="src/main/resources/org/pentaho/di/git/spoon/images/changed.png" width="16">: Changed
+- <img src="src/main/resources/org/pentaho/di/git/spoon/images/removed.png" width="16">: Removed
 
 Note that even just a x-y location change of step/job entry is recognized as a changed one.
 
 ## Remote
 
-**Tools > Git > Clone Repository** allows you to clone a remote repository to the local file system.
-Currently only `origin` can be set and it is always the source of <b>Pull</b> and the target of <b>Push</b>.
+<img src="src/main/resources/org/pentaho/di/git/spoon/images/pull.png" width="16">
+**Pull** and
+<img src="src/main/resources/org/pentaho/di/git/spoon/images/push.png" width="16">
+**Push**
+allows you to sync between the opened, local repository and the remote one.
 <b>Pull</b> is equivalent of `git fetch; git merge --ff`.
 If an error (e.g., merge conflict) happens, the operation will be just cancelled.
+Note that "origin" is always the source of <b>Pull</b> and the target of <b>Push</b>.
 
 ## Branches
 
-Users can switch between branches.
-Users can create / delete a branch.
-Users can merge a branch into the current one.
+<img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16">
+**Branch** has branch operations: **Checkout** switches between branches, **Create / Delete** can create / delete a branch, **Merge** can merge a branch into the current one.
+
+Switching to a remote branch, say `origin/feature`, gets you in a detached HEAD state.
+Use **Branch > Create** to create a local branch, say `feature`, then you will get out of the state.
+Collectively, they are equivalent of `git checkout origin/feature` then `git checkout -b feature`.
 
 ## FAQ
 
