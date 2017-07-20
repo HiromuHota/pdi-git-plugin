@@ -38,7 +38,7 @@ public class DeleteBranchDialog extends Dialog {
     layout.numColumns = 2;
 
     Label branchLabel = new Label( comp, SWT.RIGHT );
-    branchLabel.setText( BaseMessages.getString( PKG, "Git.Branch" ) );
+    branchLabel.setText( BaseMessages.getString( PKG, "Git.Dialog.Branch.Delete.Message" ) );
     comboBranch = new CCombo( comp, SWT.DROP_DOWN );
     comboBranch.setLayoutData( new GridData( GridData.FILL_HORIZONTAL ) );
     comboBranch.addSelectionListener( new SelectionAdapter() {

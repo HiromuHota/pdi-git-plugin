@@ -587,9 +587,9 @@ public class GitController extends AbstractXulEventHandler {
 
   public void createBranch() throws XulException {
     XulPromptBox promptBox = (XulPromptBox) document.createElement( "promptbox" );
-    promptBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.CreateBranch" ) );
+    promptBox.setTitle( BaseMessages.getString( PKG, "Git.Dialog.Branch.Create.Title" ) );
     promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
-    promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.CreateBranch" ) );
+    promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.Branch.Create.Message" ) );
     promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
       if ( status.equals( Status.ACCEPT ) ) {
         try {
