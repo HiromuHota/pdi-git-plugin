@@ -25,6 +25,7 @@ import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
@@ -159,7 +160,7 @@ public class GitController extends AbstractXulEventHandler {
       e.printStackTrace();
     }
     setActive();
-    setPath( repo.getName() );
+    setPath( repo );
     setBranch( uiGit.getBranch() );
     setDiff( "" );
     setAuthorName( uiGit.getAuthorName() );
@@ -371,8 +372,9 @@ public class GitController extends AbstractXulEventHandler {
     return this.path;
   }
 
-  public void setPath( String path ) {
-    this.path = "".equals( path ) ? null : path;
+  public void setPath( GitRepository repo ) {
+    this.path = repo.getName();
+    ( (Control) document.getElementById( "path" ).getManagedObject() ).setToolTipText( repo.getDirectory() );
     firePropertyChange( "path", null, path );
     ( (SwtElement) document.getElementById( "path" ).getParent() ).layout();
   }
