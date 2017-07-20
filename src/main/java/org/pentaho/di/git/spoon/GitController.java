@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
@@ -576,7 +577,8 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void checkoutBranch() throws Exception {
-    List<String> names = uiGit.getBranches();
+    List<String> names = uiGit.getBranches( ListMode.ALL );
+    names.remove( uiGit.getBranch() );
     EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
     String name = esd.open();
     if ( name != null ) {
@@ -614,6 +616,9 @@ public class GitController extends AbstractXulEventHandler {
     if ( dialog.open() == Window.OK ) {
       String branch = dialog.getSelectedBranch();
       boolean isForce = dialog.isForce();
+      if ( branch == null ) {
+        return;
+      }
       try {
         uiGit.deleteBranch( branch, isForce );
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );

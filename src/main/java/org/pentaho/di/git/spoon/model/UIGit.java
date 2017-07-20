@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
@@ -194,19 +195,28 @@ public class UIGit extends XulEventSourceAdapter {
   }
 
   /**
-   * Get a list of branches
+   * Get a list of local branches
    * @return
    */
   public List<String> getBranches() {
-    List<String> branches = new ArrayList<String>();
+    return getBranches( null );
+  }
+
+  /**
+   * Get a list of branches based on mode
+   * @param mode
+   * @return
+   */
+  public List<String> getBranches( ListMode mode ) {
     try {
-      for ( Ref ref : git.branchList().setListMode( ListMode.ALL ).call() ) {
-        branches.add( Repository.shortenRefName( ref.getName() ) );
-      }
+      return git.branchList().setListMode( mode ).call().stream()
+        .filter( ref -> !ref.getName().endsWith( Constants.HEAD ) )
+        .map( ref -> Repository.shortenRefName( ref.getName() ) )
+        .collect( Collectors.toList() );
     } catch ( Exception e ) {
       e.printStackTrace();
     }
-    return branches;
+    return null;
   }
 
   public String getFullBranch() throws IOException {
