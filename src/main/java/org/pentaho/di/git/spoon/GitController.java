@@ -582,6 +582,7 @@ public class GitController extends AbstractXulEventHandler {
     if ( name != null ) {
       uiGit.checkout( name );
       setBranch( uiGit.getBranch() );
+      fireSourceChanged();
     }
   }
 
