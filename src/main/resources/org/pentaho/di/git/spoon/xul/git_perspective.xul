@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:pen="http://www.pentaho.org/2008/xul" id="git-perspective" title="Git" orient="vertical" height="600" width="800" onload="gitController.init()">
   <vbox flex="1">
-  <splitter flex="1" orient="HORIZONTAL">
-    <vbox flex="2">
     <hbox>
     <toolbar id="git-toolbar" mode="full">
       <toolbarbutton id="git" label="${Git.Repository}" image="org/pentaho/di/git/spoon/images/repository.svg" menu="menu-git-repository-popup"/>
@@ -19,6 +17,8 @@
     <label value="${Git.Branch}: "/>
     <label id="branchLabel"/>
     </hbox>
+  <splitter flex="1" orient="HORIZONTAL">
+    <vbox flex="2">
       <splitter flex="1" orient="VERTICAL">
         <pen:include src="org/pentaho/di/git/spoon/xul/git_revision-table.xul" ignoreroot="true" />
         <textbox id="diff" multiline="true" readonly="true" flex="2"/>
