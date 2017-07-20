@@ -581,7 +581,7 @@ public class GitController extends AbstractXulEventHandler {
     String name = esd.open();
     if ( name != null ) {
       uiGit.checkout( name );
-      setBranch( name );
+      setBranch( uiGit.getBranch() );
     }
   }
 

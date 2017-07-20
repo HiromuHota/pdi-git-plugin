@@ -181,7 +181,13 @@ public class UIGit extends XulEventSourceAdapter {
    */
   public String getBranch() {
     try {
-      return git.getRepository().getBranch();
+      Ref head = git.getRepository().exactRef( Constants.HEAD );
+      String branch = git.getRepository().getBranch();
+      if ( head.getLeaf().getName().equals( Constants.HEAD ) ) { // if detached
+        return Constants.HEAD + " detached at " + branch.substring( 0, 7 );
+      } else {
+        return branch;
+      }
     } catch ( Exception e ) {
       return "";
     }
