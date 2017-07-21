@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.4.1 - 2017-07-20
+### Fixed
+- Fix an issue that visual diff of Kettle files in sub-directories is not shown
+
 ## 0.4.0 - 2017-07-13
 ### Added
 - "Discard changes in working tree" to the context menu

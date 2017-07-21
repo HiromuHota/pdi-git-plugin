@@ -428,6 +428,7 @@ public class UIGit extends XulEventSourceAdapter {
       try ( TreeWalk tw = new TreeWalk( git.getRepository() ) ) {
         tw.addTree( tree );
         tw.setFilter( PathFilter.create( file ) );
+        tw.setRecursive( true );
         tw.next();
         ObjectLoader loader = git.getRepository().open( tw.getObjectId( 0 ) );
         return loader.openStream();
