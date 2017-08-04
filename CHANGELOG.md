@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.5.0 - 2017-08-04
+### Added
+- A concept of "Git Repository" is introduced. No longer need to open a Kettle file in order to open the corresponding Git repository.
+
+### Changed
+- Move **Tools > Git** in the menu to the top toolbar in Git perspective
+
 ## 0.4.1 - 2017-07-20
 ### Fixed
 - Fix an issue that visual diff of Kettle files in sub-directories is not shown
