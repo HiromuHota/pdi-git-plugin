@@ -120,6 +120,10 @@ The host and port should be replaced according to your proxy server.
 
 Proxy Authentication is currently not supported.
 
+### When I checkedout a remote branch, say *origin/develop*, I ended up being in a HEAD detached state. How can I create a local branch?
+
+Please create a branch called *develop*, then you will be out of the HEAD detached state.
+
 # How to compile
 
 ```
