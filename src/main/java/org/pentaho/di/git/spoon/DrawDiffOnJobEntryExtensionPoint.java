@@ -34,7 +34,7 @@ public class DrawDiffOnJobEntryExtensionPoint implements ExtensionPointInterface
         if ( jobMeta.getJobversion() == null ? false : jobMeta.getJobversion().startsWith( "git" ) ) {
           String status = je.getAttribute( ATTR_GIT, ATTR_STATUS );
           Point n = je.getLocation();
-          String location = "org/pentaho/di/ui/spoon/git/images/";
+          String location = "org/pentaho/di/git/spoon/images/";
           if ( status.equals( REMOVED ) ) {
             location += "removed.svg";
           } else if ( status.equals( CHANGED ) ) {

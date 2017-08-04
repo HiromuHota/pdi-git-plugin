@@ -8,7 +8,6 @@ import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.gui.GCInterface;
 import org.pentaho.di.core.gui.Point;
 import org.pentaho.di.core.gui.BasePainter;
-import org.pentaho.di.core.gui.PrimitiveGCInterface.EImage;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.TransPainter;
@@ -35,8 +34,7 @@ public class DrawDiffOnStepExtensionPoint implements ExtensionPointInterface {
         if ( transMeta.getTransversion() == null ? false : transMeta.getTransversion().startsWith( "git" ) ) {
           String status = step.getAttribute( ATTR_GIT, ATTR_STATUS );
           Point n = step.getLocation();
-          EImage image = null;
-          String location = "org/pentaho/di/ui/spoon/git/images/";
+          String location = "org/pentaho/di/git/spoon/images/";
           if ( status.equals( REMOVED ) ) {
             location += "removed.svg";
           } else if ( status.equals( CHANGED ) ) {
