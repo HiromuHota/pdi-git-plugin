@@ -576,15 +576,19 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  public void checkoutBranch() throws Exception {
+  public void checkoutBranch() {
     List<String> names = uiGit.getBranches( ListMode.ALL );
     names.remove( uiGit.getBranch() );
     EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
     String name = esd.open();
     if ( name != null ) {
-      uiGit.checkout( name );
-      setBranch( uiGit.getBranch() );
-      fireSourceChanged();
+      try {
+        uiGit.checkout( name );
+        setBranch( uiGit.getBranch() );
+        fireSourceChanged();
+      } catch ( Exception e ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
     }
   }
 
