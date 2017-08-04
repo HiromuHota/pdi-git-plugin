@@ -16,19 +16,19 @@ To uninstall, just remove the `pdi-git-plugin` folder.
 The Git plugin is provided as a <i>perspective</i> (See [Using Perspectives](https://help.pentaho.com/Documentation/7.1/0L0/0Y0/020)).
 **View > Perspectives > Git** takes you to the Git perspective.
 
-## Repository
+## Git Repository
 
 When you switch to the Git perspective, you will be asked to choose a Git repository out of a list to open.
-To add a repository to the list, go to
+To add a Git repository to the list, go to
 <img src="src/main/resources/org/pentaho/di/git/spoon/images/repository.png" width="16">
-**Repository > Add**.
+**Git Repository > Add**.
 
 The information of repositories will be stored in `$HOME/.pentaho/metastore/pentaho/Git Repository/`.
 
 ### Config
 
 <img src="src/main/resources/org/pentaho/di/git/spoon/images/context_menu.png" width="16">
-**Config** allows you to configure the opened repository.
+**Config** allows you to configure the opened Git repository.
 Currently, a remote repository named "origin" can be set.
 
 ## Working with files
