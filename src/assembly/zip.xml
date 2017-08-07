@@ -9,6 +9,14 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
+      <directory>${basedir}</directory>
+      <outputDirectory>${project.name}</outputDirectory>
+      <includes>
+        <include>version.xml</include>
+        <include>OSS_Licenses.md</include>
+      </includes>
+    </fileSet>
+    <fileSet>
       <directory>${project.build.directory}</directory>
       <outputDirectory>${project.name}</outputDirectory>
       <includes>
