@@ -119,17 +119,22 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
       String url = dialog.getURL();
       String directory = null;
       try {
-        URIish uri = new URIish( url );
         directory = dialog.getDirectory() + File.separator + dialog.getCloneAs();
         Git git = UIGit.cloneRepo( directory, url );
         git.close();
-        saveRepository( repo );
         showMessageBox( "Success", "Success" );
+        saveRepository( repo );
         gitController.openGit( repo );
       } catch ( Exception e ) {
         if ( e instanceof TransportException
             && e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
           cloneRepoWithUsernamePassword( directory, url );
+          try {
+            saveRepository( repo );
+            gitController.openGit( repo );
+          } catch ( MetaStoreException e1 ) {
+            showMessageBox( "Error", e1.getLocalizedMessage() );
+          }
         } else {
           showMessageBox( "Error", e.getLocalizedMessage() );
         }
