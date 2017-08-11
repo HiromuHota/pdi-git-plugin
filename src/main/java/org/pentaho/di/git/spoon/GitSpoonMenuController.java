@@ -7,13 +7,13 @@ import java.util.List;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.git.spoon.dialog.CloneRepositoryDialog;
 import org.pentaho.di.git.spoon.dialog.EditRepositoryDialog;
 import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.UIGit;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.spoon.ISpoonMenuController;
 import org.pentaho.di.ui.spoon.Spoon;
@@ -22,13 +22,18 @@ import org.pentaho.metastore.api.exceptions.MetaStoreException;
 import org.pentaho.metastore.persist.MetaStoreFactory;
 import org.pentaho.metastore.util.PentahoDefaults;
 import org.pentaho.ui.xul.XulException;
+import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.dom.Document;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
+import org.pentaho.ui.xul.util.XulDialogCallback.Status;
+import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
 
 import com.google.common.annotations.VisibleForTesting;
 
 public class GitSpoonMenuController extends AbstractXulEventHandler implements ISpoonMenuController {
+
+  private static final Class<?> PKG = GitController.class;
 
   private GitController gitController;
 
@@ -65,13 +70,25 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
     return "gitSpoonMenuController";
   }
 
-  public void addRepo() throws MetaStoreException {
+  public void addRepo() throws MetaStoreException, XulException {
     IMetaStore metaStore = Spoon.getInstance().getMetaStore();
     MetaStoreFactory<GitRepository> repoFactory = new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
     GitRepository repo = new GitRepository();
     EditRepositoryDialog dialog = new EditRepositoryDialog( getShell(), repo );
     if ( dialog.open() == Window.OK ) {
       repoFactory.saveElement( repo );
+
+      XulConfirmBox confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
+      confirmBox.setTitle( "Success" );
+      confirmBox.setMessage( "Open now?" );
+      confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+      confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
+      confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
+        if ( returnCode == Status.ACCEPT ) {
+          gitController.openGit( repo );
+        }
+      } );
+      confirmBox.open();
     }
   }
 
@@ -86,6 +103,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
 
     if ( name != null ) {
       repoFactory.deleteElement( name );
+      showMessageBox( "Success", "Success" );
     }
   }
 
