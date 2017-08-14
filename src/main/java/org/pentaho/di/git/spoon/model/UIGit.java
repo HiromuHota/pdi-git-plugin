@@ -382,12 +382,12 @@ public class UIGit extends XulEventSourceAdapter {
   }
 
   public String diff( String file, boolean isCached ) throws Exception {
-    OutputStream out = new ByteArrayOutputStream();
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
     git.diff().setOutputStream( out )
       .setPathFilter( PathFilter.create( file ) )
       .setCached( isCached )
       .call();
-    return out.toString();
+    return out.toString( "UTF-8" );
   }
 
   /**
@@ -410,13 +410,13 @@ public class UIGit extends XulEventSourceAdapter {
       }
     }
 
-    OutputStream out = new ByteArrayOutputStream();
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
     DiffFormatter formatter = new DiffFormatter( out );
     formatter.setRepository( git.getRepository() );
     formatter.setDetectRenames( true );
     formatter.format( oldTree, newTree );
     formatter.close();
-    return out.toString();
+    return out.toString( "UTF-8" );
   }
 
   public ObjectStream open( String file, String commitId ) throws Exception {
