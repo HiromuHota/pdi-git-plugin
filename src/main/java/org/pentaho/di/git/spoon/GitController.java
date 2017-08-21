@@ -16,6 +16,7 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
@@ -206,7 +207,11 @@ public class GitController extends AbstractXulEventHandler {
   public void addToIndex() throws Exception {
     List<UIFile> contents = getSelectedUnstagedObjects();
     for ( UIFile content : contents ) {
-      uiGit.add( content.getName() );
+      if ( content.getChangeType() == ChangeType.DELETE ) {
+        uiGit.rm( content.getName() );
+      } else {
+        uiGit.add( content.getName() );
+      }
     }
     fireSourceChanged();
   }
@@ -299,7 +304,11 @@ public class GitController extends AbstractXulEventHandler {
     for ( Object o : event.getDataTransfer().getData() ) {
       if ( o instanceof UIFile ) {
         UIFile content = (UIFile) o;
-        uiGit.add( content.getName() );
+        if ( content.getChangeType() == ChangeType.DELETE ) {
+          uiGit.rm( content.getName() );
+        } else {
+          uiGit.add( content.getName() );
+        }
       }
     }
   }

@@ -8,7 +8,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,6 +24,8 @@ import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.NoFilepatternException;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.Config;
@@ -289,40 +290,45 @@ public class UIGit extends XulEventSourceAdapter {
   }
 
   public List<UIFile> getUnstagedObjects() throws Exception {
-    Set<String> files = new HashSet<String>();
+    List<UIFile> files = new ArrayList<UIFile>();
     try {
       Status status = git.status().call();
-      files.addAll( status.getModified() );
-      files.addAll( status.getUntracked() );
+      status.getUntracked().forEach( name -> {
+        files.add( new UIFile( name, ChangeType.ADD ) );
+      } );
+      status.getModified().forEach( name -> {
+        files.add( new UIFile( name, ChangeType.MODIFY ) );
+      } );
+      status.getMissing().forEach( name -> {
+        files.add( new UIFile( name, ChangeType.DELETE ) );
+      } );
     } catch ( Exception e ) {
       // Do nothing
     }
-    return getObjects( files );
+    return files;
   }
 
   public List<UIFile> getStagedObjects() throws Exception {
-    Set<String> files = new HashSet<String>();
+    List<UIFile> files = new ArrayList<UIFile>();
     try {
       Status status = git.status().call();
-      files.addAll( status.getAdded() );
-      files.addAll( status.getChanged() );
+      status.getAdded().forEach( name -> {
+        files.add( new UIFile( name, ChangeType.ADD ) );
+      } );
+      status.getChanged().forEach( name -> {
+        files.add( new UIFile( name, ChangeType.MODIFY ) );
+      } );
+      status.getRemoved().forEach( name -> {
+        files.add( new UIFile( name, ChangeType.DELETE ) );
+      } );
     } catch ( Exception e ) {
       // Do nothing
     }
-    return getObjects( files );
+    return files;
   }
 
   public boolean hasStagedObjects() throws Exception {
     return getStagedObjects().size() != 0;
-  }
-
-  private List<UIFile> getObjects( Set<String> files ) throws Exception {
-    List<UIFile> objs = new ArrayList<UIFile>();
-    for ( String file : files ) {
-      UIFile obj = new UIFile( file );
-      objs.add( obj );
-    }
-    return objs;
   }
 
   public void initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {
@@ -342,6 +348,10 @@ public class UIGit extends XulEventSourceAdapter {
 
   public DirCache add( String filepattern ) throws Exception {
     return git.add().addFilepattern( filepattern ).call();
+  }
+
+  public DirCache rm( String filepattern ) throws NoFilepatternException, GitAPIException {
+    return git.rm().addFilepattern( filepattern ).call();
   }
 
   public Ref reset( String path ) throws Exception {

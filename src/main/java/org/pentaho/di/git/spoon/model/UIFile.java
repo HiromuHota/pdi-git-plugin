@@ -1,14 +1,16 @@
 package org.pentaho.di.git.spoon.model;
 
-import org.apache.commons.io.FilenameUtils;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.pentaho.ui.xul.XulEventSourceAdapter;
 
 public class UIFile extends XulEventSourceAdapter {
 
   private String name;
+  private ChangeType changeType;
 
-  public UIFile( String name ) {
+  public UIFile( String name, ChangeType changeType ) {
     this.name = name;
+    this.changeType = changeType;
   }
 
   public String getName() {
@@ -19,14 +21,27 @@ public class UIFile extends XulEventSourceAdapter {
     this.name = name;
   }
 
+  public ChangeType getChangeType() {
+    return changeType;
+  }
+
+  public void setChangeType( ChangeType changeType ) {
+    this.changeType = changeType;
+  }
+
   public String getImage() {
-    String ext = FilenameUtils.getExtension( name );
-    if ( "ktr".equalsIgnoreCase( ext ) ) {
-      return "ui/images/transrepo.svg";
-    } else if ( "kjb".equalsIgnoreCase( ext ) ) {
-      return "ui/images/jobrepo.svg";
-    } else {
-      return "";
+    final String location = "org/pentaho/di/git/spoon/images/";
+    switch ( changeType ) {
+      case ADD:
+      case COPY:
+        return location + "added.svg";
+      case MODIFY:
+      case RENAME:
+        return location + "changed.svg";
+      case DELETE:
+        return location + "removed.svg";
+      default:
+        return "";
     }
   }
 }
