@@ -329,7 +329,7 @@ public class UIGit extends XulEventSourceAdapter {
           files.add( new UIFile( name, ChangeType.DELETE ) );
         } );
       } else {
-        List<DiffEntry> diffs = getDiffCommand( commitId )
+        List<DiffEntry> diffs = getDiffCommand( commitId, commitId + "^" )
           .setShowNameAndStatusOnly( true )
           .call();
         RenameDetector rd = new RenameDetector( git.getRepository() );
@@ -421,7 +421,7 @@ public class UIGit extends XulEventSourceAdapter {
 
   public String diff( String file, String commitId ) throws Exception {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    getDiffCommand( commitId )
+    getDiffCommand( commitId, commitId + "^" )
       .setOutputStream( out )
       .setPathFilter( PathFilter.create( file ) )
       .call();
@@ -537,15 +537,17 @@ public class UIGit extends XulEventSourceAdapter {
     return git.checkout().addPath( path ).call();
   }
 
-  private DiffCommand getDiffCommand( String commitId ) throws MissingObjectException, IncorrectObjectTypeException, IOException {
+  private DiffCommand getDiffCommand( String newCommitId, String oldCommitId ) throws MissingObjectException, IncorrectObjectTypeException, IOException {
     RevTree newTree = null;
     RevTree oldTree = null;
+    ObjectId newId = git.getRepository().resolve( newCommitId );
+    ObjectId oldId = git.getRepository().resolve( oldCommitId );
     try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
-      RevCommit commit = rw.parseCommit( ObjectId.fromString( commitId ) );
-      newTree = commit.getTree();
-      if ( commit.getParentCount() != 0 ) {
-        RevCommit parentCommit = rw.parseCommit( commit.getParent( 0 ).getId() );
-        oldTree = parentCommit.getTree();
+      RevCommit newCommit = rw.parseCommit( newId );
+      newTree = newCommit.getTree();
+      if ( oldId != null ) {
+        RevCommit oldCommit = rw.parseCommit( oldId );
+        oldTree = oldCommit.getTree();
       }
     }
     CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
