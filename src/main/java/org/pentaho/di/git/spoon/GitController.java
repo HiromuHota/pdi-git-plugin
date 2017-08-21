@@ -372,7 +372,11 @@ public class GitController extends AbstractXulEventHandler {
   public void setSelectedStagedObjects( List<UIFile> selectedStagedObjects ) throws Exception {
     this.selectedStagedObjects = selectedStagedObjects;
     if ( selectedStagedObjects.size() != 0 ) {
-      setDiff( uiGit.diff( selectedStagedObjects.get( 0 ).getName(), true ) );
+      if ( getSelectedRevisions().get( 0 ).getName().equals( "" ) ) { // WIP
+        setDiff( uiGit.diff( selectedStagedObjects.get( 0 ).getName(), true ) );
+      } else {
+        setDiff( uiGit.diff( selectedStagedObjects.get( 0 ).getName(), getSelectedRevisions().get( 0 ).getName() ) );
+      }
     }
   }
 

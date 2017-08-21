@@ -3,7 +3,6 @@ package org.pentaho.di.git.spoon.model;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jgit.api.CloneCommand;
+import org.eclipse.jgit.api.DiffCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
@@ -30,6 +30,8 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RenameDetector;
 import org.eclipse.jgit.dircache.DirCache;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
@@ -327,27 +329,7 @@ public class UIGit extends XulEventSourceAdapter {
           files.add( new UIFile( name, ChangeType.DELETE ) );
         } );
       } else {
-        RevTree newTree = null;
-        RevTree oldTree = null;
-        try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
-          RevCommit commit = rw.parseCommit( ObjectId.fromString( commitId ) );
-          newTree = commit.getTree();
-          if ( commit.getParentCount() != 0 ) {
-            RevCommit parentCommit = rw.parseCommit( commit.getParent( 0 ).getId() );
-            oldTree = parentCommit.getTree();
-          }
-        }
-        CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
-        try ( ObjectReader oldReader = git.getRepository().newObjectReader() ) {
-          oldTreeParser.reset( oldReader, oldTree.getId() );
-        }
-        CanonicalTreeParser newTreeParser = new CanonicalTreeParser();
-        try ( ObjectReader newReader = git.getRepository().newObjectReader() ) {
-          newTreeParser.reset( newReader, newTree.getId() );
-        }
-        List<DiffEntry> diffs = git.diff()
-          .setOldTree( oldTreeParser )
-          .setNewTree( newTreeParser )
+        List<DiffEntry> diffs = getDiffCommand( commitId )
           .setShowNameAndStatusOnly( true )
           .call();
         RenameDetector rd = new RenameDetector( git.getRepository() );
@@ -433,6 +415,15 @@ public class UIGit extends XulEventSourceAdapter {
     git.diff().setOutputStream( out )
       .setPathFilter( PathFilter.create( file ) )
       .setCached( isCached )
+      .call();
+    return out.toString( "UTF-8" );
+  }
+
+  public String diff( String file, String commitId ) throws Exception {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    getDiffCommand( commitId )
+      .setOutputStream( out )
+      .setPathFilter( PathFilter.create( file ) )
       .call();
     return out.toString( "UTF-8" );
   }
@@ -544,5 +535,29 @@ public class UIGit extends XulEventSourceAdapter {
 
   public Ref checkoutPath( String path ) throws Exception {
     return git.checkout().addPath( path ).call();
+  }
+
+  private DiffCommand getDiffCommand( String commitId ) throws MissingObjectException, IncorrectObjectTypeException, IOException {
+    RevTree newTree = null;
+    RevTree oldTree = null;
+    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
+      RevCommit commit = rw.parseCommit( ObjectId.fromString( commitId ) );
+      newTree = commit.getTree();
+      if ( commit.getParentCount() != 0 ) {
+        RevCommit parentCommit = rw.parseCommit( commit.getParent( 0 ).getId() );
+        oldTree = parentCommit.getTree();
+      }
+    }
+    CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
+    try ( ObjectReader oldReader = git.getRepository().newObjectReader() ) {
+      oldTreeParser.reset( oldReader, oldTree.getId() );
+    }
+    CanonicalTreeParser newTreeParser = new CanonicalTreeParser();
+    try ( ObjectReader newReader = git.getRepository().newObjectReader() ) {
+      newTreeParser.reset( newReader, newTree.getId() );
+    }
+    return git.diff()
+      .setOldTree( oldTreeParser )
+      .setNewTree( newTreeParser );
   }
 }
