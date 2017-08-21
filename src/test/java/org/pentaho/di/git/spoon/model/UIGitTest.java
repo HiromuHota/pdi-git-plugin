@@ -160,7 +160,7 @@ public class UIGitTest extends RepositoryTestCase {
     writeTrashFile( "a.ktr", "content" );
     writeTrashFile( "b.kjb", "content" );
     git.add().addFilepattern( "." ).call();
-    List<UIFile> stagedObjects = uiGit.getStagedObjects();
+    List<UIFile> stagedObjects = uiGit.getStagedObjects( "" );
     assertEquals( 2, stagedObjects.size() );
     assertEquals( "a.ktr", stagedObjects.get( 0 ).getName() );
     assertEquals( "b.kjb", stagedObjects.get( 1 ).getName() );

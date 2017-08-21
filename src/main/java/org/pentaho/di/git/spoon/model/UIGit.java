@@ -26,6 +26,7 @@ import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.Config;
@@ -33,6 +34,7 @@ import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.ObjectStream;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
@@ -52,6 +54,7 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.http.apache.HttpClientConnectionFactory;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FileUtils;
@@ -308,19 +311,47 @@ public class UIGit extends XulEventSourceAdapter {
     return files;
   }
 
-  public List<UIFile> getStagedObjects() throws Exception {
+  public List<UIFile> getStagedObjects( String commitId ) throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
     try {
-      Status status = git.status().call();
-      status.getAdded().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.ADD ) );
-      } );
-      status.getChanged().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.MODIFY ) );
-      } );
-      status.getRemoved().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.DELETE ) );
-      } );
+      if ( commitId.equals( "" ) ) {
+        Status status = git.status().call();
+        status.getAdded().forEach( name -> {
+          files.add( new UIFile( name, ChangeType.ADD ) );
+        } );
+        status.getChanged().forEach( name -> {
+          files.add( new UIFile( name, ChangeType.MODIFY ) );
+        } );
+        status.getRemoved().forEach( name -> {
+          files.add( new UIFile( name, ChangeType.DELETE ) );
+        } );
+      } else {
+        RevTree newTree = null;
+        RevTree oldTree = null;
+        try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
+          RevCommit commit = rw.parseCommit( ObjectId.fromString( commitId ) );
+          newTree = commit.getTree();
+          if ( commit.getParentCount() != 0 ) {
+            RevCommit parentCommit = rw.parseCommit( commit.getParent( 0 ).getId() );
+            oldTree = parentCommit.getTree();
+          }
+        }
+        CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
+        try ( ObjectReader oldReader = git.getRepository().newObjectReader() ) {
+          oldTreeParser.reset( oldReader, oldTree.getId() );
+        }
+        CanonicalTreeParser newTreeParser = new CanonicalTreeParser();
+        try ( ObjectReader newReader = git.getRepository().newObjectReader() ) {
+          newTreeParser.reset( newReader, newTree.getId() );
+        }
+        List<DiffEntry> diffs = git.diff()
+          .setOldTree( oldTreeParser )
+          .setNewTree( newTreeParser )
+          .call();
+        diffs.forEach( diff -> {
+          files.add( new UIFile( diff.getNewPath(), diff.getChangeType() ) );
+        } );
+      }
     } catch ( Exception e ) {
       // Do nothing
     }
@@ -328,7 +359,7 @@ public class UIGit extends XulEventSourceAdapter {
   }
 
   public boolean hasStagedObjects() throws Exception {
-    return getStagedObjects().size() != 0;
+    return getStagedObjects( "" ).size() != 0;
   }
 
   public void initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {
