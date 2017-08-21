@@ -127,7 +127,7 @@ public class GitController extends AbstractXulEventHandler {
     bf.createBinding( this, "branch", branchLabel, "value" );
     bf.createBinding( this, "diff", diffText, "value" );
     revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
-    unstagedBinding = bf.createBinding( uiGit, "unstagedObjects", unstagedTable, "elements" );
+    unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
 
     bf.createBinding( revisionTable, "selectedItems", this, "selectedRevisions" );
@@ -349,6 +349,7 @@ public class GitController extends AbstractXulEventHandler {
         commitMessageTextbox.setReadonly( true );
         commitButton.setDisabled( true );
       }
+      unstagedBinding.fireSourceChanged();
       stagedBinding.fireSourceChanged();
     }
   }
@@ -425,6 +426,23 @@ public class GitController extends AbstractXulEventHandler {
   public void setCommitMessage( String commitMessage ) {
     this.commitMessage = commitMessage;
     firePropertyChange( "commitMessage", null, commitMessage );
+  }
+
+  public List<UIFile> getUnstagedObjects() throws Exception {
+    List<UIRepositoryObjectRevision> revisions = getSelectedRevisions();
+    if ( revisions == null ) { // when Spoon is starting
+      return null;
+    }
+    if ( revisions.isEmpty() ) {
+      return uiGit.getUnstagedObjects();
+    } else {
+      UIRepositoryObjectRevision revision = revisions.iterator().next();
+      if ( revision.getName().equals( "" ) ) { // WIP
+        return uiGit.getUnstagedObjects();
+      } else {
+        return null;
+      }
+    }
   }
 
   public List<UIFile> getStagedObjects() throws Exception {
