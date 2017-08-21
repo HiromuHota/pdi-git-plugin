@@ -28,6 +28,7 @@ import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.RenameDetector;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ConfigConstants;
@@ -347,9 +348,14 @@ public class UIGit extends XulEventSourceAdapter {
         List<DiffEntry> diffs = git.diff()
           .setOldTree( oldTreeParser )
           .setNewTree( newTreeParser )
+          .setShowNameAndStatusOnly( true )
           .call();
+        RenameDetector rd = new RenameDetector( git.getRepository() );
+        rd.addAll( diffs );
+        diffs = rd.compute();
         diffs.forEach( diff -> {
-          files.add( new UIFile( diff.getNewPath(), diff.getChangeType() ) );
+          files.add( new UIFile( diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath() : diff.getNewPath(),
+              diff.getChangeType() ) );
         } );
       }
     } catch ( Exception e ) {
