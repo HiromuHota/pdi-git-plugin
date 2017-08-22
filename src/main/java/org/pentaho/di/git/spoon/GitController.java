@@ -333,7 +333,7 @@ public class GitController extends AbstractXulEventHandler {
     this.selectedRevisions = selectedRevisions;
     if ( selectedRevisions.size() != 0 ) {
       if ( getSelectedRevisions().get( 0 ).getName().equals( "" ) ) { //When WIP is selected
-        setDiff( "" );
+        setDiff( uiGit.diff( UIGit.WORKINGTREE, Constants.HEAD ) );
         setAuthorName( uiGit.getAuthorName() );
         authorNameTextbox.setReadonly( false );
         setCommitMessage( "" );
