@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.5.1 - 2017-08-22
+### Added
+- Add version.xml and OSS_Licenses.md to the assemply zip
+
+### Changed
+- Save the repository information to metastore after cloneRepoWithUsernamePassword
+
+### Fixed
+- Show a confirmation dialog (after adding/deleting a repository)
+- Prevent the texual diff from getting garbled (e.g., when Japanese)
+
 ## 0.5.0 - 2017-08-04
 ### Added
 - A concept of "Git Repository" is introduced. No longer need to open a Kettle file in order to open the corresponding Git repository.
