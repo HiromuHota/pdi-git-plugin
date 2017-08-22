@@ -30,8 +30,7 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RenameDetector;
 import org.eclipse.jgit.dircache.DirCache;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.dircache.DirCacheIterator;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
@@ -57,7 +56,9 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.http.apache.HttpClientConnectionFactory;
+import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FileUtils;
@@ -82,6 +83,8 @@ public class UIGit extends XulEventSourceAdapter {
     HttpTransport.setConnectionFactory( new HttpClientConnectionFactory() );
   }
 
+  public static final String WORKINGTREE = "WORKINGTREE";
+  public static final String INDEX = "INDEX";
   private Git git;
   private String directory;
 
@@ -419,9 +422,17 @@ public class UIGit extends XulEventSourceAdapter {
     return out.toString( "UTF-8" );
   }
 
-  public String diff( String file, String commitId ) throws Exception {
+  public String diff( String newCommitId, String oldCommitId ) throws Exception {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    getDiffCommand( commitId, commitId + "^" )
+    getDiffCommand( newCommitId, oldCommitId )
+      .setOutputStream( out )
+      .call();
+    return out.toString( "UTF-8" );
+  }
+
+  public String diff( String file, String newCommitId, String oldCommitId ) throws Exception {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    getDiffCommand( newCommitId, oldCommitId )
       .setOutputStream( out )
       .setPathFilter( PathFilter.create( file ) )
       .call();
@@ -537,29 +548,27 @@ public class UIGit extends XulEventSourceAdapter {
     return git.checkout().addPath( path ).call();
   }
 
-  private DiffCommand getDiffCommand( String newCommitId, String oldCommitId ) throws MissingObjectException, IncorrectObjectTypeException, IOException {
-    RevTree newTree = null;
-    RevTree oldTree = null;
-    ObjectId newId = git.getRepository().resolve( newCommitId );
-    ObjectId oldId = git.getRepository().resolve( oldCommitId );
-    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
-      RevCommit newCommit = rw.parseCommit( newId );
-      newTree = newCommit.getTree();
-      if ( oldId != null ) {
-        RevCommit oldCommit = rw.parseCommit( oldId );
-        oldTree = oldCommit.getTree();
+  private DiffCommand getDiffCommand( String newCommitId, String oldCommitId ) throws Exception {
+    return git.diff()
+      .setOldTree( getTreeIterator( oldCommitId ) )
+      .setNewTree( getTreeIterator( newCommitId ) );
+  }
+
+  private AbstractTreeIterator getTreeIterator( String commitId ) throws Exception {
+    AbstractTreeIterator treeIterator;
+    if ( commitId.equals( WORKINGTREE ) ) {
+      treeIterator = new FileTreeIterator( git.getRepository() );
+    } else if ( commitId.equals( INDEX ) ) {
+      treeIterator = new DirCacheIterator( git.getRepository().readDirCache() );
+    } else {
+      treeIterator = new CanonicalTreeParser();
+      try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
+        RevTree tree = rw.parseTree( git.getRepository().resolve( commitId ) );
+        try ( ObjectReader reader = git.getRepository().newObjectReader() ) {
+          ( (CanonicalTreeParser) treeIterator ).reset( reader, tree.getId() );
+        }
       }
     }
-    CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
-    try ( ObjectReader oldReader = git.getRepository().newObjectReader() ) {
-      oldTreeParser.reset( oldReader, oldTree.getId() );
-    }
-    CanonicalTreeParser newTreeParser = new CanonicalTreeParser();
-    try ( ObjectReader newReader = git.getRepository().newObjectReader() ) {
-      newTreeParser.reset( newReader, newTree.getId() );
-    }
-    return git.diff()
-      .setOldTree( oldTreeParser )
-      .setNewTree( newTreeParser );
+    return treeIterator;
   }
 }

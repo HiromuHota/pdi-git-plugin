@@ -375,7 +375,9 @@ public class GitController extends AbstractXulEventHandler {
       if ( getSelectedRevisions().get( 0 ).getName().equals( "" ) ) { // WIP
         setDiff( uiGit.diff( selectedStagedObjects.get( 0 ).getName(), true ) );
       } else {
-        setDiff( uiGit.diff( selectedStagedObjects.get( 0 ).getName(), getSelectedRevisions().get( 0 ).getName() ) );
+        setDiff( uiGit.diff( selectedStagedObjects.get( 0 ).getName(),
+            getSelectedRevisions().get( 0 ).getName(),
+            getSelectedRevisions().get( 0 ).getName() + "^" ) );
       }
     }
   }
