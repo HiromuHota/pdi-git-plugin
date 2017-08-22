@@ -3,9 +3,12 @@ package org.pentaho.di.git.spoon.model;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
@@ -75,10 +78,7 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testGetBranches() throws Exception {
-    // commit something
-    writeTrashFile( "Test.txt", "Hello world" );
-    git.add().addFilepattern( "Test.txt" ).call();
-    git.commit().setMessage( "initial commit" ).call();
+    initialCommit();
 
     assertEquals( Constants.MASTER, uiGit.getBranches().get( 0 ) );
   }
@@ -140,9 +140,7 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testGetRevisions() throws Exception {
-    writeTrashFile( "Test.txt", "Hello world" );
-    git.add().addFilepattern( "Test.txt" ).call();
-    git.commit().setMessage( "initial commit" ).call();
+    initialCommit();
     UIRepositoryObjectRevisions revisions = uiGit.getRevisions();
     assertEquals( 1, revisions.size() );
   }
@@ -314,10 +312,7 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testShow() throws Exception {
-    // Make the initial commit
-    writeTrashFile( "Test.txt", "Hello world" );
-    git.add().addFilepattern( "Test.txt" ).call();
-    RevCommit commit = git.commit().setMessage( "initial commit" ).call();
+    RevCommit commit = initialCommit();
 
     String diff = uiGit.show( commit.getId().name() );
     assertTrue( diff.contains( "Hello world" ) );
@@ -332,11 +327,18 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
+  public void testOpen() throws Exception {
+    RevCommit commit = initialCommit();
+
+    InputStream inputStream = uiGit.open( "Test.txt", commit.getName() );
+    StringWriter writer = new StringWriter();
+    IOUtils.copy( inputStream, writer, "UTF-8" );
+    assertEquals( "Hello world", writer.toString() );
+  }
+
+  @Test
   public void testCheckout() throws Exception {
-    // commit something
-    writeTrashFile( "Test.txt", "Hello world" );
-    git.add().addFilepattern( "Test.txt" ).call();
-    git.commit().setMessage( "initial commit" ).call();
+    initialCommit();
 
     git.branchCreate().setName( "develop" ).call();
     uiGit.checkout( "master" );
@@ -363,10 +365,7 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testCreateDeleteBranch() throws Exception {
-    // commit something
-    writeTrashFile( "Test.txt", "Hello world" );
-    git.add().addFilepattern( "Test.txt" ).call();
-    git.commit().setMessage( "initial commit" ).call();
+    initialCommit();
 
     // create a branch
     Ref ref = uiGit.createBranch( "test" );
@@ -376,5 +375,11 @@ public class UIGitTest extends RepositoryTestCase {
     List<String> deleted = uiGit.deleteBranch( "test", true );
     assertEquals( 1, deleted.size() );
     assertEquals( Constants.R_HEADS + "test", deleted.get( 0 ) );
+  }
+
+  private RevCommit initialCommit() throws Exception {
+    writeTrashFile( "Test.txt", "Hello world" );
+    git.add().addFilepattern( "Test.txt" ).call();
+    return git.commit().setMessage( "initial commit" ).call();
   }
 }
