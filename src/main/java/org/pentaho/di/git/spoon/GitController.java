@@ -263,9 +263,12 @@ public class GitController extends AbstractXulEventHandler {
         EngineMetaInterface metaOld = null, metaNew = null;
         Consumer<EngineMetaInterface> c = null;
         try {
-          InputStream xmlStreamOld = uiGit.open( content.getName(), Constants.HEAD );
-          String commitIdOld = uiGit.getCommitId( Constants.HEAD );
-          InputStream xmlStreamNew = new FileInputStream( new File( filePath ) );
+          InputStream xmlStreamOld, xmlStreamNew;
+          String commitIdOld, commitIdNew;
+          xmlStreamOld = uiGit.open( content.getName(), Constants.HEAD );
+          commitIdOld = uiGit.getCommitId( Constants.HEAD );
+          xmlStreamNew = uiGit.open( content.getName(), UIGit.WORKINGTREE );
+          commitIdNew = UIGit.WORKINGTREE;
           if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
             // Use temporary metaOld_ because metaOld will be modified before the 2nd comparison
             metaOld = new TransMeta( xmlStreamOld, null, true, null, null );
@@ -273,7 +276,7 @@ public class GitController extends AbstractXulEventHandler {
             metaOld = PdiDiff.compareSteps( (TransMeta) metaOld, (TransMeta) metaNew, true );
             metaNew = PdiDiff.compareSteps( (TransMeta) metaNew, (TransMeta) metaOld, false );
             ( (TransMeta) metaOld ).setTransversion( "git: " + commitIdOld );
-            ( (TransMeta) metaNew ).setTransversion( "git: " + UIGit.WORKINGTREE );
+            ( (TransMeta) metaNew ).setTransversion( "git: " + commitIdNew );
             c = meta -> Spoon.getInstance().addTransGraph( (TransMeta) meta );
           } else if ( filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
             metaOld = new JobMeta( xmlStreamOld, null, null );
@@ -281,18 +284,18 @@ public class GitController extends AbstractXulEventHandler {
             metaOld = PdiDiff.compareJobEntries( (JobMeta) metaOld, (JobMeta) metaNew, true );
             metaNew = PdiDiff.compareJobEntries( (JobMeta) metaNew, (JobMeta) metaOld, false );
             ( (JobMeta) metaOld ).setJobversion( "git: " + commitIdOld );
-            ( (JobMeta) metaNew ).setJobversion( "git: " + UIGit.WORKINGTREE );
+            ( (JobMeta) metaNew ).setJobversion( "git: " + commitIdNew );
             c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
           }
           xmlStreamOld.close();
           xmlStreamNew.close();
 
           metaOld.clearChanged();
-          metaOld.setName( metaOld.getName() + " (" + Constants.HEAD + "->" + UIGit.WORKINGTREE + ")" );
+          metaOld.setName( String.format( "%s (%s -> %s)", metaOld.getName(), commitIdOld.substring( 0, 7 ), commitIdNew.substring( 0, 7 ) ) );
           metaOld.setFilename( filePath );
           c.accept( metaOld );
           metaNew.clearChanged();
-          metaNew.setName( metaNew.getName() + " (" + UIGit.WORKINGTREE + "->" + Constants.HEAD + ")" );
+          metaNew.setName( String.format( "%s (%s -> %s)", metaNew.getName(), commitIdNew.substring( 0, 7 ), commitIdOld.substring( 0, 7 ) ) );
           metaNew.setFilename( filePath );
           c.accept( metaNew );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );

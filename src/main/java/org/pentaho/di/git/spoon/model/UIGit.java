@@ -2,7 +2,9 @@ package org.pentaho.di.git.spoon.model;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -37,7 +39,6 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.ObjectStream;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -63,6 +64,7 @@ import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FileUtils;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
@@ -440,7 +442,12 @@ public class UIGit extends XulEventSourceAdapter {
     return out.toString( "UTF-8" );
   }
 
-  public ObjectStream open( String file, String commitId ) throws Exception {
+  public InputStream open( String file, String commitId ) throws Exception {
+    if ( commitId.equals( WORKINGTREE ) ) {
+      String baseDirectory = getDirectory();
+      String filePath = baseDirectory + Const.FILE_SEPARATOR + file;
+      return new FileInputStream( new File( filePath ) );
+    }
     ObjectId id = git.getRepository().resolve( commitId );
     try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
       RevObject obj = rw.parseAny( id );
