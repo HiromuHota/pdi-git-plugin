@@ -160,7 +160,7 @@ public class UIGitTest extends RepositoryTestCase {
 
     // Test for staged
     git.add().addFilepattern( "." ).call();
-    List<UIFile> stagedObjects = uiGit.getStagedObjects( "" );
+    List<UIFile> stagedObjects = uiGit.getStagedObjects( UIGit.WORKINGTREE );
     assertEquals( 3, stagedObjects.size() );
     assertTrue( stagedObjects.stream().anyMatch( obj -> obj.getName().equals( "a.ktr" ) ) );
 
@@ -183,7 +183,7 @@ public class UIGitTest extends RepositoryTestCase {
     git.add().addFilepattern( "." ).call();
     git.rm().addFilepattern( a.getName() ).call();
     git.rm().addFilepattern( b.getName() ).call();
-    stagedObjects = uiGit.getStagedObjects( "" );
+    stagedObjects = uiGit.getStagedObjects( UIGit.WORKINGTREE );
     assertEquals( 4, stagedObjects.size() );
     assertEquals( ChangeType.DELETE, stagedObjects.stream().filter( obj -> obj.getName().equals( "b.kjb" ) ).findFirst().get().getChangeType() );
     assertEquals( ChangeType.ADD, stagedObjects.stream().filter( obj -> obj.getName().equals( "a2.ktr" ) ).findFirst().get().getChangeType() );

@@ -278,10 +278,10 @@ public class UIGit extends XulEventSourceAdapter {
     try {
       if ( !git.status().call().isClean() ) {
         PurObjectRevision rev = new PurObjectRevision(
-            "",
+            WORKINGTREE,
             "*",
             new Date(),
-            " // WIP" );
+            " // " + UIGit.WORKINGTREE );
         revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
       }
       Iterable<RevCommit> iterable = git.log().call();
@@ -316,7 +316,7 @@ public class UIGit extends XulEventSourceAdapter {
 
   public List<UIFile> getStagedObjects( String commitId ) throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
-    if ( commitId.equals( "" ) ) {
+    if ( commitId.equals( WORKINGTREE ) ) {
       Status status = git.status().call();
       status.getAdded().forEach( name -> {
         files.add( new UIFile( name, ChangeType.ADD ) );
@@ -343,7 +343,7 @@ public class UIGit extends XulEventSourceAdapter {
   }
 
   public boolean hasStagedObjects() throws Exception {
-    return getStagedObjects( "" ).size() != 0;
+    return getStagedObjects( WORKINGTREE ).size() != 0;
   }
 
   public void initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {

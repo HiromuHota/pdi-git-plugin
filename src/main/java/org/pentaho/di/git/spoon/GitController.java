@@ -336,7 +336,7 @@ public class GitController extends AbstractXulEventHandler {
   public void setSelectedRevisions( List<UIRepositoryObjectRevision> selectedRevisions ) throws Exception {
     this.selectedRevisions = selectedRevisions;
     if ( selectedRevisions.size() != 0 ) {
-      if ( getSelectedRevisions().get( 0 ).getName().equals( "" ) ) { //When WIP is selected
+      if ( getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE ) ) { //When WIP is selected
         setDiff( uiGit.diff( UIGit.WORKINGTREE, Constants.HEAD ) );
         setAuthorName( uiGit.getAuthorName() );
         authorNameTextbox.setReadonly( false );
@@ -449,7 +449,7 @@ public class GitController extends AbstractXulEventHandler {
       return uiGit.getUnstagedObjects();
     } else {
       UIRepositoryObjectRevision revision = revisions.iterator().next();
-      if ( revision.getName().equals( "" ) ) { // WIP
+      if ( revision.getName().equals( UIGit.WORKINGTREE ) ) { // WIP
         return uiGit.getUnstagedObjects();
       } else {
         return null;
@@ -463,7 +463,7 @@ public class GitController extends AbstractXulEventHandler {
       return null;
     }
     if ( revisions.isEmpty() ) {
-      return uiGit.getStagedObjects( "" );
+      return uiGit.getStagedObjects( UIGit.WORKINGTREE );
     } else {
       UIRepositoryObjectRevision revision = revisions.iterator().next();
       return uiGit.getStagedObjects( revision.getName() );
