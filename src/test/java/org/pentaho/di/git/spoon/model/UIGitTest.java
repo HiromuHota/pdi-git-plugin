@@ -13,6 +13,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.RemoteAddCommand;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.errors.MissingObjectException;
@@ -146,24 +147,47 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testGetUnstagedObjects() throws Exception {
-    writeTrashFile( "a.ktr", "content" );
-    writeTrashFile( "b.kjb", "content" );
-    List<UIFile> stagedObjects = uiGit.getUnstagedObjects();
-    assertEquals( 2, stagedObjects.size() );
-    assertEquals( "a.ktr", stagedObjects.get( 0 ).getName() );
-    assertEquals( "b.kjb", stagedObjects.get( 1 ).getName() );
-  }
+  public void testGetUnstagedAndStagedObjects() throws Exception {
+    // Create files
+    File a = writeTrashFile( "a.ktr", "1234567" );
+    File b = writeTrashFile( "b.kjb", "content" );
+    File c = writeTrashFile( "c.kjb", "abcdefg" );
 
-  @Test
-  public void testGetStagedObjects() throws Exception {
-    writeTrashFile( "a.ktr", "content" );
-    writeTrashFile( "b.kjb", "content" );
+    // Test for unstaged
+    List<UIFile> unStagedObjects = uiGit.getUnstagedObjects();
+    assertEquals( 3, unStagedObjects.size() );
+    assertTrue( unStagedObjects.stream().anyMatch( obj -> obj.getName().equals( "a.ktr" ) ) );
+
+    // Test for staged
     git.add().addFilepattern( "." ).call();
     List<UIFile> stagedObjects = uiGit.getStagedObjects( "" );
-    assertEquals( 2, stagedObjects.size() );
-    assertEquals( "a.ktr", stagedObjects.get( 0 ).getName() );
-    assertEquals( "b.kjb", stagedObjects.get( 1 ).getName() );
+    assertEquals( 3, stagedObjects.size() );
+    assertTrue( stagedObjects.stream().anyMatch( obj -> obj.getName().equals( "a.ktr" ) ) );
+
+    // Make a commit
+    RevCommit commit = git.commit().setMessage( "initial commit" ).call();
+    stagedObjects = uiGit.getStagedObjects( commit.getId().name() );
+    assertEquals( 3, stagedObjects.size() );
+    assertTrue( stagedObjects.stream().anyMatch( obj -> obj.getName().equals( "b.kjb" ) ) );
+
+    // Change
+    a.renameTo( new File( git.getRepository().getWorkTree(), "a2.ktr" ) );
+    b.delete();
+    FileUtils.writeStringToFile( c, "A change" );
+
+    // Test for unstaged
+    unStagedObjects = uiGit.getUnstagedObjects();
+    assertEquals( ChangeType.DELETE, unStagedObjects.stream().filter( obj -> obj.getName().equals( "b.kjb" ) ).findFirst().get().getChangeType() );
+
+    // Test for staged
+    git.add().addFilepattern( "." ).call();
+    git.rm().addFilepattern( a.getName() ).call();
+    git.rm().addFilepattern( b.getName() ).call();
+    stagedObjects = uiGit.getStagedObjects( "" );
+    assertEquals( 4, stagedObjects.size() );
+    assertEquals( ChangeType.DELETE, stagedObjects.stream().filter( obj -> obj.getName().equals( "b.kjb" ) ).findFirst().get().getChangeType() );
+    assertEquals( ChangeType.ADD, stagedObjects.stream().filter( obj -> obj.getName().equals( "a2.ktr" ) ).findFirst().get().getChangeType() );
+    assertEquals( ChangeType.MODIFY, stagedObjects.stream().filter( obj -> obj.getName().equals( "c.kjb" ) ).findFirst().get().getChangeType() );
   }
 
   @Test
@@ -304,10 +328,18 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testDiff() throws Exception {
-    writeTrashFile( "Test.txt", "Hello world" );
+    File file = writeTrashFile( "Test.txt", "Hello world" );
 
     String diff = uiGit.diff( UIGit.WORKINGTREE, UIGit.INDEX, "Test.txt" );
     assertTrue( diff.contains( "Hello world" ) );
+
+    git.add().addFilepattern( "Test.txt" ).call();
+    git.commit().setMessage( "initial commit" ).call();
+
+    // Should detect renames
+    file.renameTo( new File( git.getRepository().getWorkTree(), "Test2.txt" ) );
+    diff = uiGit.diff( UIGit.WORKINGTREE, Constants.HEAD, "Test2.txt" );
+    assertTrue( diff.contains( "rename" ) );
   }
 
   @Test

@@ -301,51 +301,43 @@ public class UIGit extends XulEventSourceAdapter {
 
   public List<UIFile> getUnstagedObjects() throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
-    try {
-      Status status = git.status().call();
-      status.getUntracked().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.ADD ) );
-      } );
-      status.getModified().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.MODIFY ) );
-      } );
-      status.getMissing().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.DELETE ) );
-      } );
-    } catch ( Exception e ) {
-      // Do nothing
-    }
+    Status status = git.status().call();
+    status.getUntracked().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.ADD ) );
+    } );
+    status.getModified().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.MODIFY ) );
+    } );
+    status.getMissing().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.DELETE ) );
+    } );
     return files;
   }
 
   public List<UIFile> getStagedObjects( String commitId ) throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
-    try {
-      if ( commitId.equals( "" ) ) {
-        Status status = git.status().call();
-        status.getAdded().forEach( name -> {
-          files.add( new UIFile( name, ChangeType.ADD ) );
-        } );
-        status.getChanged().forEach( name -> {
-          files.add( new UIFile( name, ChangeType.MODIFY ) );
-        } );
-        status.getRemoved().forEach( name -> {
-          files.add( new UIFile( name, ChangeType.DELETE ) );
-        } );
-      } else {
-        List<DiffEntry> diffs = getDiffCommand( commitId, commitId + "^" )
-          .setShowNameAndStatusOnly( true )
-          .call();
-        RenameDetector rd = new RenameDetector( git.getRepository() );
-        rd.addAll( diffs );
-        diffs = rd.compute();
-        diffs.forEach( diff -> {
-          files.add( new UIFile( diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath() : diff.getNewPath(),
-              diff.getChangeType() ) );
-        } );
-      }
-    } catch ( Exception e ) {
-      // Do nothing
+    if ( commitId.equals( "" ) ) {
+      Status status = git.status().call();
+      status.getAdded().forEach( name -> {
+        files.add( new UIFile( name, ChangeType.ADD ) );
+      } );
+      status.getChanged().forEach( name -> {
+        files.add( new UIFile( name, ChangeType.MODIFY ) );
+      } );
+      status.getRemoved().forEach( name -> {
+        files.add( new UIFile( name, ChangeType.DELETE ) );
+      } );
+    } else {
+      List<DiffEntry> diffs = getDiffCommand( commitId, commitId + "^" )
+        .setShowNameAndStatusOnly( true )
+        .call();
+      RenameDetector rd = new RenameDetector( git.getRepository() );
+      rd.addAll( diffs );
+      diffs = rd.compute();
+      diffs.forEach( diff -> {
+        files.add( new UIFile( diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath() : diff.getNewPath(),
+            diff.getChangeType() ) );
+      } );
     }
     return files;
   }
