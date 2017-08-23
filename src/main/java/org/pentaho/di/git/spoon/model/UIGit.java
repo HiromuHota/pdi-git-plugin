@@ -58,6 +58,7 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.http.apache.HttpClientConnectionFactory;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
@@ -413,6 +414,16 @@ public class UIGit extends XulEventSourceAdapter {
     return cmd.call();
   }
 
+  /**
+   * Show diff for a commit
+   * @param commitId
+   * @return
+   * @throws Exception
+   */
+  public String show( String commitId ) throws Exception {
+    return diff( commitId, commitId + "^" );
+  }
+
   public String diff( String newCommitId, String oldCommitId ) throws Exception {
     return diff( newCommitId, oldCommitId, null );
   }
@@ -433,35 +444,6 @@ public class UIGit extends XulEventSourceAdapter {
           .filter( diff -> diff.getNewPath().equals( file ) )
           .collect( Collectors.toList() ) );
     }
-    formatter.close();
-    return out.toString( "UTF-8" );
-  }
-
-  /**
-   * Show diff for a commit
-   * @param commitId
-   * @return
-   * @throws Exception
-   */
-  public String show( String commitId ) throws Exception {
-    RevTree newTree = null;
-    RevTree oldTree = null;
-    final ObjectId id = git.getRepository().resolve( commitId );
-    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
-      RevObject obj = rw.parseAny( id );
-      RevCommit commit = (RevCommit) obj;
-      newTree = commit.getTree();
-      if ( commit.getParentCount() != 0 ) {
-        RevCommit parentCommit = rw.parseCommit( commit.getParent( 0 ).getId() );
-        oldTree = parentCommit.getTree();
-      }
-    }
-
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    DiffFormatter formatter = new DiffFormatter( out );
-    formatter.setRepository( git.getRepository() );
-    formatter.setDetectRenames( true );
-    formatter.format( oldTree, newTree );
     formatter.close();
     return out.toString( "UTF-8" );
   }
@@ -553,20 +535,24 @@ public class UIGit extends XulEventSourceAdapter {
   }
 
   private AbstractTreeIterator getTreeIterator( String commitId ) throws Exception {
-    AbstractTreeIterator treeIterator;
     if ( commitId.equals( WORKINGTREE ) ) {
-      treeIterator = new FileTreeIterator( git.getRepository() );
+      return new FileTreeIterator( git.getRepository() );
     } else if ( commitId.equals( INDEX ) ) {
-      treeIterator = new DirCacheIterator( git.getRepository().readDirCache() );
+      return new DirCacheIterator( git.getRepository().readDirCache() );
     } else {
-      treeIterator = new CanonicalTreeParser();
-      try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
-        RevTree tree = rw.parseTree( git.getRepository().resolve( commitId ) );
-        try ( ObjectReader reader = git.getRepository().newObjectReader() ) {
-          ( (CanonicalTreeParser) treeIterator ).reset( reader, tree.getId() );
+      ObjectId id = git.getRepository().resolve( commitId );
+      if ( id == null ) { // commitId does not exist
+        return new EmptyTreeIterator();
+      } else {
+        CanonicalTreeParser treeIterator = new CanonicalTreeParser();
+        try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
+          RevTree tree = rw.parseTree( id );
+          try ( ObjectReader reader = git.getRepository().newObjectReader() ) {
+            treeIterator.reset( reader, tree.getId() );
+          }
         }
+        return treeIterator;
       }
     }
-    return treeIterator;
   }
 }
