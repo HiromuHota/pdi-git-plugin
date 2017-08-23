@@ -413,48 +413,26 @@ public class UIGit extends XulEventSourceAdapter {
     return cmd.call();
   }
 
-  public String diff( String file, boolean isCached ) throws Exception {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    git.diff().setOutputStream( out )
-      .setPathFilter( PathFilter.create( file ) )
-      .setCached( isCached )
-      .call();
-    return out.toString( "UTF-8" );
-  }
-
   public String diff( String newCommitId, String oldCommitId ) throws Exception {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    getDiffCommand( newCommitId, oldCommitId )
-      .setOutputStream( out )
-      .call();
-    return out.toString( "UTF-8" );
+    return diff( newCommitId, oldCommitId, null );
   }
 
-  public String diff( String file, String newCommitId, String oldCommitId ) throws Exception {
+  public String diff( String newCommitId, String oldCommitId, String file ) throws Exception {
     // DiffFormatter does not detect renames with path filters on
-//    DiffFormatter formatter = new DiffFormatter( out );
-//    formatter.setRepository( git.getRepository() );
-//    formatter.setDetectRenames( true );
-//    formatter.setPathFilter( PathFilter.create( file ) );
-//    formatter.format( getTreeIterator( oldCommitId ), getTreeIterator( newCommitId ) );
-//    formatter.close();
-
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    List<DiffEntry> diffs = getDiffCommand( newCommitId, oldCommitId )
-        .setShowNameAndStatusOnly( true ).call();
-
-    // Detect renames
-    RenameDetector rd = new RenameDetector( git.getRepository() );
-    rd.addAll( diffs );
-    diffs = rd.compute();
-
-    // Write out to String after filtering
     DiffFormatter formatter = new DiffFormatter( out );
     formatter.setRepository( git.getRepository() );
-    formatter.format(
-        diffs.stream()
-        .filter( diff -> diff.getNewPath().equals( file ) )
-        .collect( Collectors.toList() ) );
+    formatter.setDetectRenames( true );
+    List<DiffEntry> diffs = formatter.scan( getTreeIterator( oldCommitId ), getTreeIterator( newCommitId ) );
+
+    if ( file == null ) {
+      formatter.format( diffs );
+    } else {
+      formatter.format(
+          diffs.stream()
+          .filter( diff -> diff.getNewPath().equals( file ) )
+          .collect( Collectors.toList() ) );
+    }
     formatter.close();
     return out.toString( "UTF-8" );
   }

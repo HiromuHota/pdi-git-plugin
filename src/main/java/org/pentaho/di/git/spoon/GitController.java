@@ -361,7 +361,7 @@ public class GitController extends AbstractXulEventHandler {
   public void setSelectedUnstagedObjects( List<UIFile> selectedUnstagedObjects ) throws Exception {
     this.selectedUnstagedObjects = selectedUnstagedObjects;
     if ( selectedUnstagedObjects.size() != 0 ) {
-      setDiff( uiGit.diff( selectedUnstagedObjects.get( 0 ).getName(), false ) );
+      setDiff( uiGit.diff( UIGit.WORKINGTREE, UIGit.INDEX, selectedUnstagedObjects.get( 0 ).getName() ) );
     }
   }
 
@@ -373,11 +373,13 @@ public class GitController extends AbstractXulEventHandler {
     this.selectedStagedObjects = selectedStagedObjects;
     if ( selectedStagedObjects.size() != 0 ) {
       if ( getSelectedRevisions().get( 0 ).getName().equals( "" ) ) { // WIP
-        setDiff( uiGit.diff( selectedStagedObjects.get( 0 ).getName(), true ) );
+        setDiff( uiGit.diff( Constants.HEAD, UIGit.INDEX, selectedStagedObjects.get( 0 ).getName() ) );
       } else {
-        setDiff( uiGit.diff( selectedStagedObjects.get( 0 ).getName(),
+        setDiff( uiGit.diff(
             getSelectedRevisions().get( 0 ).getName(),
-            getSelectedRevisions().get( 0 ).getName() + "^" ) );
+            getSelectedRevisions().get( 0 ).getName() + "^",
+            selectedStagedObjects.get( 0 ).getName() )
+        );
       }
     }
   }

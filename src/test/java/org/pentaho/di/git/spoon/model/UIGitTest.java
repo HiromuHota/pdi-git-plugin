@@ -306,7 +306,7 @@ public class UIGitTest extends RepositoryTestCase {
   public void testDiff() throws Exception {
     writeTrashFile( "Test.txt", "Hello world" );
 
-    String diff = uiGit.diff( "Test.txt", false );
+    String diff = uiGit.diff( UIGit.WORKINGTREE, UIGit.INDEX, "Test.txt" );
     assertTrue( diff.contains( "Hello world" ) );
   }
 
