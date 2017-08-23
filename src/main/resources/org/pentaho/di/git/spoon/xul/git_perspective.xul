@@ -68,7 +68,7 @@
     <menuitem label="${Git.ContextMenu.AddToIndex}" command="gitController.addToIndex()"/>
     <menuitem label="${Git.ContextMenu.Discard}" command="gitController.discard()"/>
     <menuitem label="${Git.ContextMenu.Open}" command="gitController.openFile()"/>
-    <menuitem label="${Git.ContextMenu.Diff}" command="gitController.diff()"/>
+    <menuitem label="${Git.ContextMenu.VisualDiff}" command="gitController.visualdiff()"/>
   </menupopup>
   <menupopup id="stagedContextMenu">
     <menuitem label="${Git.ContextMenu.RemoveFromIndex}" command="gitController.removeFromIndex()"/>

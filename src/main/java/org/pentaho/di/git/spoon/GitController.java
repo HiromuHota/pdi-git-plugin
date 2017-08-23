@@ -250,7 +250,11 @@ public class GitController extends AbstractXulEventHandler {
       } );
   }
 
-  public void diff() {
+  /**
+   * Compare two versions of a particular Kettle file and
+   * open them in the data integration perspective
+   */
+  public void visualdiff() {
     String baseDirectory = uiGit.getDirectory();
     getSelectedUnstagedObjects().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
@@ -269,7 +273,7 @@ public class GitController extends AbstractXulEventHandler {
             metaOld = PdiDiff.compareSteps( (TransMeta) metaOld, (TransMeta) metaNew, true );
             metaNew = PdiDiff.compareSteps( (TransMeta) metaNew, (TransMeta) metaOld, false );
             ( (TransMeta) metaOld ).setTransversion( "git: " + commitIdOld );
-            ( (TransMeta) metaNew ).setTransversion( "git: WORKINGTREE" );
+            ( (TransMeta) metaNew ).setTransversion( "git: " + UIGit.WORKINGTREE );
             c = meta -> Spoon.getInstance().addTransGraph( (TransMeta) meta );
           } else if ( filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
             metaOld = new JobMeta( xmlStreamOld, null, null );
@@ -277,18 +281,18 @@ public class GitController extends AbstractXulEventHandler {
             metaOld = PdiDiff.compareJobEntries( (JobMeta) metaOld, (JobMeta) metaNew, true );
             metaNew = PdiDiff.compareJobEntries( (JobMeta) metaNew, (JobMeta) metaOld, false );
             ( (JobMeta) metaOld ).setJobversion( "git: " + commitIdOld );
-            ( (JobMeta) metaNew ).setJobversion( "git: WORKINGTREE" );
+            ( (JobMeta) metaNew ).setJobversion( "git: " + UIGit.WORKINGTREE );
             c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
           }
           xmlStreamOld.close();
           xmlStreamNew.close();
 
           metaOld.clearChanged();
-          metaOld.setName( metaOld.getName() + " (HEAD->Working tree)" );
+          metaOld.setName( metaOld.getName() + " (" + Constants.HEAD + "->" + UIGit.WORKINGTREE + ")" );
           metaOld.setFilename( filePath );
           c.accept( metaOld );
           metaNew.clearChanged();
-          metaNew.setName( metaNew.getName() + " (Working tree->HEAD)" );
+          metaNew.setName( metaNew.getName() + " (" + UIGit.WORKINGTREE + "->" + Constants.HEAD + ")" );
           metaNew.setFilename( filePath );
           c.accept( metaNew );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
