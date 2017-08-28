@@ -5,11 +5,14 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
@@ -60,6 +63,7 @@ import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
 import org.pentaho.ui.xul.swt.SwtElement;
 import org.pentaho.ui.xul.swt.custom.DialogConstant;
+import org.pentaho.ui.xul.swt.tags.SwtTreeItem;
 import org.pentaho.ui.xul.util.XulDialogCallback.Status;
 import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
 
@@ -82,6 +86,7 @@ public class GitController extends AbstractXulEventHandler {
   private XulTree revisionTable;
   private XulTree unstagedTable;
   private XulTree stagedTable;
+  private XulTree changedTable;
   private XulButton commitButton;
   private XulButton pullButton;
   private XulButton pushButton;
@@ -93,6 +98,7 @@ public class GitController extends AbstractXulEventHandler {
   private Binding revisionBinding;
   private Binding unstagedBinding;
   private Binding stagedBinding;
+  private Binding changedBinding;
 
   public GitController() {
     setName( "gitController" );
@@ -106,6 +112,27 @@ public class GitController extends AbstractXulEventHandler {
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
     stagedTable = (XulTree) document.getElementById( "staged-table" );
+    changedTable = (XulTree) document.getElementById( "changed-table" );
+    TableViewer tv = (TableViewer) changedTable.getManagedObject();
+    tv.addDoubleClickListener( event -> {
+      IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+      SwtTreeItem selectedItem = (SwtTreeItem) selection.getFirstElement();
+      UIFile file = (UIFile) selectedItem.getBoundObject();
+      if ( getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE ) ) { //When WIP is selected
+        try {
+          if ( file.getIsStaged() ) {
+            uiGit.reset( file.getName() );
+          } else {
+            uiGit.add( file.getName() );
+          }
+          unstagedBinding.fireSourceChanged();
+          stagedBinding.fireSourceChanged();
+          changedBinding.fireSourceChanged();
+        } catch ( Exception e ) {
+          e.printStackTrace();
+        }
+      }
+    } );
     commitButton = (XulButton) document.getElementById( "commit" );
     pullButton = (XulButton) document.getElementById( "pull" );
     pushButton = (XulButton) document.getElementById( "push" );
@@ -129,6 +156,7 @@ public class GitController extends AbstractXulEventHandler {
     revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
     unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
     stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
+    changedBinding = bf.createBinding( this, "changedObjects", changedTable, "elements" );
 
     bf.createBinding( revisionTable, "selectedItems", this, "selectedRevisions" );
     bf.createBinding( unstagedTable, "selectedItems", this, "selectedUnstagedObjects" );
@@ -199,6 +227,7 @@ public class GitController extends AbstractXulEventHandler {
       revisionBinding.fireSourceChanged();
       unstagedBinding.fireSourceChanged();
       stagedBinding.fireSourceChanged();
+      changedBinding.fireSourceChanged();
     } catch ( Exception e ) {
       e.printStackTrace();
     }
@@ -358,6 +387,7 @@ public class GitController extends AbstractXulEventHandler {
       }
       unstagedBinding.fireSourceChanged();
       stagedBinding.fireSourceChanged();
+      changedBinding.fireSourceChanged();
     }
   }
 
@@ -471,6 +501,17 @@ public class GitController extends AbstractXulEventHandler {
       UIRepositoryObjectRevision revision = revisions.iterator().next();
       return uiGit.getStagedObjects( revision.getName() );
     }
+  }
+
+  public List<UIFile> getChangedObjects() throws Exception {
+    List<UIFile> changedObjects = new ArrayList<UIFile>();
+    if ( getUnstagedObjects() != null ) {
+      changedObjects.addAll( getUnstagedObjects() );
+    }
+    if ( getStagedObjects() != null ) {
+      changedObjects.addAll( getStagedObjects() );
+    }
+    return changedObjects;
   }
 
   public void commit() throws Exception {

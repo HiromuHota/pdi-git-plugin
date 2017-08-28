@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<window id="dummyRootElement" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:pen="http://www.pentaho.org/2008/xul">
+
+  <tree id="changed-table" flex="1" hidecolumnpicker="true" enableColumnDrag="true" seltype="single" context="unstagedContextMenu" treeLines="false" sortable="true">
+    <treecols>
+      <treecol id="checkbox-col" type="checkbox" flex="1" pen:binding="isStaged"/>
+      <treecol id="name-col" flex="9" label="${Git.ChangedFiles}" pen:binding="name" pen:imagebinding="image" sortActive="true" sortDirection="ASCENDING"/>
+    </treecols>
+    <treechildren/>
+  </tree>
+</window>

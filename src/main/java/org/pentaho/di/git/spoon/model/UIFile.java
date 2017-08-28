@@ -7,10 +7,18 @@ public class UIFile extends XulEventSourceAdapter {
 
   private String name;
   private ChangeType changeType;
+  private Boolean isStaged = false;
 
+  @Deprecated
   public UIFile( String name, ChangeType changeType ) {
     this.name = name;
     this.changeType = changeType;
+  }
+
+  public UIFile( String name, ChangeType changeType, Boolean isStaged ) {
+    this.name = name;
+    this.changeType = changeType;
+    this.isStaged = isStaged;
   }
 
   public String getName() {
@@ -43,5 +51,13 @@ public class UIFile extends XulEventSourceAdapter {
       default:
         return "";
     }
+  }
+
+  public Boolean getIsStaged() {
+    return isStaged;
+  }
+
+  public void setIsStaged( Boolean isStaged ) {
+    this.isStaged = isStaged;
   }
 }

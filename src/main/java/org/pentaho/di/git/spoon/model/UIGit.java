@@ -305,13 +305,13 @@ public class UIGit extends XulEventSourceAdapter {
     List<UIFile> files = new ArrayList<UIFile>();
     Status status = git.status().call();
     status.getUntracked().forEach( name -> {
-      files.add( new UIFile( name, ChangeType.ADD ) );
+      files.add( new UIFile( name, ChangeType.ADD, false ) );
     } );
     status.getModified().forEach( name -> {
-      files.add( new UIFile( name, ChangeType.MODIFY ) );
+      files.add( new UIFile( name, ChangeType.MODIFY, false ) );
     } );
     status.getMissing().forEach( name -> {
-      files.add( new UIFile( name, ChangeType.DELETE ) );
+      files.add( new UIFile( name, ChangeType.DELETE, false ) );
     } );
     return files;
   }
@@ -321,13 +321,13 @@ public class UIGit extends XulEventSourceAdapter {
     if ( commitId.equals( WORKINGTREE ) ) {
       Status status = git.status().call();
       status.getAdded().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.ADD ) );
+        files.add( new UIFile( name, ChangeType.ADD, true ) );
       } );
       status.getChanged().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.MODIFY ) );
+        files.add( new UIFile( name, ChangeType.MODIFY, true ) );
       } );
       status.getRemoved().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.DELETE ) );
+        files.add( new UIFile( name, ChangeType.DELETE, true ) );
       } );
     } else {
       List<DiffEntry> diffs = getDiffCommand( commitId, commitId + "^" )
@@ -338,7 +338,7 @@ public class UIGit extends XulEventSourceAdapter {
       diffs = rd.compute();
       diffs.forEach( diff -> {
         files.add( new UIFile( diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath() : diff.getNewPath(),
-            diff.getChangeType() ) );
+            diff.getChangeType(), false ) );
       } );
     }
     return files;
