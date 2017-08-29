@@ -474,11 +474,18 @@ public class GitController extends AbstractXulEventHandler {
       return null;
     }
     List<UIFile> changedObjects = new ArrayList<UIFile>();
-    if ( isWIP() ) {
+    if ( getSelectedRevisions().isEmpty()
+        || ( getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE ) && getSelectedRevisions().size() == 1 ) ) { // Only WIP is selected
       changedObjects.addAll( uiGit.getUnstagedObjects() );
       changedObjects.addAll( uiGit.getStagedObjects( UIGit.WORKINGTREE ) );
     } else {
-      changedObjects.addAll( uiGit.getStagedObjects( getSelectedRevisions().get( 0 ).getName() ) );
+      if ( getSelectedRevisions().size() == 1 ) {
+        changedObjects.addAll( uiGit.getStagedObjects( getSelectedRevisions().get( 0 ).getName() ) );
+      } else {
+        String newCommitId = getSelectedRevisions().get( 0 ).getName();
+        String oldCommitId = getSelectedRevisions().get( getSelectedRevisions().size() - 1 ).getName();
+        changedObjects.addAll( uiGit.getStagedObjects( newCommitId, oldCommitId ) );
+      }
     }
     return changedObjects;
   }

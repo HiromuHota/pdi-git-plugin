@@ -344,6 +344,21 @@ public class UIGit extends XulEventSourceAdapter {
     return files;
   }
 
+  public List<UIFile> getStagedObjects( String newCommitId, String oldCommitId ) throws Exception {
+    List<UIFile> files = new ArrayList<UIFile>();
+    List<DiffEntry> diffs = getDiffCommand( newCommitId, oldCommitId )
+      .setShowNameAndStatusOnly( true )
+      .call();
+    RenameDetector rd = new RenameDetector( git.getRepository() );
+    rd.addAll( diffs );
+    diffs = rd.compute();
+    diffs.forEach( diff -> {
+      files.add( new UIFile( diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath() : diff.getNewPath(),
+        diff.getChangeType(), false ) );
+    } );
+    return files;
+  }
+
   public boolean hasStagedObjects() throws Exception {
     return getStagedObjects( WORKINGTREE ).size() != 0;
   }
