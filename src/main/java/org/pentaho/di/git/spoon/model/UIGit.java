@@ -554,4 +554,12 @@ public class UIGit extends XulEventSourceAdapter {
       }
     }
   }
+
+  public static String abbreviate( String commitId ) {
+    if ( commitId.length() == Constants.OBJECT_ID_STRING_LENGTH ) {
+      return commitId.substring( 0, 7 );
+    } else {
+      return commitId;
+    }
+  }
 }

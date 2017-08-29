@@ -237,7 +237,9 @@ public class GitController extends AbstractXulEventHandler {
           }
           meta.clearChanged();
           meta.setFilename( filePath );
-          meta.setName( String.format( "%s (%s)", meta.getName(), commitId.substring( 0, 7 ) ) );
+          if ( !isWIP() ) {
+            meta.setName( String.format( "%s (%s)", meta.getName(), UIGit.abbreviate( commitId ) ) );
+          }
           c.accept( meta );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
         } catch ( Exception e ) {
@@ -292,11 +294,11 @@ public class GitController extends AbstractXulEventHandler {
           xmlStreamNew.close();
 
           metaOld.clearChanged();
-          metaOld.setName( String.format( "%s (%s -> %s)", metaOld.getName(), commitIdOld.substring( 0, 7 ), commitIdNew.substring( 0, 7 ) ) );
+          metaOld.setName( String.format( "%s (%s -> %s)", metaOld.getName(), UIGit.abbreviate( commitIdOld ), UIGit.abbreviate( commitIdNew ) ) );
           metaOld.setFilename( filePath );
           c.accept( metaOld );
           metaNew.clearChanged();
-          metaNew.setName( String.format( "%s (%s -> %s)", metaNew.getName(), commitIdNew.substring( 0, 7 ), commitIdOld.substring( 0, 7 ) ) );
+          metaNew.setName( String.format( "%s (%s -> %s)", metaNew.getName(), UIGit.abbreviate( commitIdNew ), UIGit.abbreviate( commitIdOld ) ) );
           metaNew.setFilename( filePath );
           c.accept( metaNew );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
@@ -498,6 +500,10 @@ public class GitController extends AbstractXulEventHandler {
    * @throws Exception
    */
   public void discard() throws Exception {
+    if ( !isWIP() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not in " + UIGit.WORKINGTREE );
+      return;
+    }
     XulConfirmBox confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
     confirmBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.Discard" ) );
     confirmBox.setMessage( "Are you sure?" );
