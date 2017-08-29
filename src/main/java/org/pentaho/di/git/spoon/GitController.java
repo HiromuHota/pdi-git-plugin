@@ -9,8 +9,11 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationListener;
+import org.eclipse.jface.viewers.ColumnViewerEditorDeactivationEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
@@ -104,22 +107,38 @@ public class GitController extends AbstractXulEventHandler {
 
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     changedTable = (XulTree) document.getElementById( "changed-table" );
+    /*
+     * Add a listener to add/reset file upon checking/unchecking changed files
+     */
     TableViewer tv = (TableViewer) changedTable.getManagedObject();
-    tv.addDoubleClickListener( event -> {
-      IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-      SwtTreeItem selectedItem = (SwtTreeItem) selection.getFirstElement();
-      UIFile file = (UIFile) selectedItem.getBoundObject();
-      if ( isWIP() ) {
-        try {
-          if ( file.getIsStaged() ) {
-            uiGit.reset( file.getName() );
-          } else {
-            uiGit.add( file.getName() );
+    tv.getColumnViewerEditor().addEditorActivationListener( new ColumnViewerEditorActivationListener() {
+      @Override
+      public void beforeEditorDeactivated( ColumnViewerEditorDeactivationEvent event ) {
+      }
+      @Override
+      public void beforeEditorActivated( ColumnViewerEditorActivationEvent event ) {
+        ViewerCell viewerCell = (ViewerCell) event.getSource();
+        SwtTreeItem selectedItem = (SwtTreeItem) viewerCell.getElement();
+        UIFile file = (UIFile) selectedItem.getBoundObject();
+        if ( isWIP() ) {
+          try {
+            if ( file.getIsStaged() ) {
+              uiGit.reset( file.getName() );
+            } else {
+              uiGit.add( file.getName() );
+            }
+          } catch ( Exception e ) {
+            e.printStackTrace();
           }
-          changedBinding.fireSourceChanged();
-        } catch ( Exception e ) {
-          e.printStackTrace();
         }
+      }
+
+      @Override
+      public void afterEditorDeactivated( ColumnViewerEditorDeactivationEvent event ) {
+      }
+
+      @Override
+      public void afterEditorActivated( ColumnViewerEditorActivationEvent event ) {
       }
     } );
     commitButton = (XulButton) document.getElementById( "commit" );
