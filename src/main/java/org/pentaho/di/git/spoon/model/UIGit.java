@@ -415,7 +415,11 @@ public class UIGit extends XulEventSourceAdapter {
    * @throws Exception
    */
   public String show( String commitId ) throws Exception {
-    return diff( commitId, commitId + "^" );
+    if ( commitId.equals( WORKINGTREE ) ) {
+      return diff( WORKINGTREE, Constants.HEAD );
+    } else {
+      return diff( commitId, commitId + "^" );
+    }
   }
 
   public String diff( String newCommitId, String oldCommitId ) throws Exception {

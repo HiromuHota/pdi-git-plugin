@@ -361,17 +361,20 @@ public class GitController extends AbstractXulEventHandler {
   public void setSelectedRevisions( List<UIRepositoryObjectRevision> selectedRevisions ) throws Exception {
     this.selectedRevisions = selectedRevisions;
     if ( selectedRevisions.size() != 0 ) {
+      String commitId = getSelectedRevisions().get( 0 ).getName();
+      if ( selectedRevisions.size() == 1 ) {
+        setDiff( uiGit.show( commitId ) );
+      } else {
+        String commitIdOld = getSelectedRevisions().get( getSelectedRevisions().size() - 1 ).getName();
+        setDiff( uiGit.diff( commitId, commitIdOld ) );
+      }
       if ( isWIP() ) {
-        setDiff( uiGit.diff( UIGit.WORKINGTREE, Constants.HEAD ) );
         setAuthorName( uiGit.getAuthorName() );
         authorNameTextbox.setReadonly( false );
         setCommitMessage( "" );
         commitMessageTextbox.setReadonly( false );
         commitButton.setDisabled( false );
       } else {
-        // TODO Should show diff for multiple commits
-        String commitId = getSelectedRevisions().get( 0 ).getName();
-        setDiff( uiGit.show( commitId ) );
         setAuthorName( uiGit.getAuthorName( commitId ) );
         authorNameTextbox.setReadonly( true );
         setCommitMessage( uiGit.getCommitMessage( commitId ) );
