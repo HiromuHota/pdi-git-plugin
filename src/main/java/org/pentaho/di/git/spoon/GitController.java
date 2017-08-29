@@ -243,7 +243,7 @@ public class GitController extends AbstractXulEventHandler {
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
         String commitId;
-        commitId = isOnlyWIP() ? UIGit.WORKINGTREE : getSelectedRevisions().get( 0 ).getName();
+        commitId = isOnlyWIP() ? UIGit.WORKINGTREE : getFirstSelectedRevision().getName();
         try ( InputStream xmlStream = uiGit.open( content.getName(), commitId ) ) {
           EngineMetaInterface meta = null;
           Consumer<EngineMetaInterface> c = null;
@@ -286,9 +286,9 @@ public class GitController extends AbstractXulEventHandler {
             commitIdNew = UIGit.WORKINGTREE;
             commitIdOld = Constants.HEAD;
           } else {
-            commitIdNew = getSelectedRevisions().get( 0 ).getName();
+            commitIdNew = getFirstSelectedRevision().getName();
             commitIdOld = getSelectedRevisions().size() == 1 ? uiGit.getCommitId( commitIdNew + "^" )
-              : getSelectedRevisions().get( getSelectedRevisions().size() - 1 ).getName();
+              : getLastSelectedRevision().getName();
           }
           xmlStreamOld = uiGit.open( content.getName(), commitIdOld );
           xmlStreamNew = uiGit.open( content.getName(), commitIdNew );
@@ -359,14 +359,22 @@ public class GitController extends AbstractXulEventHandler {
     return selectedRevisions;
   }
 
+  private UIRepositoryObjectRevision getFirstSelectedRevision() {
+    return getSelectedRevisions().get( 0 );
+  }
+
+  private UIRepositoryObjectRevision getLastSelectedRevision() {
+    return getSelectedRevisions().get( getSelectedRevisions().size() - 1 );
+  }
+
   public void setSelectedRevisions( List<UIRepositoryObjectRevision> selectedRevisions ) throws Exception {
     this.selectedRevisions = selectedRevisions;
     if ( selectedRevisions.size() != 0 ) {
-      String commitId = getSelectedRevisions().get( 0 ).getName();
+      String commitId = getFirstSelectedRevision().getName();
       if ( selectedRevisions.size() == 1 ) {
         setDiff( uiGit.show( commitId ) );
       } else {
-        String commitIdOld = getSelectedRevisions().get( getSelectedRevisions().size() - 1 ).getName();
+        String commitIdOld = getLastSelectedRevision().getName();
         setDiff( uiGit.diff( commitId, commitIdOld ) );
       }
       if ( isOnlyWIP() ) {
@@ -405,9 +413,9 @@ public class GitController extends AbstractXulEventHandler {
           setDiff( uiGit.diff( UIGit.WORKINGTREE, UIGit.INDEX, selectedObjects.get( 0 ).getName() ) );
         }
       } else {
-        String newCommitId = getSelectedRevisions().get( 0 ).getName();
+        String newCommitId = getFirstSelectedRevision().getName();
         String oldCommitId = getSelectedRevisions().size() == 1 ? uiGit.getCommitId( newCommitId + "^" )
-          : getSelectedRevisions().get( getSelectedRevisions().size() - 1 ).getName();
+          : getLastSelectedRevision().getName();
         setDiff( uiGit.diff( newCommitId, oldCommitId, selectedObjects.get( 0 ).getName() ) );
       }
     }
@@ -420,7 +428,7 @@ public class GitController extends AbstractXulEventHandler {
    */
   private Boolean isOnlyWIP() {
     return getSelectedRevisions().isEmpty()
-        || ( getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
+        || ( getFirstSelectedRevision().getName().equals( UIGit.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
   }
 
   private Shell getShell() {
@@ -485,10 +493,10 @@ public class GitController extends AbstractXulEventHandler {
       changedObjects.addAll( uiGit.getStagedObjects( UIGit.WORKINGTREE ) );
     } else {
       if ( getSelectedRevisions().size() == 1 ) {
-        changedObjects.addAll( uiGit.getStagedObjects( getSelectedRevisions().get( 0 ).getName() ) );
+        changedObjects.addAll( uiGit.getStagedObjects( getFirstSelectedRevision().getName() ) );
       } else {
-        String newCommitId = getSelectedRevisions().get( 0 ).getName();
-        String oldCommitId = getSelectedRevisions().get( getSelectedRevisions().size() - 1 ).getName();
+        String newCommitId = getFirstSelectedRevision().getName();
+        String oldCommitId = getLastSelectedRevision().getName();
         changedObjects.addAll( uiGit.getStagedObjects( newCommitId, oldCommitId ) );
       }
     }
@@ -519,7 +527,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void checkout() throws XulException, IllegalArgumentException, InvocationTargetException {
-    String commitId = getSelectedRevisions().get( 0 ).getName();
+    String commitId = getFirstSelectedRevision().getName();
     try {
       uiGit.checkout( commitId );
     } catch ( Exception e ) {
