@@ -405,11 +405,10 @@ public class GitController extends AbstractXulEventHandler {
           setDiff( uiGit.diff( UIGit.WORKINGTREE, UIGit.INDEX, selectedObjects.get( 0 ).getName() ) );
         }
       } else {
-        setDiff( uiGit.diff(
-            getSelectedRevisions().get( 0 ).getName(),
-            getSelectedRevisions().get( 0 ).getName() + "^",
-            selectedObjects.get( 0 ).getName() )
-        );
+        String newCommitId = getSelectedRevisions().get( 0 ).getName();
+        String oldCommitId = getSelectedRevisions().size() == 1 ? uiGit.getCommitId( newCommitId + "^" )
+          : getSelectedRevisions().get( getSelectedRevisions().size() - 1 ).getName();
+        setDiff( uiGit.diff( newCommitId, oldCommitId, selectedObjects.get( 0 ).getName() ) );
       }
     }
   }
