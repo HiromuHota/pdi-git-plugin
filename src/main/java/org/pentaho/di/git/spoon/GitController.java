@@ -136,6 +136,11 @@ public class GitController extends AbstractXulEventHandler {
 
       @Override
       public void afterEditorDeactivated( ColumnViewerEditorDeactivationEvent event ) {
+        try {
+          changedBinding.fireSourceChanged();
+        } catch ( Exception e ) {
+          e.printStackTrace();
+        }
       }
 
       @Override
