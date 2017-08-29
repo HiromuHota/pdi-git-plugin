@@ -120,7 +120,7 @@ public class GitController extends AbstractXulEventHandler {
         ViewerCell viewerCell = (ViewerCell) event.getSource();
         SwtTreeItem selectedItem = (SwtTreeItem) viewerCell.getElement();
         UIFile file = (UIFile) selectedItem.getBoundObject();
-        if ( isWIP() ) {
+        if ( isOnlyWIP() ) {
           try {
             if ( file.getIsStaged() ) {
               uiGit.reset( file.getName() );
@@ -243,7 +243,7 @@ public class GitController extends AbstractXulEventHandler {
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
         String commitId;
-        commitId = isWIP() ? UIGit.WORKINGTREE : getSelectedRevisions().get( 0 ).getName();
+        commitId = isOnlyWIP() ? UIGit.WORKINGTREE : getSelectedRevisions().get( 0 ).getName();
         try ( InputStream xmlStream = uiGit.open( content.getName(), commitId ) ) {
           EngineMetaInterface meta = null;
           Consumer<EngineMetaInterface> c = null;
@@ -256,7 +256,7 @@ public class GitController extends AbstractXulEventHandler {
           }
           meta.clearChanged();
           meta.setFilename( filePath );
-          if ( !isWIP() ) {
+          if ( !isOnlyWIP() ) {
             meta.setName( String.format( "%s (%s)", meta.getName(), UIGit.abbreviate( commitId ) ) );
           }
           c.accept( meta );
@@ -282,12 +282,13 @@ public class GitController extends AbstractXulEventHandler {
         try {
           InputStream xmlStreamOld, xmlStreamNew;
           String commitIdOld, commitIdNew;
-          if ( isWIP() ) {
+          if ( isOnlyWIP() ) {
             commitIdNew = UIGit.WORKINGTREE;
             commitIdOld = Constants.HEAD;
           } else {
             commitIdNew = getSelectedRevisions().get( 0 ).getName();
-            commitIdOld = uiGit.getCommitId( commitIdNew + "^" );
+            commitIdOld = getSelectedRevisions().size() == 1 ? uiGit.getCommitId( commitIdNew + "^" )
+              : getSelectedRevisions().get( getSelectedRevisions().size() - 1 ).getName();
           }
           xmlStreamOld = uiGit.open( content.getName(), commitIdOld );
           xmlStreamNew = uiGit.open( content.getName(), commitIdNew );
@@ -368,16 +369,21 @@ public class GitController extends AbstractXulEventHandler {
         String commitIdOld = getSelectedRevisions().get( getSelectedRevisions().size() - 1 ).getName();
         setDiff( uiGit.diff( commitId, commitIdOld ) );
       }
-      if ( isWIP() ) {
+      if ( isOnlyWIP() ) {
         setAuthorName( uiGit.getAuthorName() );
         authorNameTextbox.setReadonly( false );
         setCommitMessage( "" );
         commitMessageTextbox.setReadonly( false );
         commitButton.setDisabled( false );
       } else {
-        setAuthorName( uiGit.getAuthorName( commitId ) );
+        if ( getSelectedRevisions().size() == 1 ) {
+          setAuthorName( uiGit.getAuthorName( commitId ) );
+          setCommitMessage( uiGit.getCommitMessage( commitId ) );
+        } else {
+          setAuthorName( "" );
+          setCommitMessage( "" );
+        }
         authorNameTextbox.setReadonly( true );
-        setCommitMessage( uiGit.getCommitMessage( commitId ) );
         commitMessageTextbox.setReadonly( true );
         commitButton.setDisabled( true );
       }
@@ -392,7 +398,7 @@ public class GitController extends AbstractXulEventHandler {
   public void setSelectedChangedObjects( List<UIFile> selectedObjects ) throws Exception {
     this.selectedChangedObjects = selectedObjects;
     if ( selectedObjects.size() != 0 ) {
-      if ( isWIP() ) {
+      if ( isOnlyWIP() ) {
         if ( selectedObjects.get( 0 ).getIsStaged() ) {
           setDiff( uiGit.diff( UIGit.INDEX, Constants.HEAD, selectedObjects.get( 0 ).getName() ) );
         } else {
@@ -409,12 +415,13 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   /**
-   * Check if WIP is selected
+   * Check if only WIP is selected
    * Return true if none is selected
    * @return
    */
-  private Boolean isWIP() {
-    return getSelectedRevisions().isEmpty() || getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE );
+  private Boolean isOnlyWIP() {
+    return getSelectedRevisions().isEmpty()
+        || ( getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
   }
 
   private Shell getShell() {
@@ -474,8 +481,7 @@ public class GitController extends AbstractXulEventHandler {
       return null;
     }
     List<UIFile> changedObjects = new ArrayList<UIFile>();
-    if ( getSelectedRevisions().isEmpty()
-        || ( getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE ) && getSelectedRevisions().size() == 1 ) ) { // Only WIP is selected
+    if ( isOnlyWIP() ) {
       changedObjects.addAll( uiGit.getUnstagedObjects() );
       changedObjects.addAll( uiGit.getStagedObjects( UIGit.WORKINGTREE ) );
     } else {
@@ -529,7 +535,7 @@ public class GitController extends AbstractXulEventHandler {
    * @throws Exception
    */
   public void discard() throws Exception {
-    if ( !isWIP() ) {
+    if ( !isOnlyWIP() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not in " + UIGit.WORKINGTREE );
       return;
     }
