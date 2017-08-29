@@ -58,6 +58,7 @@ import org.pentaho.ui.xul.components.XulLabel;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
+import org.pentaho.ui.xul.components.XulTreeCol;
 import org.pentaho.ui.xul.containers.XulTree;
 import org.pentaho.ui.xul.dnd.DropEvent;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
@@ -85,6 +86,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private XulTree revisionTable;
   private XulTree changedTable;
+  private XulTreeCol checkboxCol;
   private XulButton commitButton;
   private XulButton pullButton;
   private XulButton pushButton;
@@ -107,6 +109,7 @@ public class GitController extends AbstractXulEventHandler {
 
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     changedTable = (XulTree) document.getElementById( "changed-table" );
+    checkboxCol = (XulTreeCol) document.getElementById( "checkbox-col" );
     /*
      * Add a listener to add/reset file upon checking/unchecking changed files
      */
@@ -120,16 +123,14 @@ public class GitController extends AbstractXulEventHandler {
         ViewerCell viewerCell = (ViewerCell) event.getSource();
         SwtTreeItem selectedItem = (SwtTreeItem) viewerCell.getElement();
         UIFile file = (UIFile) selectedItem.getBoundObject();
-        if ( isOnlyWIP() ) {
-          try {
-            if ( file.getIsStaged() ) {
-              uiGit.reset( file.getName() );
-            } else {
-              uiGit.add( file.getName() );
-            }
-          } catch ( Exception e ) {
-            e.printStackTrace();
+        try {
+          if ( file.getIsStaged() ) {
+            uiGit.reset( file.getName() );
+          } else {
+            uiGit.add( file.getName() );
           }
+        } catch ( Exception e ) {
+          e.printStackTrace();
         }
       }
 
@@ -378,12 +379,14 @@ public class GitController extends AbstractXulEventHandler {
         setDiff( uiGit.diff( commitId, commitIdOld ) );
       }
       if ( isOnlyWIP() ) {
+        checkboxCol.setEditable( true );
         setAuthorName( uiGit.getAuthorName() );
         authorNameTextbox.setReadonly( false );
         setCommitMessage( "" );
         commitMessageTextbox.setReadonly( false );
         commitButton.setDisabled( false );
       } else {
+        checkboxCol.setEditable( false );
         if ( getSelectedRevisions().size() == 1 ) {
           setAuthorName( uiGit.getAuthorName( commitId ) );
           setCommitMessage( uiGit.getCommitMessage( commitId ) );
