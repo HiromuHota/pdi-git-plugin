@@ -391,7 +391,7 @@ public class GitController extends AbstractXulEventHandler {
     if ( selectedObjects.size() != 0 ) {
       if ( isWIP() ) {
         if ( selectedObjects.get( 0 ).getIsStaged() ) {
-          setDiff( uiGit.diff( Constants.HEAD, UIGit.INDEX, selectedObjects.get( 0 ).getName() ) );
+          setDiff( uiGit.diff( UIGit.INDEX, Constants.HEAD, selectedObjects.get( 0 ).getName() ) );
         } else {
           setDiff( uiGit.diff( UIGit.WORKINGTREE, UIGit.INDEX, selectedObjects.get( 0 ).getName() ) );
         }
