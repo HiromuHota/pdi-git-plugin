@@ -26,13 +26,7 @@
     </vbox>
     <vbox flex="1">
       <splitter flex="1" orient="VERTICAL">
-        <hbox flex="1">
-          <pen:include src="org/pentaho/di/git/spoon/xul/git_unstaged-table.xul" ignoreroot="true" />
-        </hbox>
-        <hbox flex="1">
-          <pen:include src="org/pentaho/di/git/spoon/xul/git_staged-table.xul" ignoreroot="true" />
-        </hbox>
-        <hbox flex="1">
+        <hbox flex="2">
           <pen:include src="org/pentaho/di/git/spoon/xul/changed-table.xul" ignoreroot="true" />
         </hbox>
         <vbox flex="1">
@@ -67,14 +61,10 @@
     <menuitem label="${Git.Merge}" command="gitController.merge()"/>
     <menuitem label="${Git.Delete}" command="gitController.deleteBranch()"/>
   </menupopup>
-  <menupopup id="unstagedContextMenu">
-    <menuitem label="${Git.ContextMenu.AddToIndex}" command="gitController.addToIndex()"/>
+  <menupopup id="changedContextMenu">
     <menuitem label="${Git.ContextMenu.Discard}" command="gitController.discard()"/>
     <menuitem label="${Git.ContextMenu.Open}" command="gitController.openFile()"/>
     <menuitem label="${Git.ContextMenu.VisualDiff}" command="gitController.visualdiff()"/>
-  </menupopup>
-  <menupopup id="stagedContextMenu">
-    <menuitem label="${Git.ContextMenu.RemoveFromIndex}" command="gitController.removeFromIndex()"/>
   </menupopup>
   <menupopup id="revisionContextMenu">
     <menuitem label="${Git.ContextMenu.Checkout}" command="gitController.checkout()"/>

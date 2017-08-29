@@ -1,7 +1,5 @@
 package org.pentaho.di.git.spoon;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
@@ -80,12 +78,9 @@ public class GitController extends AbstractXulEventHandler {
   private String authorName;
   private String commitMessage;
   private List<UIRepositoryObjectRevision> selectedRevisions;
-  private List<UIFile> selectedUnstagedObjects;
-  private List<UIFile> selectedStagedObjects;
+  private List<UIFile> selectedChangedObjects;
 
   private XulTree revisionTable;
-  private XulTree unstagedTable;
-  private XulTree stagedTable;
   private XulTree changedTable;
   private XulButton commitButton;
   private XulButton pullButton;
@@ -96,8 +91,6 @@ public class GitController extends AbstractXulEventHandler {
 
   private BindingFactory bf = new SwtBindingFactory();
   private Binding revisionBinding;
-  private Binding unstagedBinding;
-  private Binding stagedBinding;
   private Binding changedBinding;
 
   public GitController() {
@@ -110,23 +103,19 @@ public class GitController extends AbstractXulEventHandler {
     text.setFont( JFaceResources.getFont( JFaceResources.TEXT_FONT ) );
 
     revisionTable = (XulTree) document.getElementById( "revision-table" );
-    unstagedTable = (XulTree) document.getElementById( "unstaged-table" );
-    stagedTable = (XulTree) document.getElementById( "staged-table" );
     changedTable = (XulTree) document.getElementById( "changed-table" );
     TableViewer tv = (TableViewer) changedTable.getManagedObject();
     tv.addDoubleClickListener( event -> {
       IStructuredSelection selection = (IStructuredSelection) event.getSelection();
       SwtTreeItem selectedItem = (SwtTreeItem) selection.getFirstElement();
       UIFile file = (UIFile) selectedItem.getBoundObject();
-      if ( getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE ) ) { //When WIP is selected
+      if ( isWIP() ) {
         try {
           if ( file.getIsStaged() ) {
             uiGit.reset( file.getName() );
           } else {
             uiGit.add( file.getName() );
           }
-          unstagedBinding.fireSourceChanged();
-          stagedBinding.fireSourceChanged();
           changedBinding.fireSourceChanged();
         } catch ( Exception e ) {
           e.printStackTrace();
@@ -154,13 +143,10 @@ public class GitController extends AbstractXulEventHandler {
     bf.createBinding( this, "branch", branchLabel, "value" );
     bf.createBinding( this, "diff", diffText, "value" );
     revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
-    unstagedBinding = bf.createBinding( this, "unstagedObjects", unstagedTable, "elements" );
-    stagedBinding = bf.createBinding( this, "stagedObjects", stagedTable, "elements" );
     changedBinding = bf.createBinding( this, "changedObjects", changedTable, "elements" );
 
     bf.createBinding( revisionTable, "selectedItems", this, "selectedRevisions" );
-    bf.createBinding( unstagedTable, "selectedItems", this, "selectedUnstagedObjects" );
-    bf.createBinding( stagedTable, "selectedItems", this, "selectedStagedObjects" );
+    bf.createBinding( changedTable, "selectedItems", this, "selectedChangedObjects" );
 
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
     bf.createBinding( this, "authorName", authorNameTextbox, "value" );
@@ -225,41 +211,21 @@ public class GitController extends AbstractXulEventHandler {
   protected void fireSourceChanged() {
     try {
       revisionBinding.fireSourceChanged();
-      unstagedBinding.fireSourceChanged();
-      stagedBinding.fireSourceChanged();
       changedBinding.fireSourceChanged();
     } catch ( Exception e ) {
       e.printStackTrace();
     }
   }
 
-  public void addToIndex() throws Exception {
-    List<UIFile> contents = getSelectedUnstagedObjects();
-    for ( UIFile content : contents ) {
-      if ( content.getChangeType() == ChangeType.DELETE ) {
-        uiGit.rm( content.getName() );
-      } else {
-        uiGit.add( content.getName() );
-      }
-    }
-    fireSourceChanged();
-  }
-
-  public void removeFromIndex() throws Exception {
-    List<UIFile> contents = getSelectedStagedObjects();
-    for ( UIFile content : contents ) {
-      uiGit.reset( content.getName() );
-    }
-    fireSourceChanged();
-  }
-
   public void openFile() {
     String baseDirectory = uiGit.getDirectory();
-    getSelectedUnstagedObjects().stream()
+    getSelectedChangedObjects().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
-        try ( InputStream xmlStream = new FileInputStream( new File( filePath ) ) ) {
+        String commitId;
+        commitId = isWIP() ? UIGit.WORKINGTREE : getSelectedRevisions().get( 0 ).getName();
+        try ( InputStream xmlStream = uiGit.open( content.getName(), commitId ) ) {
           EngineMetaInterface meta = null;
           Consumer<EngineMetaInterface> c = null;
           if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
@@ -271,6 +237,7 @@ public class GitController extends AbstractXulEventHandler {
           }
           meta.clearChanged();
           meta.setFilename( filePath );
+          meta.setName( String.format( "%s (%s)", meta.getName(), commitId.substring( 0, 7 ) ) );
           c.accept( meta );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
         } catch ( Exception e ) {
@@ -285,7 +252,7 @@ public class GitController extends AbstractXulEventHandler {
    */
   public void visualdiff() {
     String baseDirectory = uiGit.getDirectory();
-    getSelectedUnstagedObjects().stream()
+    getSelectedChangedObjects().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
@@ -294,10 +261,15 @@ public class GitController extends AbstractXulEventHandler {
         try {
           InputStream xmlStreamOld, xmlStreamNew;
           String commitIdOld, commitIdNew;
-          xmlStreamOld = uiGit.open( content.getName(), Constants.HEAD );
-          commitIdOld = uiGit.getCommitId( Constants.HEAD );
-          xmlStreamNew = uiGit.open( content.getName(), UIGit.WORKINGTREE );
-          commitIdNew = UIGit.WORKINGTREE;
+          if ( isWIP() ) {
+            commitIdNew = UIGit.WORKINGTREE;
+            commitIdOld = Constants.HEAD;
+          } else {
+            commitIdNew = getSelectedRevisions().get( 0 ).getName();
+            commitIdOld = uiGit.getCommitId( commitIdNew + "^" );
+          }
+          xmlStreamOld = uiGit.open( content.getName(), commitIdOld );
+          xmlStreamNew = uiGit.open( content.getName(), commitIdNew );
           if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
             // Use temporary metaOld_ because metaOld will be modified before the 2nd comparison
             metaOld = new TransMeta( xmlStreamOld, null, true, null, null );
@@ -368,7 +340,7 @@ public class GitController extends AbstractXulEventHandler {
   public void setSelectedRevisions( List<UIRepositoryObjectRevision> selectedRevisions ) throws Exception {
     this.selectedRevisions = selectedRevisions;
     if ( selectedRevisions.size() != 0 ) {
-      if ( getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE ) ) { //When WIP is selected
+      if ( isWIP() ) {
         setDiff( uiGit.diff( UIGit.WORKINGTREE, Constants.HEAD ) );
         setAuthorName( uiGit.getAuthorName() );
         authorNameTextbox.setReadonly( false );
@@ -385,40 +357,40 @@ public class GitController extends AbstractXulEventHandler {
         commitMessageTextbox.setReadonly( true );
         commitButton.setDisabled( true );
       }
-      unstagedBinding.fireSourceChanged();
-      stagedBinding.fireSourceChanged();
       changedBinding.fireSourceChanged();
     }
   }
 
-  public List<UIFile> getSelectedUnstagedObjects() {
-    return selectedUnstagedObjects;
+  public List<UIFile> getSelectedChangedObjects() {
+    return selectedChangedObjects;
   }
 
-  public void setSelectedUnstagedObjects( List<UIFile> selectedUnstagedObjects ) throws Exception {
-    this.selectedUnstagedObjects = selectedUnstagedObjects;
-    if ( selectedUnstagedObjects.size() != 0 ) {
-      setDiff( uiGit.diff( UIGit.WORKINGTREE, UIGit.INDEX, selectedUnstagedObjects.get( 0 ).getName() ) );
-    }
-  }
-
-  public List<UIFile> getSelectedStagedObjects() {
-    return selectedStagedObjects;
-  }
-
-  public void setSelectedStagedObjects( List<UIFile> selectedStagedObjects ) throws Exception {
-    this.selectedStagedObjects = selectedStagedObjects;
-    if ( selectedStagedObjects.size() != 0 ) {
-      if ( getSelectedRevisions().isEmpty() || getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE ) ) { // WIP
-        setDiff( uiGit.diff( Constants.HEAD, UIGit.INDEX, selectedStagedObjects.get( 0 ).getName() ) );
+  public void setSelectedChangedObjects( List<UIFile> selectedObjects ) throws Exception {
+    this.selectedChangedObjects = selectedObjects;
+    if ( selectedObjects.size() != 0 ) {
+      if ( isWIP() ) {
+        if ( selectedObjects.get( 0 ).getIsStaged() ) {
+          setDiff( uiGit.diff( Constants.HEAD, UIGit.INDEX, selectedObjects.get( 0 ).getName() ) );
+        } else {
+          setDiff( uiGit.diff( UIGit.WORKINGTREE, UIGit.INDEX, selectedObjects.get( 0 ).getName() ) );
+        }
       } else {
         setDiff( uiGit.diff(
             getSelectedRevisions().get( 0 ).getName(),
             getSelectedRevisions().get( 0 ).getName() + "^",
-            selectedStagedObjects.get( 0 ).getName() )
+            selectedObjects.get( 0 ).getName() )
         );
       }
     }
+  }
+
+  /**
+   * Check if WIP is selected
+   * Return true if none is selected
+   * @return
+   */
+  private Boolean isWIP() {
+    return getSelectedRevisions().isEmpty() || getSelectedRevisions().get( 0 ).getName().equals( UIGit.WORKINGTREE );
   }
 
   private Shell getShell() {
@@ -473,43 +445,16 @@ public class GitController extends AbstractXulEventHandler {
     firePropertyChange( "commitMessage", null, commitMessage );
   }
 
-  public List<UIFile> getUnstagedObjects() throws Exception {
-    List<UIRepositoryObjectRevision> revisions = getSelectedRevisions();
-    if ( revisions == null ) { // when Spoon is starting
-      return null;
-    }
-    if ( revisions.isEmpty() ) {
-      return uiGit.getUnstagedObjects();
-    } else {
-      UIRepositoryObjectRevision revision = revisions.iterator().next();
-      if ( revision.getName().equals( UIGit.WORKINGTREE ) ) { // WIP
-        return uiGit.getUnstagedObjects();
-      } else {
-        return null;
-      }
-    }
-  }
-
-  public List<UIFile> getStagedObjects() throws Exception {
-    List<UIRepositoryObjectRevision> revisions = getSelectedRevisions();
-    if ( revisions == null ) { // when Spoon is starting
-      return null;
-    }
-    if ( revisions.isEmpty() ) {
-      return uiGit.getStagedObjects( UIGit.WORKINGTREE );
-    } else {
-      UIRepositoryObjectRevision revision = revisions.iterator().next();
-      return uiGit.getStagedObjects( revision.getName() );
-    }
-  }
-
   public List<UIFile> getChangedObjects() throws Exception {
-    List<UIFile> changedObjects = new ArrayList<UIFile>();
-    if ( getUnstagedObjects() != null ) {
-      changedObjects.addAll( getUnstagedObjects() );
+    if ( getSelectedRevisions() == null ) { // when Spoon is starting
+      return null;
     }
-    if ( getStagedObjects() != null ) {
-      changedObjects.addAll( getStagedObjects() );
+    List<UIFile> changedObjects = new ArrayList<UIFile>();
+    if ( isWIP() ) {
+      changedObjects.addAll( uiGit.getUnstagedObjects() );
+      changedObjects.addAll( uiGit.getStagedObjects( UIGit.WORKINGTREE ) );
+    } else {
+      changedObjects.addAll( uiGit.getStagedObjects( getSelectedRevisions().get( 0 ).getName() ) );
     }
     return changedObjects;
   }
@@ -561,7 +506,7 @@ public class GitController extends AbstractXulEventHandler {
     confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
       if ( returnCode.equals( Status.ACCEPT ) ) {
         try {
-          List<UIFile> contents = getSelectedUnstagedObjects();
+          List<UIFile> contents = getSelectedChangedObjects();
           for ( UIFile content : contents ) {
             uiGit.checkoutPath( content.getName() );
           }
