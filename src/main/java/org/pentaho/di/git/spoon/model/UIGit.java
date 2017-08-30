@@ -95,6 +95,11 @@ public class UIGit extends XulEventSourceAdapter {
     return directory;
   }
 
+  @VisibleForTesting
+  void setDirectory( String directory ) {
+    this.directory = directory;
+  }
+
   /**
    * Find a Git repository by scanning up the file system tree
    * @param pathname of a Kettle file
