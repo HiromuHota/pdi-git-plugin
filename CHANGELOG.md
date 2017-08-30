@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.6.0 - 2017-08-30
+### Changed
+- Diff can now be between arbitrary two commits
+- The two tables for unstaged and staged was merged into one table for changed files
+- The list of changed files of past commits can now be shown
+- An icon is attached to each changed file, representing ADDED, CHANGED, or REMOVED
+- Texual/visual diff of past commits can now be obtained
+
 ## 0.5.1 - 2017-08-22
 ### Added
 - Add version.xml and OSS_Licenses.md to the assemply zip
