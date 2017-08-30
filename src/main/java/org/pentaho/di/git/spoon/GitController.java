@@ -55,6 +55,7 @@ import org.pentaho.ui.xul.binding.BindingFactory;
 import org.pentaho.ui.xul.components.XulButton;
 import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.components.XulLabel;
+import org.pentaho.ui.xul.components.XulMenuitem;
 import org.pentaho.ui.xul.components.XulMessageBox;
 import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
@@ -87,6 +88,7 @@ public class GitController extends AbstractXulEventHandler {
   private XulTree revisionTable;
   private XulTree changedTable;
   private XulTreeCol checkboxCol;
+  private XulMenuitem discardMenuItem;
   private XulButton commitButton;
   private XulButton pullButton;
   private XulButton pushButton;
@@ -110,6 +112,7 @@ public class GitController extends AbstractXulEventHandler {
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     changedTable = (XulTree) document.getElementById( "changed-table" );
     checkboxCol = (XulTreeCol) document.getElementById( "checkbox-col" );
+    discardMenuItem = (XulMenuitem) document.getElementById( "menuitem-discard" );
     /*
      * Add a listener to add/reset file upon checking/unchecking changed files
      */
@@ -390,6 +393,7 @@ public class GitController extends AbstractXulEventHandler {
         setCommitMessage( "" );
         commitMessageTextbox.setReadonly( false );
         commitButton.setDisabled( false );
+        discardMenuItem.setDisabled( false );
       } else {
         checkboxCol.setEditable( false );
         if ( getSelectedRevisions().size() == 1 ) {
@@ -402,6 +406,7 @@ public class GitController extends AbstractXulEventHandler {
         authorNameTextbox.setReadonly( true );
         commitMessageTextbox.setReadonly( true );
         commitButton.setDisabled( true );
+        discardMenuItem.setDisabled( true );
       }
       changedBinding.fireSourceChanged();
     }
@@ -550,10 +555,6 @@ public class GitController extends AbstractXulEventHandler {
    * @throws Exception
    */
   public void discard() throws Exception {
-    if ( !isOnlyWIP() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not in " + UIGit.WORKINGTREE );
-      return;
-    }
     XulConfirmBox confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
     confirmBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.Discard" ) );
     confirmBox.setMessage( "Are you sure?" );
@@ -564,7 +565,11 @@ public class GitController extends AbstractXulEventHandler {
         try {
           List<UIFile> contents = getSelectedChangedObjects();
           for ( UIFile content : contents ) {
-            uiGit.checkoutPath( content.getName() );
+            if ( content.getIsStaged() ) {
+              showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please unstage first" );
+            } else {
+              uiGit.checkoutPath( content.getName() );
+            }
           }
           fireSourceChanged();
         } catch ( Exception e ) {

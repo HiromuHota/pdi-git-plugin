@@ -62,7 +62,7 @@
     <menuitem label="${Git.Delete}" command="gitController.deleteBranch()"/>
   </menupopup>
   <menupopup id="changedContextMenu">
-    <menuitem label="${Git.ContextMenu.Discard}" command="gitController.discard()"/>
+    <menuitem id="menuitem-discard" label="${Git.ContextMenu.Discard}" command="gitController.discard()"/>
     <menuitem label="${Git.ContextMenu.Open}" command="gitController.openFile()"/>
     <menuitem label="${Git.ContextMenu.VisualDiff}" command="gitController.visualdiff()"/>
   </menupopup>
