@@ -20,7 +20,6 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
@@ -61,7 +60,6 @@ import org.pentaho.ui.xul.components.XulPromptBox;
 import org.pentaho.ui.xul.components.XulTextbox;
 import org.pentaho.ui.xul.components.XulTreeCol;
 import org.pentaho.ui.xul.containers.XulTree;
-import org.pentaho.ui.xul.dnd.DropEvent;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 import org.pentaho.ui.xul.swt.SwtBindingFactory;
 import org.pentaho.ui.xul.swt.SwtElement;
@@ -339,31 +337,6 @@ public class GitController extends AbstractXulEventHandler {
       } );
   }
 
-  public void onDropToStaged( DropEvent event ) throws Exception {
-    for ( Object o : event.getDataTransfer().getData() ) {
-      if ( o instanceof UIFile ) {
-        UIFile content = (UIFile) o;
-        if ( content.getChangeType() == ChangeType.DELETE ) {
-          uiGit.rm( content.getName() );
-        } else {
-          uiGit.add( content.getName() );
-        }
-      }
-    }
-  }
-
-  public void onDropToUnstaged( DropEvent event ) throws Exception {
-    for ( Object o : event.getDataTransfer().getData() ) {
-      if ( o instanceof UIFile ) {
-        UIFile content = (UIFile) o;
-        uiGit.reset( content.getName() );
-      }
-    }
-  }
-
-  public void onDrag( DropEvent event ) {
-  }
-
   public List<UIRepositoryObjectRevision> getSelectedRevisions() {
     return selectedRevisions;
   }
@@ -600,7 +573,7 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  public void pullWithUsernamePassword() {
+  private void pullWithUsernamePassword() {
     UsernamePasswordDialog dialog = new UsernamePasswordDialog( getShell() );
     if ( dialog.open() == Window.OK ) {
       String username = dialog.getUsername();

@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.vfs2.FileObject;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.RemoteAddCommand;
@@ -32,7 +31,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
 public class UIGitTest extends RepositoryTestCase {
@@ -50,27 +48,6 @@ public class UIGitTest extends RepositoryTestCase {
 
     // create another repository
     db2 = createWorkRepository();
-  }
-
-  @Test
-  public void testFindGitRepository() throws Exception {
-    // Find a repo in the same dir
-    File file = writeTrashFile( "a.ktr", "content" );
-    FileObject f = KettleVFS.getFileObject( file.getPath() );
-    assertEquals( db.getDirectory().getParent(), uiGit.findGitRepository( f.getURL().toString() ) );
-
-    // Find a repo in the parent dir
-    file = writeTrashFile( "subdir", "a.ktr", "content" );
-    f = KettleVFS.getFileObject( file.getPath() );
-    assertEquals( db.getDirectory().getParent(), uiGit.findGitRepository( f.getURL().toString() ) );
-  }
-
-  @Test
-  public void testNotFindGitRepository() throws Exception {
-    File dir = createTempDirectory( "nonGitDir" );
-    File file = new File( dir, "test.ktr" );
-    FileObject f = KettleVFS.getFileObject( file.getPath() );
-    assertEquals( dir.getPath(), uiGit.findGitRepository( f.getURL().toString() ) );
   }
 
   @Test

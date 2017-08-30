@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -49,7 +47,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.HttpTransport;
 import org.eclipse.jgit.transport.PushResult;
@@ -98,36 +95,6 @@ public class UIGit extends XulEventSourceAdapter {
   @VisibleForTesting
   void setDirectory( String directory ) {
     this.directory = directory;
-  }
-
-  /**
-   * Find a Git repository by scanning up the file system tree
-   * @param pathname of a Kettle file
-   * @return
-   */
-  public String findGitRepository( String pathname ) {
-    File parentFile = null;
-    try {
-      parentFile = new File( new URI( pathname ) ).getParentFile();
-    } catch ( URISyntaxException e1 ) {
-      e1.printStackTrace();
-    }
-    Repository repository;
-    try {
-      repository = ( new FileRepositoryBuilder() ).readEnvironment() // scan environment GIT_* variables
-          .findGitDir( parentFile ) // scan up the file system tree
-          .build();
-      return repository.getDirectory().getParent();
-    } catch ( IOException e ) {
-      return null;
-    } catch ( IllegalArgumentException e ) {
-      if ( e.getMessage().equals( "One of setGitDir or setWorkTree must be called." ) ) {
-        // git repository not found
-        return parentFile.getPath();
-      } else {
-        return null;
-      }
-    }
   }
 
   /**
