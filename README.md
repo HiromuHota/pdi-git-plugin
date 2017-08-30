@@ -33,21 +33,37 @@ Currently, a remote repository named "origin" can be set.
 
 ## Working with files
 
-Stage changed files by drag & drop, write a good commit message, change the author name if necessary, and finally <b>Commit</b>.
+Stage changed files by checking the checkbox on the left side of each file, write a good commit message, change the author name if necessary, and finally <b>Commit</b>.
 Right-click on a commit pops up a context menu, where you can choose **checkout** to checkout that particular commit.
 
-### Diff
+## Diff
 
-Texual diff will be displayed in the bottom left corner:
+Diff information can be obtained texually and visually.
+In order to get the right diff you want to see, it is important to understand the followings:
 
-- When a commit is selected in the commit history, or
-- When <i>WIP</i> (work-in-progress) is selected in the commit history and an unstaged/untracked files is selected
+- When only one commit is selected, the diff will be between the selected commit and its first parent commit.
+- When multiple commits are selected, the diff will be between the newest commit and the oldest commit (out of the selected commits).
+- When no commit is selected, it is assumed that WORKINGTREE is selected.
 
-Visual diff can be displayed by right-clicking on a unstaged/untracked file, then choose **Visual diff**.
-This opens up two tabs: **HEAD -> Working tree** and **Working tree -> HEAD** in the Data Integration perspective.
+Examples:
 
-- HEAD -> Working tree: the difference you see when looking from HEAD (the last committed version) to the working tree (the current, uncommitted version)
-- Working tree -> HEAD:	 vice versa
+- Only WORKINGTREE is selected: (1)
+- Only 456def is selected: (2)
+- WORKINGTREE and 456def are selected: (3)
+- 123abc and 789ghi are selected: (4)
+
+You can also see the diff of a specific changed file by selecting one of them, but special rules applie when WORKINGTREE is selected.
+
+- If only WORKINGTREE is selected AND the selected file is not staged: (5)
+- If only WORKINGTREE is selected AND the selected file is staged: (6)
+- If another commit is also selected: the diff will be between WORKINGTREE and that another commit
+
+![diff](images/diff.png)
+
+A texual diff will be displayed in the bottom left corner.
+Visual diff can be displayed by right-clicking on a changed file, then choose **Visual diff**.
+This opens up two tabs in the Data Integration perspective:
+one tab shows the difference you see when looking from one commit to another commit, and the other tab shows the other way around.
 
 The difference is represented by the small icon superimposed on the top-right corner on the steps/job entries.
 Each icon means as follows:
