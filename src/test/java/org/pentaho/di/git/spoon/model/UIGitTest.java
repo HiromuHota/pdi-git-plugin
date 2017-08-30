@@ -330,7 +330,7 @@ public class UIGitTest extends RepositoryTestCase {
   public void testDiff() throws Exception {
     File file = writeTrashFile( "Test.txt", "Hello world" );
 
-    String diff = uiGit.diff( UIGit.WORKINGTREE, UIGit.INDEX, "Test.txt" );
+    String diff = uiGit.diff( UIGit.INDEX, UIGit.WORKINGTREE, "Test.txt" );
     assertTrue( diff.contains( "Hello world" ) );
 
     git.add().addFilepattern( "Test.txt" ).call();
@@ -338,7 +338,7 @@ public class UIGitTest extends RepositoryTestCase {
 
     // Should detect renames
     file.renameTo( new File( git.getRepository().getWorkTree(), "Test2.txt" ) );
-    diff = uiGit.diff( UIGit.WORKINGTREE, Constants.HEAD, "Test2.txt" );
+    diff = uiGit.diff( Constants.HEAD, UIGit.WORKINGTREE, "Test2.txt" );
     assertTrue( diff.contains( "rename" ) );
   }
 

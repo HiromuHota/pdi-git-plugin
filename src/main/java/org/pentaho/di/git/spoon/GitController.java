@@ -381,7 +381,7 @@ public class GitController extends AbstractXulEventHandler {
         setDiff( uiGit.show( commitId ) );
       } else {
         String commitIdOld = getLastSelectedRevision().getName();
-        setDiff( uiGit.diff( commitId, commitIdOld ) );
+        setDiff( uiGit.diff( commitIdOld, commitId ) );
       }
       if ( isOnlyWIP() ) {
         checkboxCol.setEditable( true );
@@ -416,15 +416,15 @@ public class GitController extends AbstractXulEventHandler {
     if ( selectedObjects.size() != 0 ) {
       if ( isOnlyWIP() ) {
         if ( selectedObjects.get( 0 ).getIsStaged() ) {
-          setDiff( uiGit.diff( UIGit.INDEX, Constants.HEAD, selectedObjects.get( 0 ).getName() ) );
+          setDiff( uiGit.diff( Constants.HEAD, UIGit.INDEX, selectedObjects.get( 0 ).getName() ) );
         } else {
-          setDiff( uiGit.diff( UIGit.WORKINGTREE, UIGit.INDEX, selectedObjects.get( 0 ).getName() ) );
+          setDiff( uiGit.diff( UIGit.INDEX, UIGit.WORKINGTREE, selectedObjects.get( 0 ).getName() ) );
         }
       } else {
         String newCommitId = getFirstSelectedRevision().getName();
         String oldCommitId = getSelectedRevisions().size() == 1 ? uiGit.getCommitId( newCommitId + "^" )
           : getLastSelectedRevision().getName();
-        setDiff( uiGit.diff( newCommitId, oldCommitId, selectedObjects.get( 0 ).getName() ) );
+        setDiff( uiGit.diff( oldCommitId, newCommitId, selectedObjects.get( 0 ).getName() ) );
       }
     }
   }
@@ -505,7 +505,7 @@ public class GitController extends AbstractXulEventHandler {
       } else {
         String newCommitId = getFirstSelectedRevision().getName();
         String oldCommitId = getLastSelectedRevision().getName();
-        changedObjects.addAll( uiGit.getStagedObjects( newCommitId, oldCommitId ) );
+        changedObjects.addAll( uiGit.getStagedObjects( oldCommitId, newCommitId ) );
       }
     }
     return changedObjects;

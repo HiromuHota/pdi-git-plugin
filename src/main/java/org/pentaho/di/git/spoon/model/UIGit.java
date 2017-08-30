@@ -330,7 +330,7 @@ public class UIGit extends XulEventSourceAdapter {
         files.add( new UIFile( name, ChangeType.DELETE, true ) );
       } );
     } else {
-      List<DiffEntry> diffs = getDiffCommand( commitId, commitId + "^" )
+      List<DiffEntry> diffs = getDiffCommand( commitId + "^", commitId )
         .setShowNameAndStatusOnly( true )
         .call();
       RenameDetector rd = new RenameDetector( git.getRepository() );
@@ -344,9 +344,9 @@ public class UIGit extends XulEventSourceAdapter {
     return files;
   }
 
-  public List<UIFile> getStagedObjects( String newCommitId, String oldCommitId ) throws Exception {
+  public List<UIFile> getStagedObjects( String oldCommitId, String newCommitId ) throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
-    List<DiffEntry> diffs = getDiffCommand( newCommitId, oldCommitId )
+    List<DiffEntry> diffs = getDiffCommand( oldCommitId, newCommitId )
       .setShowNameAndStatusOnly( true )
       .call();
     RenameDetector rd = new RenameDetector( git.getRepository() );
@@ -431,17 +431,17 @@ public class UIGit extends XulEventSourceAdapter {
    */
   public String show( String commitId ) throws Exception {
     if ( commitId.equals( WORKINGTREE ) ) {
-      return diff( WORKINGTREE, Constants.HEAD );
+      return diff( Constants.HEAD, WORKINGTREE );
     } else {
-      return diff( commitId, commitId + "^" );
+      return diff( commitId + "^", commitId );
     }
   }
 
-  public String diff( String newCommitId, String oldCommitId ) throws Exception {
-    return diff( newCommitId, oldCommitId, null );
+  public String diff( String oldCommitId, String newCommitId ) throws Exception {
+    return diff( oldCommitId, newCommitId, null );
   }
 
-  public String diff( String newCommitId, String oldCommitId, String file ) throws Exception {
+  public String diff( String oldCommitId, String newCommitId, String file ) throws Exception {
     // DiffFormatter does not detect renames with path filters on
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     DiffFormatter formatter = new DiffFormatter( out );
@@ -546,7 +546,7 @@ public class UIGit extends XulEventSourceAdapter {
     return git.checkout().addPath( path ).call();
   }
 
-  private DiffCommand getDiffCommand( String newCommitId, String oldCommitId ) throws Exception {
+  private DiffCommand getDiffCommand( String oldCommitId, String newCommitId ) throws Exception {
     return git.diff()
       .setOldTree( getTreeIterator( oldCommitId ) )
       .setNewTree( getTreeIterator( newCommitId ) );
