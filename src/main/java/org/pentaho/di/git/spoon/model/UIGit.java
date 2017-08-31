@@ -275,7 +275,12 @@ public class UIGit extends XulEventSourceAdapter {
     return revisions;
   }
 
-  public List<UIFile> getUnstagedObjects() throws Exception {
+  /**
+   * Get the list of unstaged files
+   * @return
+   * @throws Exception
+   */
+  public List<UIFile> getUnstagedFiles() throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
     Status status = git.status().call();
     status.getUntracked().forEach( name -> {
@@ -290,35 +295,34 @@ public class UIGit extends XulEventSourceAdapter {
     return files;
   }
 
-  public List<UIFile> getStagedObjects( String commitId ) throws Exception {
+  /**
+   * Get the list of staged files
+   * @return
+   * @throws Exception
+   */
+  public List<UIFile> getStagedFiles() throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
-    if ( commitId.equals( WORKINGTREE ) ) {
-      Status status = git.status().call();
-      status.getAdded().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.ADD, true ) );
-      } );
-      status.getChanged().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.MODIFY, true ) );
-      } );
-      status.getRemoved().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.DELETE, true ) );
-      } );
-    } else {
-      List<DiffEntry> diffs = getDiffCommand( commitId + "^", commitId )
-        .setShowNameAndStatusOnly( true )
-        .call();
-      RenameDetector rd = new RenameDetector( git.getRepository() );
-      rd.addAll( diffs );
-      diffs = rd.compute();
-      diffs.forEach( diff -> {
-        files.add( new UIFile( diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath() : diff.getNewPath(),
-            diff.getChangeType(), false ) );
-      } );
-    }
+    Status status = git.status().call();
+    status.getAdded().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.ADD, true ) );
+    } );
+    status.getChanged().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.MODIFY, true ) );
+    } );
+    status.getRemoved().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.DELETE, true ) );
+    } );
     return files;
   }
 
-  public List<UIFile> getStagedObjects( String oldCommitId, String newCommitId ) throws Exception {
+  /**
+   * Get the list of changed files between two commits
+   * @param oldCommitId
+   * @param newCommitId
+   * @return
+   * @throws Exception
+   */
+  public List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
     List<DiffEntry> diffs = getDiffCommand( oldCommitId, newCommitId )
       .setShowNameAndStatusOnly( true )
@@ -333,8 +337,8 @@ public class UIGit extends XulEventSourceAdapter {
     return files;
   }
 
-  public boolean hasStagedObjects() throws Exception {
-    return getStagedObjects( WORKINGTREE ).size() != 0;
+  public boolean hasStagedFiles() throws Exception {
+    return !getStagedFiles().isEmpty();
   }
 
   public void initRepo( String baseDirectory ) throws IllegalStateException, GitAPIException {
@@ -364,6 +368,10 @@ public class UIGit extends XulEventSourceAdapter {
     git.reset().addPath( path ).call();
   }
 
+  public void resetHard() throws Exception {
+    git.reset().setMode( ResetType.HARD ).call();
+  }
+
   /**
    * Equivalent of <tt>git fetch; git merge --ff</tt>
    *
@@ -380,10 +388,6 @@ public class UIGit extends XulEventSourceAdapter {
     CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
     cmd.setCredentialsProvider( credentialsProvider );
     return cmd.call();
-  }
-
-  public void resetHard() throws Exception {
-    git.reset().setMode( ResetType.HARD ).call();
   }
 
   public Iterable<PushResult> push() throws Exception {
@@ -493,6 +497,16 @@ public class UIGit extends XulEventSourceAdapter {
     git.checkout().setName( name ).call();
   }
 
+  /**
+   * Checkout a file of a particular branch or commit
+   * @param name branch or commit; null for INDEX
+   * @param path
+   * @throws Exception
+   */
+  public void checkout( String name, String path ) throws Exception {
+    git.checkout().setName( name ).addPath( path ).call();
+  }
+
   public Ref createBranch( String value ) throws Exception {
     return git.branchCreate().setName( value ).call();
   }
@@ -514,10 +528,6 @@ public class UIGit extends XulEventSourceAdapter {
         .include( ref )
         .setStrategy( MergeStrategy.get( mergeStrategy ) )
         .call();
-  }
-
-  public void checkoutPath( String path ) throws Exception {
-    git.checkout().addPath( path ).call();
   }
 
   private DiffCommand getDiffCommand( String oldCommitId, String newCommitId ) throws Exception {

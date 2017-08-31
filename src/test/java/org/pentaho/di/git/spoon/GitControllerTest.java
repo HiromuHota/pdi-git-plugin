@@ -99,7 +99,7 @@ public class GitControllerTest {
   public void shouldNotCommitWhenNoStagedObjects() throws Exception {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
-    doReturn( false ).when( uiGit ).hasStagedObjects();
+    doReturn( false ).when( uiGit ).hasStagedFiles();
 
     controller.commit();
 
@@ -110,7 +110,7 @@ public class GitControllerTest {
   public void shouldCommit() throws Exception {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
-    doReturn( true ).when( uiGit ).hasStagedObjects();
+    doReturn( true ).when( uiGit ).hasStagedFiles();
 
     controller.commit();
 

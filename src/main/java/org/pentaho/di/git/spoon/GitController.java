@@ -472,22 +472,22 @@ public class GitController extends AbstractXulEventHandler {
     }
     List<UIFile> changedObjects = new ArrayList<UIFile>();
     if ( isOnlyWIP() ) {
-      changedObjects.addAll( uiGit.getUnstagedObjects() );
-      changedObjects.addAll( uiGit.getStagedObjects( UIGit.WORKINGTREE ) );
+      changedObjects.addAll( uiGit.getUnstagedFiles() );
+      changedObjects.addAll( uiGit.getStagedFiles() );
     } else {
       if ( getSelectedRevisions().size() == 1 ) {
-        changedObjects.addAll( uiGit.getStagedObjects( getFirstSelectedRevision().getName() ) );
+        changedObjects.addAll( uiGit.getStagedFiles( getFirstSelectedRevision().getName() + "~", getFirstSelectedRevision().getName() ) );
       } else {
         String newCommitId = getFirstSelectedRevision().getName();
         String oldCommitId = getLastSelectedRevision().getName();
-        changedObjects.addAll( uiGit.getStagedObjects( oldCommitId, newCommitId ) );
+        changedObjects.addAll( uiGit.getStagedFiles( oldCommitId, newCommitId ) );
       }
     }
     return changedObjects;
   }
 
   public void commit() throws Exception {
-    if ( !uiGit.hasStagedObjects() ) {
+    if ( !uiGit.hasStagedFiles() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           "There are no staged files" );
       return;
@@ -532,7 +532,7 @@ public class GitController extends AbstractXulEventHandler {
             if ( content.getIsStaged() ) {
               showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please unstage first" );
             } else {
-              uiGit.checkoutPath( content.getName() );
+              uiGit.checkout( null, content.getName() );
             }
           }
           fireSourceChanged();

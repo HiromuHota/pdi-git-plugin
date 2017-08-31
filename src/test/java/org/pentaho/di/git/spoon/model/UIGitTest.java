@@ -138,19 +138,19 @@ public class UIGitTest extends RepositoryTestCase {
     File c = writeTrashFile( "c.kjb", "abcdefg" );
 
     // Test for unstaged
-    List<UIFile> unStagedObjects = uiGit.getUnstagedObjects();
+    List<UIFile> unStagedObjects = uiGit.getUnstagedFiles();
     assertEquals( 3, unStagedObjects.size() );
     assertTrue( unStagedObjects.stream().anyMatch( obj -> obj.getName().equals( "a.ktr" ) ) );
 
     // Test for staged
     git.add().addFilepattern( "." ).call();
-    List<UIFile> stagedObjects = uiGit.getStagedObjects( UIGit.WORKINGTREE );
+    List<UIFile> stagedObjects = uiGit.getStagedFiles();
     assertEquals( 3, stagedObjects.size() );
     assertTrue( stagedObjects.stream().anyMatch( obj -> obj.getName().equals( "a.ktr" ) ) );
 
     // Make a commit
     RevCommit commit = git.commit().setMessage( "initial commit" ).call();
-    stagedObjects = uiGit.getStagedObjects( commit.getId().name() );
+    stagedObjects = uiGit.getStagedFiles( commit.getId().name() + "~", commit.getId().name() );
     assertEquals( 3, stagedObjects.size() );
     assertTrue( stagedObjects.stream().anyMatch( obj -> obj.getName().equals( "b.kjb" ) ) );
 
@@ -160,14 +160,14 @@ public class UIGitTest extends RepositoryTestCase {
     FileUtils.writeStringToFile( c, "A change" );
 
     // Test for unstaged
-    unStagedObjects = uiGit.getUnstagedObjects();
+    unStagedObjects = uiGit.getUnstagedFiles();
     assertEquals( ChangeType.DELETE, unStagedObjects.stream().filter( obj -> obj.getName().equals( "b.kjb" ) ).findFirst().get().getChangeType() );
 
     // Test for staged
     git.add().addFilepattern( "." ).call();
     git.rm().addFilepattern( a.getName() ).call();
     git.rm().addFilepattern( b.getName() ).call();
-    stagedObjects = uiGit.getStagedObjects( UIGit.WORKINGTREE );
+    stagedObjects = uiGit.getStagedFiles();
     assertEquals( 4, stagedObjects.size() );
     assertEquals( ChangeType.DELETE, stagedObjects.stream().filter( obj -> obj.getName().equals( "b.kjb" ) ).findFirst().get().getChangeType() );
     assertEquals( ChangeType.ADD, stagedObjects.stream().filter( obj -> obj.getName().equals( "a2.ktr" ) ).findFirst().get().getChangeType() );
@@ -386,14 +386,19 @@ public class UIGitTest extends RepositoryTestCase {
     // commit something
     File file = writeTrashFile( "Test.txt", "Hello world" );
     git.add().addFilepattern( "Test.txt" ).call();
-    git.commit().setMessage( "initial commit" ).call();
+    RevCommit commit = git.commit().setMessage( "initial commit" ).call();
 
     // Add some change
     FileUtils.writeStringToFile( file, "Change" );
     assertEquals( "Change", FileUtils.readFileToString( file ) );
 
-    uiGit.checkoutPath( file.getName() );
+    uiGit.checkout( null, file.getName() );
+    assertEquals( "Hello world", FileUtils.readFileToString( file ) );
 
+    uiGit.checkout( Constants.HEAD, file.getName() );
+    assertEquals( "Hello world", FileUtils.readFileToString( file ) );
+
+    uiGit.checkout( commit.getName(), file.getName() );
     assertEquals( "Hello world", FileUtils.readFileToString( file ) );
   }
 
