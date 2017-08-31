@@ -9,6 +9,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -17,6 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.git.spoon.model.GitRepository;
+import org.pentaho.di.git.spoon.model.VCS;
 
 public class EditRepositoryDialog extends Dialog {
 
@@ -24,6 +26,7 @@ public class EditRepositoryDialog extends Dialog {
   private Text descText;
   private Text directoryText;
   private String directory;
+  private Combo typeCombo;
 
   protected GitRepository repo;
 
@@ -71,6 +74,13 @@ public class EditRepositoryDialog extends Dialog {
         }
       }
     } );
+
+    Label typeLabel = new Label( comp, SWT.RIGHT );
+    typeLabel.setText( "Type: " );
+    typeLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
+    typeCombo = new Combo( comp, SWT.READ_ONLY );
+    typeCombo.setItems( VCS.GIT );
+    typeCombo.select( 0 );
     return comp;
   }
 
@@ -79,6 +89,7 @@ public class EditRepositoryDialog extends Dialog {
     repo.setName( nameText.getText() );
     repo.setDescription( descText.getText() );
     repo.setDirectory( directoryText.getText() );
+    repo.setType( typeCombo.getText() );
     directory = directoryText.getText();
     super.okPressed();
   }

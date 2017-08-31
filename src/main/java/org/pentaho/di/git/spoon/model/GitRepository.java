@@ -40,4 +40,15 @@ public class GitRepository {
   public void setDirectory( String directory ) {
     this.directory = directory;
   }
+
+  @MetaStoreAttribute( key = "type" )
+  private String type;
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType( String type ) {
+    this.type = type;
+  }
 }

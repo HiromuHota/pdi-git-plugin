@@ -12,6 +12,7 @@ public interface VCS {
 
   String WORKINGTREE = "WORKINGTREE";
   String INDEX = "INDEX";
+  String GIT = "Git";
 
   String getDirectory();
 
