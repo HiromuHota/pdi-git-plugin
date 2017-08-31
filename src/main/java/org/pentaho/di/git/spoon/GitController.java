@@ -37,6 +37,7 @@ import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
+import org.pentaho.di.git.spoon.model.VCS;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
@@ -70,7 +71,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private static final Class<?> PKG = GitController.class;
 
-  private UIGit uiGit = new UIGit();
+  private VCS uiGit = new UIGit();
   private String path;
   private String branch;
   private String diff;
@@ -246,7 +247,7 @@ public class GitController extends AbstractXulEventHandler {
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
         String commitId;
-        commitId = isOnlyWIP() ? UIGit.WORKINGTREE : getFirstSelectedRevision().getName();
+        commitId = isOnlyWIP() ? VCS.WORKINGTREE : getFirstSelectedRevision().getName();
         try ( InputStream xmlStream = uiGit.open( content.getName(), commitId ) ) {
           EngineMetaInterface meta = null;
           Consumer<EngineMetaInterface> c = null;
@@ -286,7 +287,7 @@ public class GitController extends AbstractXulEventHandler {
           InputStream xmlStreamOld, xmlStreamNew;
           String commitIdOld, commitIdNew;
           if ( isOnlyWIP() ) {
-            commitIdNew = UIGit.WORKINGTREE;
+            commitIdNew = VCS.WORKINGTREE;
             commitIdOld = Constants.HEAD;
           } else {
             commitIdNew = getFirstSelectedRevision().getName();
@@ -390,9 +391,9 @@ public class GitController extends AbstractXulEventHandler {
     if ( selectedFiles.size() != 0 ) {
       if ( isOnlyWIP() ) {
         if ( selectedFiles.get( 0 ).getIsStaged() ) {
-          setDiff( uiGit.diff( Constants.HEAD, UIGit.INDEX, selectedFiles.get( 0 ).getName() ) );
+          setDiff( uiGit.diff( Constants.HEAD, VCS.INDEX, selectedFiles.get( 0 ).getName() ) );
         } else {
-          setDiff( uiGit.diff( UIGit.INDEX, UIGit.WORKINGTREE, selectedFiles.get( 0 ).getName() ) );
+          setDiff( uiGit.diff( VCS.INDEX, VCS.WORKINGTREE, selectedFiles.get( 0 ).getName() ) );
         }
       } else {
         String newCommitId = getFirstSelectedRevision().getName();
@@ -410,7 +411,7 @@ public class GitController extends AbstractXulEventHandler {
    */
   private Boolean isOnlyWIP() {
     return getSelectedRevisions().isEmpty()
-        || ( getFirstSelectedRevision().getName().equals( UIGit.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
+        || ( getFirstSelectedRevision().getName().equals( VCS.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
   }
 
   private Shell getShell() {
@@ -768,7 +769,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   @VisibleForTesting
-  void setUIGit( UIGit uiGit ) {
+  void setUIGit( VCS uiGit ) {
     this.uiGit = uiGit;
   }
 

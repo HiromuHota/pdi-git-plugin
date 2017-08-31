@@ -314,7 +314,7 @@ public class UIGitTest extends RepositoryTestCase {
   public void testDiff() throws Exception {
     File file = writeTrashFile( "Test.txt", "Hello world" );
 
-    String diff = uiGit.diff( UIGit.INDEX, UIGit.WORKINGTREE, "Test.txt" );
+    String diff = uiGit.diff( VCS.INDEX, VCS.WORKINGTREE, "Test.txt" );
     assertTrue( diff.contains( "+Hello world" ) );
 
     git.add().addFilepattern( "Test.txt" ).call();
@@ -325,7 +325,7 @@ public class UIGitTest extends RepositoryTestCase {
     git.add().addFilepattern( "Test.txt" ).call();
     RevCommit commit2 = git.commit().setMessage( "second commit" ).call();
 
-    diff = uiGit.diff( commit1.getName(), UIGit.WORKINGTREE );
+    diff = uiGit.diff( commit1.getName(), VCS.WORKINGTREE );
     assertTrue( diff.contains( "-Hello world" ) );
     assertTrue( diff.contains( "+second commit" ) );
     diff = uiGit.diff( commit1.getName(), commit2.getName() );
@@ -333,7 +333,7 @@ public class UIGitTest extends RepositoryTestCase {
 
     // Should detect renames
     file.renameTo( new File( git.getRepository().getWorkTree(), "Test2.txt" ) );
-    diff = uiGit.diff( Constants.HEAD, UIGit.WORKINGTREE, "Test2.txt" );
+    diff = uiGit.diff( Constants.HEAD, VCS.WORKINGTREE, "Test2.txt" );
     assertTrue( diff.contains( "rename" ) );
   }
 
@@ -346,7 +346,7 @@ public class UIGitTest extends RepositoryTestCase {
 
     // Make the second commit
     writeTrashFile( "Test2.txt", "Second commit" );
-    diff = uiGit.show( UIGit.WORKINGTREE );
+    diff = uiGit.show( VCS.WORKINGTREE );
     assertTrue( diff.contains( "+Second commit" ) );
     git.add().addFilepattern( "Test2.txt" ).call();
     commit = git.commit().setMessage( "initial commit" ).call();
@@ -364,7 +364,7 @@ public class UIGitTest extends RepositoryTestCase {
     IOUtils.copy( inputStream, writer, "UTF-8" );
     assertEquals( "Hello world", writer.toString() );
 
-    inputStream = uiGit.open( "Test.txt", UIGit.WORKINGTREE );
+    inputStream = uiGit.open( "Test.txt", VCS.WORKINGTREE );
     writer = new StringWriter();
     IOUtils.copy( inputStream, writer, "UTF-8" );
     assertEquals( "Hello world", writer.toString() );
