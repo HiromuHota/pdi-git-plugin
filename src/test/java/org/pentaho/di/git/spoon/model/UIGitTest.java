@@ -84,11 +84,9 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testDeleteRemote() throws Exception {
-    RemoteConfig remoteConfig = setupRemote();
-    RemoteConfig remote = uiGit.removeRemote();
+    setupRemote();
+    uiGit.removeRemote();
 
-    // assert that the removed remote is the initial remote
-    assertEquals( remoteConfig.getName(), remote.getName() );
     // assert that there are no remotes left
     assertTrue( RemoteConfig.getAllRemoteConfigs( db.getConfig() ).isEmpty() );
   }
@@ -109,12 +107,20 @@ public class UIGitTest extends RepositoryTestCase {
     PersonIdent author = new PersonIdent( "author", "author@example.com" );
     String message = "Initial commit";
 
-    RevCommit commit = uiGit.commit( author, message );
+    uiGit.commit( author.toExternalString(), message );
+    String commitId = uiGit.getCommitId( Constants.HEAD );
 
-    assertEquals( author, commit.getAuthorIdent() );
-    assertEquals( message, commit.getFullMessage() );
-    assertEquals( message, uiGit.getCommitMessage( commit.getName() ) );
-    assertEquals( "author <author@example.com>", uiGit.getAuthorName( commit.getName() ) );
+    assertTrue( author.toExternalString().contains( uiGit.getAuthorName( commitId ) ) );
+    assertEquals( message, uiGit.getCommitMessage( commitId ) );
+  }
+
+  @Test
+  public void shouldNotCommitWhenAuthorNameMalformed() throws Exception {
+    writeTrashFile( "Test.txt", "Hello world" );
+    uiGit.add( "Test.txt" );
+
+    thrown.expect( NullPointerException.class );
+    uiGit.commit( "random author", "Initial commit" );
   }
 
   @Test

@@ -23,13 +23,10 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
-import org.eclipse.jgit.util.RawParseUtils;
-import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -193,7 +190,7 @@ public class GitController extends AbstractXulEventHandler {
   public void openGit( GitRepository repo ) {
     String baseDirectory = repo.getDirectory();
     try {
-      uiGit.openGit( baseDirectory );
+      uiGit.openRepo( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
     } catch ( NullPointerException e ) {
@@ -221,7 +218,7 @@ public class GitController extends AbstractXulEventHandler {
       confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
         if ( returnCode == Status.ACCEPT ) {
           try {
-            uiGit.initGit( baseDirectory );
+            uiGit.initRepo( baseDirectory );
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           } catch ( Exception e ) {
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -497,13 +494,7 @@ public class GitController extends AbstractXulEventHandler {
     }
 
     try {
-      PersonIdent author = RawParseUtils.parsePersonIdent( getAuthorName() );
-      // Set the local time
-      PersonIdent author2 = new PersonIdent( author.getName(), author.getEmailAddress(),
-          SystemReader.getInstance().getCurrentTime(),
-          SystemReader.getInstance().getTimezone( SystemReader.getInstance().getCurrentTime() ) );
-
-      uiGit.commit( author2, getCommitMessage() );
+      uiGit.commit( getAuthorName(), getCommitMessage() );
       setCommitMessage( "" );
       fireSourceChanged();
     } catch ( NullPointerException e ) {

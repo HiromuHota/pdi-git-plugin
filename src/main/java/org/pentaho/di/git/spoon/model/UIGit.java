@@ -29,7 +29,6 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RenameDetector;
-import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheIterator;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ConfigConstants;
@@ -61,6 +60,8 @@ import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FileUtils;
+import org.eclipse.jgit.util.RawParseUtils;
+import org.eclipse.jgit.util.SystemReader;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
@@ -204,10 +205,6 @@ public class UIGit extends XulEventSourceAdapter {
     return null;
   }
 
-  public String getFullBranch() throws IOException {
-    return git.getRepository().getFullBranch();
-  }
-
   public String getRemote() {
     try {
       StoredConfig config = git.getRepository().getConfig();
@@ -218,7 +215,7 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
-  public RemoteConfig addRemote( String s ) throws Exception {
+  public void addRemote( String s ) throws Exception {
     // Make sure you have only one URI for push
     removeRemote();
 
@@ -227,14 +224,14 @@ public class UIGit extends XulEventSourceAdapter {
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
     cmd.setUri( uri );
     firePropertyChange( "remote", null, s );
-    return cmd.call();
+    cmd.call();
   }
 
-  public RemoteConfig removeRemote() throws GitAPIException {
+  public void removeRemote() throws GitAPIException {
     RemoteRemoveCommand cmd = git.remoteRemove();
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
     firePropertyChange( "remote", null, "" );
-    return cmd.call();
+    cmd.call();
   }
 
   public boolean hasRemote() {
@@ -243,8 +240,13 @@ public class UIGit extends XulEventSourceAdapter {
     return remotes.contains( Constants.DEFAULT_REMOTE_NAME );
   }
 
-  public RevCommit commit( PersonIdent author, String message ) throws Exception {
-    return git.commit().setAuthor( author ).setMessage( message ).call();
+  public void commit( String authorName, String message ) throws Exception {
+    PersonIdent author = RawParseUtils.parsePersonIdent( authorName );
+    // Set the local time
+    PersonIdent author2 = new PersonIdent( author.getName(), author.getEmailAddress(),
+        SystemReader.getInstance().getCurrentTime(),
+        SystemReader.getInstance().getTimezone( SystemReader.getInstance().getCurrentTime() ) );
+    git.commit().setAuthor( author2 ).setMessage( message ).call();
   }
 
   public UIRepositoryObjectRevisions getRevisions() throws Exception {
@@ -335,31 +337,31 @@ public class UIGit extends XulEventSourceAdapter {
     return getStagedObjects( WORKINGTREE ).size() != 0;
   }
 
-  public void initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {
+  public void initRepo( String baseDirectory ) throws IllegalStateException, GitAPIException {
     git = Git.init().setDirectory( new File( baseDirectory ) ).call();
     directory = baseDirectory;
   }
 
-  public void openGit( String baseDirectory ) throws IOException {
+  public void openRepo( String baseDirectory ) throws IOException {
     git = Git.open( new File( baseDirectory ) );
     directory = baseDirectory;
   }
 
-  public void closeGit() {
+  public void closeRepo() {
     git.close();
     git = null;
   }
 
-  public DirCache add( String filepattern ) throws Exception {
-    return git.add().addFilepattern( filepattern ).call();
+  public void add( String filepattern ) throws Exception {
+    git.add().addFilepattern( filepattern ).call();
   }
 
-  public DirCache rm( String filepattern ) throws NoFilepatternException, GitAPIException {
-    return git.rm().addFilepattern( filepattern ).call();
+  public void rm( String filepattern ) throws NoFilepatternException, GitAPIException {
+    git.rm().addFilepattern( filepattern ).call();
   }
 
-  public Ref reset( String path ) throws Exception {
-    return git.reset().addPath( path ).call();
+  public void reset( String path ) throws Exception {
+    git.reset().addPath( path ).call();
   }
 
   /**
@@ -380,8 +382,8 @@ public class UIGit extends XulEventSourceAdapter {
     return cmd.call();
   }
 
-  public Ref resetHard() throws Exception {
-    return git.reset().setMode( ResetType.HARD ).call();
+  public void resetHard() throws Exception {
+    git.reset().setMode( ResetType.HARD ).call();
   }
 
   public Iterable<PushResult> push() throws Exception {
@@ -455,13 +457,13 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
-  public static Git cloneRepo( String directory, String uri ) throws Exception {
+  public static void cloneRepo( String directory, String uri ) throws Exception {
     CloneCommand cmd = Git.cloneRepository();
     cmd.setDirectory( new File( directory ) );
     cmd.setURI( uri );
     try {
       Git git = cmd.call();
-      return git;
+      git.close();
     } catch ( Exception e ) {
       try {
         FileUtils.delete( new File( directory ), FileUtils.RECURSIVE );
@@ -469,17 +471,17 @@ public class UIGit extends XulEventSourceAdapter {
       } catch ( IOException e1 ) {
         e1.printStackTrace();
       }
-      return null;
     }
   }
 
-  public static Git cloneRepo( String directory, String uri, String username, String password ) throws Exception {
+  public static void cloneRepo( String directory, String uri, String username, String password ) throws Exception {
     CloneCommand cmd = Git.cloneRepository();
     cmd.setDirectory( new File( directory ) );
     cmd.setURI( uri );
     CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
     cmd.setCredentialsProvider( credentialsProvider );
-    return cmd.call();
+    Git git = cmd.call();
+    git.close();
   }
 
   /**
@@ -514,8 +516,8 @@ public class UIGit extends XulEventSourceAdapter {
         .call();
   }
 
-  public Ref checkoutPath( String path ) throws Exception {
-    return git.checkout().addPath( path ).call();
+  public void checkoutPath( String path ) throws Exception {
+    git.checkout().addPath( path ).call();
   }
 
   private DiffCommand getDiffCommand( String oldCommitId, String newCommitId ) throws Exception {

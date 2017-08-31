@@ -74,7 +74,7 @@ public class GitControllerTest {
 
     controller.initGit( "random-path" );
 
-    verify( uiGit ).initGit( anyString() );
+    verify( uiGit ).initRepo( anyString() );
   }
 
   @Test
@@ -84,7 +84,7 @@ public class GitControllerTest {
 
     controller.initGit( "random-path" );
 
-    verify( uiGit, never() ).initGit( anyString() );
+    verify( uiGit, never() ).initRepo( anyString() );
   }
 
   @Test
@@ -100,18 +100,6 @@ public class GitControllerTest {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     doReturn( false ).when( uiGit ).hasStagedObjects();
-
-    controller.commit();
-
-    verify( uiGit, never() ).commit( any(), anyString() );
-  }
-
-  @Test
-  public void shouldNotCommitWhenAuthorNameMalformed() throws Exception {
-    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
-    doReturn( true ).when( uiGit ).hasStagedObjects();
-    controller.setAuthorName( "random author" );
 
     controller.commit();
 
