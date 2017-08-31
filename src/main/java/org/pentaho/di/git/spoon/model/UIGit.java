@@ -507,12 +507,12 @@ public class UIGit extends XulEventSourceAdapter {
     git.checkout().setName( name ).addPath( path ).call();
   }
 
-  public Ref createBranch( String value ) throws Exception {
-    return git.branchCreate().setName( value ).call();
+  public void createBranch( String value ) throws Exception {
+    git.branchCreate().setName( value ).call();
   }
 
-  public List<String> deleteBranch( String name, boolean force ) throws Exception {
-    return git.branchDelete()
+  public void deleteBranch( String name, boolean force ) throws Exception {
+    git.branchDelete()
         .setBranchNames( name )
         .setForce( force )
         .call();

@@ -407,13 +407,15 @@ public class UIGitTest extends RepositoryTestCase {
     initialCommit();
 
     // create a branch
-    Ref ref = uiGit.createBranch( "test" );
-    assertEquals( Constants.R_HEADS + "test", ref.getName() );
+    uiGit.createBranch( "test" );
+    List<String> branches = uiGit.getBranches();
+    assertTrue( branches.contains( "test" ) );
 
     // delete the branch
-    List<String> deleted = uiGit.deleteBranch( "test", true );
-    assertEquals( 1, deleted.size() );
-    assertEquals( Constants.R_HEADS + "test", deleted.get( 0 ) );
+    uiGit.deleteBranch( "test", true );
+    branches = uiGit.getBranches();
+    assertEquals( 1, branches.size() );
+    assertFalse( branches.contains( "test" ) );
   }
 
   private RevCommit initialCommit() throws Exception {
