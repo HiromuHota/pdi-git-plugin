@@ -23,11 +23,14 @@ import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.XulOverlay;
 import org.pentaho.ui.xul.XulRunner;
+import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.containers.XulMenupopup;
 import org.pentaho.ui.xul.containers.XulVbox;
 import org.pentaho.ui.xul.impl.XulEventHandler;
 import org.pentaho.ui.xul.swt.SwtXulRunner;
 import org.pentaho.ui.xul.swt.tags.SwtDeck;
+import org.pentaho.ui.xul.util.XulDialogCallback.Status;
+import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
 
 public class GitPerspective implements SpoonPerspectiveImageProvider {
 
@@ -124,7 +127,29 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     }
     if ( active ) {
       if ( !controller.isOpen() ) {
-        gitSpoonMenuController.openRepo();
+        try {
+          if ( gitSpoonMenuController.isRepoEmpty() ) {
+            XulConfirmBox confirmBox = (XulConfirmBox) container.getDocumentRoot().createElement( "confirmbox" );
+            confirmBox.setTitle( "No repository" );
+            confirmBox.setMessage( "Add a new one?" );
+            confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+            confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
+            confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
+              if ( returnCode == Status.ACCEPT ) {
+                try {
+                  gitSpoonMenuController.addRepo();
+                } catch ( Exception e ) {
+                  e.printStackTrace();
+                }
+              }
+            } );
+            confirmBox.open();
+          } else {
+            gitSpoonMenuController.openRepo();
+          }
+        } catch ( Exception e ) {
+          e.printStackTrace();
+        }
       }
       if ( controller.isOpen() ) {
         controller.fireSourceChanged();
