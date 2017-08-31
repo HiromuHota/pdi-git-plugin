@@ -15,7 +15,6 @@ import org.eclipse.jface.viewers.ColumnViewerEditorDeactivationEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
@@ -644,7 +643,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void checkoutBranch() {
-    List<String> names = uiGit.getBranches( ListMode.ALL );
+    List<String> names = uiGit.getBranches();
     names.remove( uiGit.getBranch() );
     EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
     String name = esd.open();
@@ -681,7 +680,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void deleteBranch() throws XulException {
     DeleteBranchDialog dialog = new DeleteBranchDialog( getShell() );
-    List<String> branches = uiGit.getBranches();
+    List<String> branches = uiGit.getLocalBranches();
     branches.remove( uiGit.getBranch() );
     dialog.setBranches( branches );
     if ( dialog.open() == Window.OK ) {
@@ -701,7 +700,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void merge() throws XulException {
     MergeBranchDialog dialog = new MergeBranchDialog( getShell() );
-    List<String> branches = uiGit.getBranches();
+    List<String> branches = uiGit.getLocalBranches();
     branches.remove( uiGit.getBranch() );
     dialog.setBranches( branches );
     if ( dialog.open() == Window.OK ) {

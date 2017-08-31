@@ -184,8 +184,16 @@ public class UIGit extends XulEventSourceAdapter {
    * Get a list of local branches
    * @return
    */
-  public List<String> getBranches() {
+  public List<String> getLocalBranches() {
     return getBranches( null );
+  }
+
+  /**
+   * Get a list of all (local + remote) branches
+   * @return
+   */
+  public List<String> getBranches() {
+    return getBranches( ListMode.ALL );
   }
 
   /**
@@ -193,7 +201,7 @@ public class UIGit extends XulEventSourceAdapter {
    * @param mode
    * @return
    */
-  public List<String> getBranches( ListMode mode ) {
+  private List<String> getBranches( ListMode mode ) {
     try {
       return git.branchList().setListMode( mode ).call().stream()
         .filter( ref -> !ref.getName().endsWith( Constants.HEAD ) )

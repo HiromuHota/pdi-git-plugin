@@ -59,7 +59,7 @@ public class UIGitTest extends RepositoryTestCase {
   public void testGetBranches() throws Exception {
     initialCommit();
 
-    assertEquals( Constants.MASTER, uiGit.getBranches().get( 0 ) );
+    assertEquals( Constants.MASTER, uiGit.getLocalBranches().get( 0 ) );
   }
 
   @Test
@@ -408,12 +408,12 @@ public class UIGitTest extends RepositoryTestCase {
 
     // create a branch
     uiGit.createBranch( "test" );
-    List<String> branches = uiGit.getBranches();
+    List<String> branches = uiGit.getLocalBranches();
     assertTrue( branches.contains( "test" ) );
 
     // delete the branch
     uiGit.deleteBranch( "test", true );
-    branches = uiGit.getBranches();
+    branches = uiGit.getLocalBranches();
     assertEquals( 1, branches.size() );
     assertFalse( branches.contains( "test" ) );
   }
