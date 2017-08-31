@@ -43,6 +43,7 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
+import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.ui.xul.XulException;
@@ -71,7 +72,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private static final Class<?> PKG = GitController.class;
 
-  private VCS uiGit = new UIGit();
+  private VCS uiGit;
   private String path;
   private String branch;
   private String diff;
@@ -165,7 +166,7 @@ public class GitController extends AbstractXulEventHandler {
     bf.createBinding( this, "path", pathLabel, "value" );
     bf.createBinding( this, "branch", branchLabel, "value" );
     bf.createBinding( this, "diff", diffText, "value" );
-    revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
+    revisionBinding = bf.createBinding( this, "revisions", revisionTable, "elements" );
     changedBinding = bf.createBinding( this, "changedFiles", changedTable, "elements" );
 
     bf.createBinding( revisionTable, "selectedItems", this, "selectedRevisions" );
@@ -190,6 +191,9 @@ public class GitController extends AbstractXulEventHandler {
   public void openGit( GitRepository repo ) {
     String baseDirectory = repo.getDirectory();
     try {
+      if ( repo.getType().equals( VCS.GIT ) ) {
+        uiGit = new UIGit();
+      }
       uiGit.openRepo( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
@@ -464,6 +468,14 @@ public class GitController extends AbstractXulEventHandler {
   public void setCommitMessage( String commitMessage ) {
     this.commitMessage = commitMessage;
     firePropertyChange( "commitMessage", null, commitMessage );
+  }
+
+  public UIRepositoryObjectRevisions getRevisions() throws Exception {
+    if ( !isOpen() ) {
+      return null;
+    } else {
+      return uiGit.getRevisions();
+    }
   }
 
   public List<UIFile> getChangedFiles() throws Exception {
@@ -774,6 +786,6 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public boolean isOpen() {
-    return uiGit.isOpen();
+    return uiGit != null;
   }
 }
