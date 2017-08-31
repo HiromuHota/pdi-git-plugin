@@ -42,8 +42,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   public void openRepo() {
-    IMetaStore metaStore = Spoon.getInstance().getMetaStore();
-    MetaStoreFactory<GitRepository> repoFactory = new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
+    MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
 
     try {
       List<String> names = repoFactory.getElementNames();
@@ -61,6 +60,10 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
     }
   }
 
+  public Boolean isRepoEmpty() throws MetaStoreException {
+    return getRepoFactory().getElementNames().isEmpty();
+  }
+
   @Override
   public void updateMenu( Document doc ) {
   }
@@ -71,8 +74,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   public void addRepo() throws MetaStoreException, XulException {
-    IMetaStore metaStore = Spoon.getInstance().getMetaStore();
-    MetaStoreFactory<GitRepository> repoFactory = new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
+    MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
     GitRepository repo = new GitRepository();
     EditRepositoryDialog dialog = new EditRepositoryDialog( getShell(), repo );
     if ( dialog.open() == Window.OK ) {
@@ -93,8 +95,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   public void removeRepo() throws MetaStoreException {
-    IMetaStore metaStore = Spoon.getInstance().getMetaStore();
-    MetaStoreFactory<GitRepository> repoFactory = new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
+    MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
 
     List<String> names = repoFactory.getElementNames();
     Collections.sort( names );
@@ -108,8 +109,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   public void editRepo() throws MetaStoreException {
-    IMetaStore metaStore = Spoon.getInstance().getMetaStore();
-    MetaStoreFactory<GitRepository> repoFactory = new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
+    MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
 
     List<String> names = repoFactory.getElementNames();
     Collections.sort( names );
@@ -199,12 +199,16 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
 
   @VisibleForTesting
   void saveRepository( GitRepository repo ) throws MetaStoreException {
-    IMetaStore metaStore = Spoon.getInstance().getMetaStore();
-    MetaStoreFactory<GitRepository> repoFactory = new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
+    MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
     repoFactory.saveElement( repo );
   }
 
   Shell getShell() {
     return Spoon.getInstance().getShell();
+  }
+
+  private MetaStoreFactory<GitRepository> getRepoFactory() {
+    IMetaStore metaStore = Spoon.getInstance().getMetaStore();
+    return new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
   }
 }
