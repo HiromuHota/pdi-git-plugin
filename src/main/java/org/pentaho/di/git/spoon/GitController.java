@@ -78,7 +78,7 @@ public class GitController extends AbstractXulEventHandler {
   private String authorName;
   private String commitMessage;
   private List<UIRepositoryObjectRevision> selectedRevisions;
-  private List<UIFile> selectedChangedObjects;
+  private List<UIFile> selectedChangedFiles;
 
   private XulTree revisionTable;
   private XulTree changedTable;
@@ -166,10 +166,10 @@ public class GitController extends AbstractXulEventHandler {
     bf.createBinding( this, "branch", branchLabel, "value" );
     bf.createBinding( this, "diff", diffText, "value" );
     revisionBinding = bf.createBinding( uiGit, "revisions", revisionTable, "elements" );
-    changedBinding = bf.createBinding( this, "changedObjects", changedTable, "elements" );
+    changedBinding = bf.createBinding( this, "changedFiles", changedTable, "elements" );
 
     bf.createBinding( revisionTable, "selectedItems", this, "selectedRevisions" );
-    bf.createBinding( changedTable, "selectedItems", this, "selectedChangedObjects" );
+    bf.createBinding( changedTable, "selectedItems", this, "selectedChangedFiles" );
 
     bf.setBindingType( Binding.Type.BI_DIRECTIONAL );
     bf.createBinding( this, "authorName", authorNameTextbox, "value" );
@@ -242,7 +242,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void openFile() {
     String baseDirectory = uiGit.getDirectory();
-    getSelectedChangedObjects().stream()
+    getSelectedChangedFiles().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
@@ -277,7 +277,7 @@ public class GitController extends AbstractXulEventHandler {
    */
   public void visualdiff() {
     String baseDirectory = uiGit.getDirectory();
-    getSelectedChangedObjects().stream()
+    getSelectedChangedFiles().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
@@ -382,24 +382,24 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  public List<UIFile> getSelectedChangedObjects() {
-    return selectedChangedObjects;
+  public List<UIFile> getSelectedChangedFiles() {
+    return selectedChangedFiles;
   }
 
-  public void setSelectedChangedObjects( List<UIFile> selectedObjects ) throws Exception {
-    this.selectedChangedObjects = selectedObjects;
-    if ( selectedObjects.size() != 0 ) {
+  public void setSelectedChangedFiles( List<UIFile> selectedFiles ) throws Exception {
+    this.selectedChangedFiles = selectedFiles;
+    if ( selectedFiles.size() != 0 ) {
       if ( isOnlyWIP() ) {
-        if ( selectedObjects.get( 0 ).getIsStaged() ) {
-          setDiff( uiGit.diff( Constants.HEAD, UIGit.INDEX, selectedObjects.get( 0 ).getName() ) );
+        if ( selectedFiles.get( 0 ).getIsStaged() ) {
+          setDiff( uiGit.diff( Constants.HEAD, UIGit.INDEX, selectedFiles.get( 0 ).getName() ) );
         } else {
-          setDiff( uiGit.diff( UIGit.INDEX, UIGit.WORKINGTREE, selectedObjects.get( 0 ).getName() ) );
+          setDiff( uiGit.diff( UIGit.INDEX, UIGit.WORKINGTREE, selectedFiles.get( 0 ).getName() ) );
         }
       } else {
         String newCommitId = getFirstSelectedRevision().getName();
         String oldCommitId = getSelectedRevisions().size() == 1 ? uiGit.getCommitId( newCommitId + "^" )
           : getLastSelectedRevision().getName();
-        setDiff( uiGit.diff( oldCommitId, newCommitId, selectedObjects.get( 0 ).getName() ) );
+        setDiff( uiGit.diff( oldCommitId, newCommitId, selectedFiles.get( 0 ).getName() ) );
       }
     }
   }
@@ -466,24 +466,24 @@ public class GitController extends AbstractXulEventHandler {
     firePropertyChange( "commitMessage", null, commitMessage );
   }
 
-  public List<UIFile> getChangedObjects() throws Exception {
+  public List<UIFile> getChangedFiles() throws Exception {
     if ( getSelectedRevisions() == null ) { // when Spoon is starting
       return null;
     }
-    List<UIFile> changedObjects = new ArrayList<UIFile>();
+    List<UIFile> changedFiles = new ArrayList<UIFile>();
     if ( isOnlyWIP() ) {
-      changedObjects.addAll( uiGit.getUnstagedFiles() );
-      changedObjects.addAll( uiGit.getStagedFiles() );
+      changedFiles.addAll( uiGit.getUnstagedFiles() );
+      changedFiles.addAll( uiGit.getStagedFiles() );
     } else {
       if ( getSelectedRevisions().size() == 1 ) {
-        changedObjects.addAll( uiGit.getStagedFiles( getFirstSelectedRevision().getName() + "~", getFirstSelectedRevision().getName() ) );
+        changedFiles.addAll( uiGit.getStagedFiles( getFirstSelectedRevision().getName() + "~", getFirstSelectedRevision().getName() ) );
       } else {
         String newCommitId = getFirstSelectedRevision().getName();
         String oldCommitId = getLastSelectedRevision().getName();
-        changedObjects.addAll( uiGit.getStagedFiles( oldCommitId, newCommitId ) );
+        changedFiles.addAll( uiGit.getStagedFiles( oldCommitId, newCommitId ) );
       }
     }
-    return changedObjects;
+    return changedFiles;
   }
 
   public void commit() throws Exception {
@@ -527,7 +527,7 @@ public class GitController extends AbstractXulEventHandler {
     confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
       if ( returnCode.equals( Status.ACCEPT ) ) {
         try {
-          List<UIFile> contents = getSelectedChangedObjects();
+          List<UIFile> contents = getSelectedChangedFiles();
           for ( UIFile content : contents ) {
             if ( content.getIsStaged() ) {
               showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please unstage first" );
