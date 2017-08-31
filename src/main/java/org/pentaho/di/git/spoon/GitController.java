@@ -72,7 +72,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private static final Class<?> PKG = GitController.class;
 
-  private VCS uiGit;
+  private VCS vcs;
   private String path;
   private String branch;
   private String diff;
@@ -124,9 +124,9 @@ public class GitController extends AbstractXulEventHandler {
         UIFile file = (UIFile) selectedItem.getBoundObject();
         try {
           if ( file.getIsStaged() ) {
-            uiGit.reset( file.getName() );
+            vcs.reset( file.getName() );
           } else {
-            uiGit.add( file.getName() );
+            vcs.add( file.getName() );
           }
         } catch ( Exception e ) {
           e.printStackTrace();
@@ -192,9 +192,9 @@ public class GitController extends AbstractXulEventHandler {
     String baseDirectory = repo.getDirectory();
     try {
       if ( repo.getType().equals( VCS.GIT ) ) {
-        uiGit = new UIGit();
+        vcs = new UIGit();
       }
-      uiGit.openRepo( baseDirectory );
+      vcs.openRepo( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
     } catch ( NullPointerException e ) {
@@ -204,9 +204,9 @@ public class GitController extends AbstractXulEventHandler {
     }
     setActive();
     setPath( repo );
-    setBranch( uiGit.getBranch() );
+    setBranch( vcs.getBranch() );
     setDiff( "" );
-    setAuthorName( uiGit.getAuthorName() );
+    setAuthorName( vcs.getAuthorName() );
     setCommitMessage( "" );
     fireSourceChanged();
   }
@@ -222,7 +222,7 @@ public class GitController extends AbstractXulEventHandler {
       confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
         if ( returnCode == Status.ACCEPT ) {
           try {
-            uiGit.initRepo( baseDirectory );
+            vcs.initRepo( baseDirectory );
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           } catch ( Exception e ) {
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -245,14 +245,14 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void openFile() {
-    String baseDirectory = uiGit.getDirectory();
+    String baseDirectory = vcs.getDirectory();
     getSelectedChangedFiles().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
         String commitId;
         commitId = isOnlyWIP() ? VCS.WORKINGTREE : getFirstSelectedRevision().getName();
-        try ( InputStream xmlStream = uiGit.open( content.getName(), commitId ) ) {
+        try ( InputStream xmlStream = vcs.open( content.getName(), commitId ) ) {
           EngineMetaInterface meta = null;
           Consumer<EngineMetaInterface> c = null;
           if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
@@ -280,7 +280,7 @@ public class GitController extends AbstractXulEventHandler {
    * open them in the data integration perspective
    */
   public void visualdiff() {
-    String baseDirectory = uiGit.getDirectory();
+    String baseDirectory = vcs.getDirectory();
     getSelectedChangedFiles().stream()
       .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
@@ -295,11 +295,11 @@ public class GitController extends AbstractXulEventHandler {
             commitIdOld = Constants.HEAD;
           } else {
             commitIdNew = getFirstSelectedRevision().getName();
-            commitIdOld = getSelectedRevisions().size() == 1 ? uiGit.getCommitId( commitIdNew + "^" )
+            commitIdOld = getSelectedRevisions().size() == 1 ? vcs.getCommitId( commitIdNew + "^" )
               : getLastSelectedRevision().getName();
           }
-          xmlStreamOld = uiGit.open( content.getName(), commitIdOld );
-          xmlStreamNew = uiGit.open( content.getName(), commitIdNew );
+          xmlStreamOld = vcs.open( content.getName(), commitIdOld );
+          xmlStreamNew = vcs.open( content.getName(), commitIdNew );
           if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
             // Use temporary metaOld_ because metaOld will be modified before the 2nd comparison
             metaOld = new TransMeta( xmlStreamOld, null, true, null, null );
@@ -355,14 +355,14 @@ public class GitController extends AbstractXulEventHandler {
     if ( selectedRevisions.size() != 0 ) {
       String commitId = getFirstSelectedRevision().getName();
       if ( selectedRevisions.size() == 1 ) {
-        setDiff( uiGit.show( commitId ) );
+        setDiff( vcs.show( commitId ) );
       } else {
         String commitIdOld = getLastSelectedRevision().getName();
-        setDiff( uiGit.diff( commitIdOld, commitId ) );
+        setDiff( vcs.diff( commitIdOld, commitId ) );
       }
       if ( isOnlyWIP() ) {
         checkboxCol.setEditable( true );
-        setAuthorName( uiGit.getAuthorName() );
+        setAuthorName( vcs.getAuthorName() );
         authorNameTextbox.setReadonly( false );
         setCommitMessage( "" );
         commitMessageTextbox.setReadonly( false );
@@ -371,8 +371,8 @@ public class GitController extends AbstractXulEventHandler {
       } else {
         checkboxCol.setEditable( false );
         if ( getSelectedRevisions().size() == 1 ) {
-          setAuthorName( uiGit.getAuthorName( commitId ) );
-          setCommitMessage( uiGit.getCommitMessage( commitId ) );
+          setAuthorName( vcs.getAuthorName( commitId ) );
+          setCommitMessage( vcs.getCommitMessage( commitId ) );
         } else {
           setAuthorName( "" );
           setCommitMessage( "" );
@@ -395,15 +395,15 @@ public class GitController extends AbstractXulEventHandler {
     if ( selectedFiles.size() != 0 ) {
       if ( isOnlyWIP() ) {
         if ( selectedFiles.get( 0 ).getIsStaged() ) {
-          setDiff( uiGit.diff( Constants.HEAD, VCS.INDEX, selectedFiles.get( 0 ).getName() ) );
+          setDiff( vcs.diff( Constants.HEAD, VCS.INDEX, selectedFiles.get( 0 ).getName() ) );
         } else {
-          setDiff( uiGit.diff( VCS.INDEX, VCS.WORKINGTREE, selectedFiles.get( 0 ).getName() ) );
+          setDiff( vcs.diff( VCS.INDEX, VCS.WORKINGTREE, selectedFiles.get( 0 ).getName() ) );
         }
       } else {
         String newCommitId = getFirstSelectedRevision().getName();
-        String oldCommitId = getSelectedRevisions().size() == 1 ? uiGit.getCommitId( newCommitId + "^" )
+        String oldCommitId = getSelectedRevisions().size() == 1 ? vcs.getCommitId( newCommitId + "^" )
           : getLastSelectedRevision().getName();
-        setDiff( uiGit.diff( oldCommitId, newCommitId, selectedFiles.get( 0 ).getName() ) );
+        setDiff( vcs.diff( oldCommitId, newCommitId, selectedFiles.get( 0 ).getName() ) );
       }
     }
   }
@@ -474,7 +474,7 @@ public class GitController extends AbstractXulEventHandler {
     if ( !isOpen() ) {
       return null;
     } else {
-      return uiGit.getRevisions();
+      return vcs.getRevisions();
     }
   }
 
@@ -484,29 +484,29 @@ public class GitController extends AbstractXulEventHandler {
     }
     List<UIFile> changedFiles = new ArrayList<UIFile>();
     if ( isOnlyWIP() ) {
-      changedFiles.addAll( uiGit.getUnstagedFiles() );
-      changedFiles.addAll( uiGit.getStagedFiles() );
+      changedFiles.addAll( vcs.getUnstagedFiles() );
+      changedFiles.addAll( vcs.getStagedFiles() );
     } else {
       if ( getSelectedRevisions().size() == 1 ) {
-        changedFiles.addAll( uiGit.getStagedFiles( getFirstSelectedRevision().getName() + "~", getFirstSelectedRevision().getName() ) );
+        changedFiles.addAll( vcs.getStagedFiles( getFirstSelectedRevision().getName() + "~", getFirstSelectedRevision().getName() ) );
       } else {
         String newCommitId = getFirstSelectedRevision().getName();
         String oldCommitId = getLastSelectedRevision().getName();
-        changedFiles.addAll( uiGit.getStagedFiles( oldCommitId, newCommitId ) );
+        changedFiles.addAll( vcs.getStagedFiles( oldCommitId, newCommitId ) );
       }
     }
     return changedFiles;
   }
 
   public void commit() throws Exception {
-    if ( !uiGit.hasStagedFiles() ) {
+    if ( !vcs.hasStagedFiles() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           "There are no staged files" );
       return;
     }
 
     try {
-      uiGit.commit( getAuthorName(), getCommitMessage() );
+      vcs.commit( getAuthorName(), getCommitMessage() );
       setCommitMessage( "" );
       fireSourceChanged();
     } catch ( NullPointerException e ) {
@@ -518,7 +518,7 @@ public class GitController extends AbstractXulEventHandler {
   public void checkout() throws XulException, IllegalArgumentException, InvocationTargetException {
     String commitId = getFirstSelectedRevision().getName();
     try {
-      uiGit.checkout( commitId );
+      vcs.checkout( commitId );
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
@@ -544,7 +544,7 @@ public class GitController extends AbstractXulEventHandler {
             if ( content.getIsStaged() ) {
               showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please unstage first" );
             } else {
-              uiGit.checkout( null, content.getName() );
+              vcs.checkout( null, content.getName() );
             }
           }
           fireSourceChanged();
@@ -558,7 +558,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void pull() {
     try {
-      PullResult pullResult = uiGit.pull();
+      PullResult pullResult = vcs.pull();
       processPullResult( pullResult );
     } catch ( TransportException e ) {
       if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
@@ -567,7 +567,7 @@ public class GitController extends AbstractXulEventHandler {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     } catch ( Exception e ) {
-      if ( uiGit.hasRemote() ) {
+      if ( vcs.hasRemote() ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       } else {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
@@ -582,7 +582,7 @@ public class GitController extends AbstractXulEventHandler {
       String username = dialog.getUsername();
       String password = dialog.getPassword();
       try {
-        PullResult pullResult = uiGit.pull( username, password );
+        PullResult pullResult = vcs.pull( username, password );
         processPullResult( pullResult );
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -599,7 +599,7 @@ public class GitController extends AbstractXulEventHandler {
     } else {
       String msg = mergeResult.getMergeStatus().toString();
       if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
-        uiGit.resetHard();
+        vcs.resetHard();
       } else if ( mergeResult.getFailingPaths().size() != 0 ) {
         for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
           msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
@@ -611,10 +611,10 @@ public class GitController extends AbstractXulEventHandler {
 
   public void push() {
     try {
-      Iterable<PushResult> resultIterable = uiGit.push();
+      Iterable<PushResult> resultIterable = vcs.push();
       processPushResult( resultIterable );
     } catch ( TransportException e ) {
-      if ( e instanceof TransportException && !uiGit.hasRemote() ) {
+      if ( e instanceof TransportException && !vcs.hasRemote() ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
             "Please setup a remote" );
       } else if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
@@ -633,7 +633,7 @@ public class GitController extends AbstractXulEventHandler {
       String username = dialog.getUsername();
       String password = dialog.getPassword();
       try {
-        Iterable<PushResult> resultIterable = uiGit.push( username, password );
+        Iterable<PushResult> resultIterable = vcs.push( username, password );
         processPushResult( resultIterable );
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -656,14 +656,14 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void checkoutBranch() {
-    List<String> names = uiGit.getBranches();
-    names.remove( uiGit.getBranch() );
+    List<String> names = vcs.getBranches();
+    names.remove( vcs.getBranch() );
     EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
     String name = esd.open();
     if ( name != null ) {
       try {
-        uiGit.checkout( name );
-        setBranch( uiGit.getBranch() );
+        vcs.checkout( name );
+        setBranch( vcs.getBranch() );
         fireSourceChanged();
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -679,8 +679,8 @@ public class GitController extends AbstractXulEventHandler {
     promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
       if ( status.equals( Status.ACCEPT ) ) {
         try {
-          uiGit.createBranch( value );
-          uiGit.checkout( value );
+          vcs.createBranch( value );
+          vcs.checkout( value );
           setBranch( value );
           fireSourceChanged();
         } catch ( Exception e ) {
@@ -693,8 +693,8 @@ public class GitController extends AbstractXulEventHandler {
 
   public void deleteBranch() throws XulException {
     DeleteBranchDialog dialog = new DeleteBranchDialog( getShell() );
-    List<String> branches = uiGit.getLocalBranches();
-    branches.remove( uiGit.getBranch() );
+    List<String> branches = vcs.getLocalBranches();
+    branches.remove( vcs.getBranch() );
     dialog.setBranches( branches );
     if ( dialog.open() == Window.OK ) {
       String branch = dialog.getSelectedBranch();
@@ -703,7 +703,7 @@ public class GitController extends AbstractXulEventHandler {
         return;
       }
       try {
-        uiGit.deleteBranch( branch, isForce );
+        vcs.deleteBranch( branch, isForce );
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -713,20 +713,20 @@ public class GitController extends AbstractXulEventHandler {
 
   public void merge() throws XulException {
     MergeBranchDialog dialog = new MergeBranchDialog( getShell() );
-    List<String> branches = uiGit.getLocalBranches();
-    branches.remove( uiGit.getBranch() );
+    List<String> branches = vcs.getLocalBranches();
+    branches.remove( vcs.getBranch() );
     dialog.setBranches( branches );
     if ( dialog.open() == Window.OK ) {
       String branch = dialog.getSelectedBranch();
       String mergeStrategy = dialog.getSelectedMergeStrategy();
       try {
-        MergeResult result = uiGit.mergeBranch( branch, mergeStrategy );
+        MergeResult result = vcs.mergeBranch( branch, mergeStrategy );
         if ( result.getMergeStatus().isSuccessful() ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           fireSourceChanged();
         } else {
           if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
-            uiGit.resetHard();
+            vcs.resetHard();
           }
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
         }
@@ -742,15 +742,15 @@ public class GitController extends AbstractXulEventHandler {
       promptBox.setTitle( "Remote repository" );
       promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
       promptBox.setMessage( "URL/path (The remote name will be \"" + Constants.DEFAULT_REMOTE_NAME + "\")" );
-      promptBox.setValue( uiGit.getRemote() );
+      promptBox.setValue( vcs.getRemote() );
       promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
         if ( status.equals( Status.ACCEPT ) ) {
           try {
-            uiGit.addRemote( value );
+            vcs.addRemote( value );
           } catch ( URISyntaxException e ) {
             if ( value.equals( "" ) ) {
               try {
-                uiGit.removeRemote();
+                vcs.removeRemote();
               } catch ( Exception e1 ) {
                 e1.printStackTrace();
               }
@@ -782,10 +782,10 @@ public class GitController extends AbstractXulEventHandler {
 
   @VisibleForTesting
   void setUIGit( VCS uiGit ) {
-    this.uiGit = uiGit;
+    this.vcs = uiGit;
   }
 
   public boolean isOpen() {
-    return uiGit != null;
+    return vcs != null;
   }
 }
