@@ -27,6 +27,7 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
+import org.pentaho.di.git.spoon.model.SVN;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.git.spoon.model.IVCS;
@@ -179,7 +180,13 @@ public class GitController extends AbstractXulEventHandler {
     document.getElementById( "config" ).setDisabled( false );
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
-    pushButton.setDisabled( false );
+    if ( vcs.getClass() == UIGit.class ) {
+      pushButton.setDisabled( false );
+      pullButton.setLabel( BaseMessages.getString( PKG, "Git.Pull" ) );
+    } else {
+      pushButton.setDisabled( true );
+      pullButton.setLabel( BaseMessages.getString( PKG, "SVN.Update" ) );
+    }
     branchButton.setDisabled( false );
     tagButton.setDisabled( false );
     ( (XulButton) document.getElementById( "refresh" ) ).setDisabled( false );
@@ -193,6 +200,8 @@ public class GitController extends AbstractXulEventHandler {
     try {
       if ( repo.getType() == null || repo.getType().equals( IVCS.GIT ) ) {
         vcs = new UIGit();
+      } else {
+        vcs = new SVN();
       }
       vcs.setShell( getShell() );
       vcs.openRepo( baseDirectory );
@@ -526,6 +535,8 @@ public class GitController extends AbstractXulEventHandler {
     } catch ( NullPointerException e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           "Malformed author name" );
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 

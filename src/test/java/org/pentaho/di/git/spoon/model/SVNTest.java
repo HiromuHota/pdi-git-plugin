@@ -1,0 +1,41 @@
+package org.pentaho.di.git.spoon.model;
+
+import static org.junit.Assert.*;
+
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
+
+public class SVNTest {
+  private VCS vcs;
+
+  @Before
+  public void setUp() throws Exception {
+    vcs = new SVN();
+    vcs.openRepo( "/Users/hiromu/workspace/new-repo" );
+  }
+
+  @Test
+  public void testCommit() throws Exception {
+    vcs.commit( "user", "password", "message" );
+  }
+
+  @Test
+  public void testGetRevisions() throws Exception {
+    UIRepositoryObjectRevisions revisions = vcs.getRevisions();
+    assertEquals( "1", revisions.get( revisions.size() - 1 ).getName() );
+  }
+
+  @Test
+  public void testGetUnstagedFiles() throws Exception {
+    List<UIFile> files = vcs.getUnstagedFiles();
+    assertTrue( files.isEmpty() );
+  }
+
+  @Test
+  public void testPull() throws Exception {
+    vcs.pull();
+  }
+}

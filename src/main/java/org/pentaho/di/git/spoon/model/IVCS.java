@@ -11,6 +11,7 @@ public interface IVCS {
   String WORKINGTREE = "WORKINGTREE";
   String INDEX = "INDEX";
   String GIT = "Git";
+  String SVN = "SVN";
   String TYPE_TAG = "tag";
   String TYPE_BRANCH = "branch";
   String TYPE_REMOTE = "remote";

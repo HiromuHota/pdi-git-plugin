@@ -79,7 +79,7 @@ public class EditRepositoryDialog extends Dialog {
     typeLabel.setText( "Type: " );
     typeLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
     typeCombo = new Combo( comp, SWT.READ_ONLY );
-    typeCombo.setItems( IVCS.GIT );
+    typeCombo.setItems( IVCS.GIT, IVCS.SVN );
     typeCombo.select( 0 );
     return comp;
   }
