@@ -47,6 +47,14 @@ public interface VCS {
   String getCommitId( String revstr ) throws Exception;
 
   /**
+   * Get SHA-1 commit Id
+   * @param revstr: (e.g., HEAD, SHA-1)
+   * @return
+   * @throws Exception
+   */
+  String getParentCommitId( String revstr ) throws Exception;
+
+  /**
    * Get the current branch
    * @return Current branch
    */

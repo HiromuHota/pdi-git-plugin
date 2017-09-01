@@ -162,6 +162,11 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
     return id.getName();
   }
 
+  @Override
+  public String getParentCommitId( String revstr ) throws Exception {
+    return getCommitId( revstr + "~" );
+  }
+
   /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.VCS#getBranch()
    */

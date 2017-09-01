@@ -295,7 +295,7 @@ public class GitController extends AbstractXulEventHandler {
             commitIdOld = Constants.HEAD;
           } else {
             commitIdNew = getFirstSelectedRevision().getName();
-            commitIdOld = getSelectedRevisions().size() == 1 ? vcs.getCommitId( commitIdNew + "^" )
+            commitIdOld = getSelectedRevisions().size() == 1 ? vcs.getParentCommitId( commitIdNew )
               : getLastSelectedRevision().getName();
           }
           xmlStreamOld = vcs.open( content.getName(), commitIdOld );
@@ -401,7 +401,7 @@ public class GitController extends AbstractXulEventHandler {
         }
       } else {
         String newCommitId = getFirstSelectedRevision().getName();
-        String oldCommitId = getSelectedRevisions().size() == 1 ? vcs.getCommitId( newCommitId + "^" )
+        String oldCommitId = getSelectedRevisions().size() == 1 ? vcs.getParentCommitId( newCommitId )
           : getLastSelectedRevision().getName();
         setDiff( vcs.diff( oldCommitId, newCommitId, selectedFiles.get( 0 ).getName() ) );
       }
@@ -488,7 +488,7 @@ public class GitController extends AbstractXulEventHandler {
       changedFiles.addAll( vcs.getStagedFiles() );
     } else {
       if ( getSelectedRevisions().size() == 1 ) {
-        changedFiles.addAll( vcs.getStagedFiles( getFirstSelectedRevision().getName() + "~", getFirstSelectedRevision().getName() ) );
+        changedFiles.addAll( vcs.getStagedFiles( vcs.getParentCommitId( getFirstSelectedRevision().getName() ), getFirstSelectedRevision().getName() ) );
       } else {
         String newCommitId = getFirstSelectedRevision().getName();
         String oldCommitId = getLastSelectedRevision().getName();
