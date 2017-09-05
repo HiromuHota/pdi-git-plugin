@@ -376,14 +376,8 @@ public class GitController extends AbstractXulEventHandler {
 
   public void setSelectedRevisions( List<UIRepositoryObjectRevision> selectedRevisions ) throws Exception {
     this.selectedRevisions = selectedRevisions;
+    setDiff( "" );
     if ( selectedRevisions.size() != 0 ) {
-      String commitId = getFirstSelectedRevision().getName();
-      if ( selectedRevisions.size() == 1 ) {
-        setDiff( uiGit.show( commitId ) );
-      } else {
-        String commitIdOld = getLastSelectedRevision().getName();
-        setDiff( uiGit.diff( commitIdOld, commitId ) );
-      }
       if ( isOnlyWIP() ) {
         checkboxCol.setEditable( true );
         setAuthorName( uiGit.getAuthorName() );
@@ -397,6 +391,7 @@ public class GitController extends AbstractXulEventHandler {
       } else {
         checkboxCol.setEditable( false );
         if ( getSelectedRevisions().size() == 1 ) {
+          String commitId = getFirstSelectedRevision().getName();
           setAuthorName( uiGit.getAuthorName( commitId ) );
           setCommitMessage( uiGit.getCommitMessage( commitId ) );
         } else {
