@@ -27,8 +27,7 @@ The information of repositories will be stored in `$HOME/.pentaho/metastore/pent
 
 ### Config
 
-<img src="src/main/resources/org/pentaho/di/git/spoon/images/context_menu.png" width="16">
-<b>Config</b> allows you to configure the opened Git repository.
+<img src="https://github.com/pentaho/pentaho-kettle/raw/7.1.0.0-R/ui/package-res/ui/images/context_menu.png" width="16"> **Config** allows you to configure the opened Git repository.
 Currently, a remote repository named "origin" can be set.
 
 ## Working with files
@@ -76,19 +75,14 @@ Note that even just a x-y location change of step/job entry is recognized as a c
 
 ## Remote
 
-<img src="src/main/resources/org/pentaho/di/git/spoon/images/pull.png" width="16">
-<b>Pull</b> and
-<img src="src/main/resources/org/pentaho/di/git/spoon/images/push.png" width="16">
-<b>Push</b>
-allows you to sync between the opened, local repository and the remote one.
+<img src="src/main/resources/org/pentaho/di/git/spoon/images/pull.png" width="16"> **Pull** and <img src="src/main/resources/org/pentaho/di/git/spoon/images/push.png" width="16"> **Push** allows you to sync between the opened, local repository and the remote one.
 <b>Pull</b> is equivalent of `git fetch; git merge --ff`.
 If an error (e.g., merge conflict) happens, the operation will be just cancelled.
 Note that "origin" is always the source of <b>Pull</b> and the target of <b>Push</b>.
 
 ## Branches
 
-<img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16">
-<b>Branch</b> has branch operations: **Checkout** switches between branches, **Create / Delete** can create / delete a branch, **Merge** can merge a branch into the current one.
+<img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16"> **Branch** has branch operations: **Checkout** switches between branches, **Create / Delete** can create / delete a branch, **Merge** can merge a branch into the current one.
 
 Switching to a remote branch, say `origin/feature`, gets you in a detached HEAD state.
 Use **Branch > Create** to create a local branch, say `feature`, then you will get out of the state.
