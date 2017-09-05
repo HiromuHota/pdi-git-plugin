@@ -376,37 +376,8 @@ public class GitController extends AbstractXulEventHandler {
 
   public void setSelectedRevisions( List<UIRepositoryObjectRevision> selectedRevisions ) throws Exception {
     this.selectedRevisions = selectedRevisions;
+    changedBinding.fireSourceChanged();
     setDiff( "" );
-    if ( selectedRevisions.size() != 0 ) {
-      if ( isOnlyWIP() ) {
-        checkboxCol.setEditable( true );
-        setAuthorName( uiGit.getAuthorName() );
-        authorNameTextbox.setReadonly( false );
-        setCommitMessage( "" );
-        commitMessageTextbox.setReadonly( false );
-        commitButton.setDisabled( false );
-        addToIndexMenuItem.setDisabled( false );
-        rmFromIndexMenuItem.setDisabled( false );
-        discardMenuItem.setDisabled( false );
-      } else {
-        checkboxCol.setEditable( false );
-        if ( getSelectedRevisions().size() == 1 ) {
-          String commitId = getFirstSelectedRevision().getName();
-          setAuthorName( uiGit.getAuthorName( commitId ) );
-          setCommitMessage( uiGit.getCommitMessage( commitId ) );
-        } else {
-          setAuthorName( "" );
-          setCommitMessage( "" );
-        }
-        authorNameTextbox.setReadonly( true );
-        commitMessageTextbox.setReadonly( true );
-        commitButton.setDisabled( true );
-        addToIndexMenuItem.setDisabled( true );
-        rmFromIndexMenuItem.setDisabled( true );
-        discardMenuItem.setDisabled( true );
-      }
-      changedBinding.fireSourceChanged();
-    }
   }
 
   public List<UIFile> getSelectedChangedObjects() {
@@ -499,12 +470,38 @@ public class GitController extends AbstractXulEventHandler {
     }
     List<UIFile> changedObjects = new ArrayList<UIFile>();
     if ( isOnlyWIP() ) {
+      addToIndexMenuItem.setDisabled( false );
+      rmFromIndexMenuItem.setDisabled( false );
+      discardMenuItem.setDisabled( false );
+      checkboxCol.setEditable( true );
+      authorNameTextbox.setReadonly( false );
+      commitMessageTextbox.setReadonly( false );
+      commitButton.setDisabled( false );
+
+      setAuthorName( uiGit.getAuthorName() );
+      setCommitMessage( "" );
+
       changedObjects.addAll( uiGit.getUnstagedObjects() );
       changedObjects.addAll( uiGit.getStagedObjects( UIGit.WORKINGTREE ) );
     } else {
+      addToIndexMenuItem.setDisabled( true );
+      rmFromIndexMenuItem.setDisabled( true );
+      discardMenuItem.setDisabled( true );
+      checkboxCol.setEditable( false );
+      authorNameTextbox.setReadonly( true );
+      commitMessageTextbox.setReadonly( true );
+      commitButton.setDisabled( true );
+
       if ( getSelectedRevisions().size() == 1 ) {
+        String commitId = getFirstSelectedRevision().getName();
+        setAuthorName( uiGit.getAuthorName( commitId ) );
+        setCommitMessage( uiGit.getCommitMessage( commitId ) );
+
         changedObjects.addAll( uiGit.getStagedObjects( getFirstSelectedRevision().getName() ) );
       } else {
+        setAuthorName( "" );
+        setCommitMessage( "" );
+
         String newCommitId = getFirstSelectedRevision().getName();
         String oldCommitId = getLastSelectedRevision().getName();
         changedObjects.addAll( uiGit.getStagedObjects( oldCommitId, newCommitId ) );
