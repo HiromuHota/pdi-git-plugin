@@ -20,6 +20,7 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
@@ -86,6 +87,8 @@ public class GitController extends AbstractXulEventHandler {
   private XulTree revisionTable;
   private XulTree changedTable;
   private XulTreeCol checkboxCol;
+  private XulMenuitem addToIndexMenuItem;
+  private XulMenuitem rmFromIndexMenuItem;
   private XulMenuitem discardMenuItem;
   private XulButton commitButton;
   private XulButton pullButton;
@@ -110,6 +113,8 @@ public class GitController extends AbstractXulEventHandler {
     revisionTable = (XulTree) document.getElementById( "revision-table" );
     changedTable = (XulTree) document.getElementById( "changed-table" );
     checkboxCol = (XulTreeCol) document.getElementById( "checkbox-col" );
+    addToIndexMenuItem = (XulMenuitem) document.getElementById( "menuitem-addtoindex" );
+    rmFromIndexMenuItem = (XulMenuitem) document.getElementById( "menuitem-rmfromindex" );
     discardMenuItem = (XulMenuitem) document.getElementById( "menuitem-discard" );
     /*
      * Add a listener to add/reset file upon checking/unchecking changed files
@@ -243,6 +248,26 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
+  public void addToIndex() throws Exception {
+    List<UIFile> contents = getSelectedChangedObjects();
+    for ( UIFile content : contents ) {
+      if ( content.getChangeType() == ChangeType.DELETE ) {
+        uiGit.rm( content.getName() );
+      } else {
+        uiGit.add( content.getName() );
+      }
+    }
+    fireSourceChanged();
+  }
+
+  public void removeFromIndex() throws Exception {
+    List<UIFile> contents = getSelectedChangedObjects();
+    for ( UIFile content : contents ) {
+      uiGit.reset( content.getName() );
+    }
+    fireSourceChanged();
+  }
+
   public void openFile() {
     String baseDirectory = uiGit.getDirectory();
     getSelectedChangedObjects().stream()
@@ -366,6 +391,8 @@ public class GitController extends AbstractXulEventHandler {
         setCommitMessage( "" );
         commitMessageTextbox.setReadonly( false );
         commitButton.setDisabled( false );
+        addToIndexMenuItem.setDisabled( false );
+        rmFromIndexMenuItem.setDisabled( false );
         discardMenuItem.setDisabled( false );
       } else {
         checkboxCol.setEditable( false );
@@ -379,6 +406,8 @@ public class GitController extends AbstractXulEventHandler {
         authorNameTextbox.setReadonly( true );
         commitMessageTextbox.setReadonly( true );
         commitButton.setDisabled( true );
+        addToIndexMenuItem.setDisabled( true );
+        rmFromIndexMenuItem.setDisabled( true );
         discardMenuItem.setDisabled( true );
       }
       changedBinding.fireSourceChanged();
