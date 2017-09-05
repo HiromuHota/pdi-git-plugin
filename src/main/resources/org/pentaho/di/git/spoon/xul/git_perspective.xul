@@ -16,6 +16,10 @@
     <label value="/"/>
     <label value="${Git.Branch}: "/>
     <label id="branchLabel"/>
+    <toolbar id="git-toolbar-right" mode="full">
+      <toolbarseparator />
+      <toolbarbutton id="refresh" label="${Git.Refresh}" image="ui/images/refresh.svg" onclick="gitController.fireSourceChanged()"/>
+    </toolbar>
     </hbox>
   <splitter flex="1" orient="HORIZONTAL">
     <vbox flex="2">

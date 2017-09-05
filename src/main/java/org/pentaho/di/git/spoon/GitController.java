@@ -239,7 +239,7 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  protected void fireSourceChanged() {
+  public void fireSourceChanged() {
     try {
       revisionBinding.fireSourceChanged();
       changedBinding.fireSourceChanged();

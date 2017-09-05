@@ -151,9 +151,6 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
           e.printStackTrace();
         }
       }
-      if ( controller.isOpen() ) {
-        controller.fireSourceChanged();
-      }
     }
   }
 
