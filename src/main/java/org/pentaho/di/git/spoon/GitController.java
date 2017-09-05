@@ -271,7 +271,6 @@ public class GitController extends AbstractXulEventHandler {
   public void openFile() {
     String baseDirectory = uiGit.getDirectory();
     getSelectedChangedObjects().stream()
-      .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
         String commitId;
@@ -285,6 +284,9 @@ public class GitController extends AbstractXulEventHandler {
           } else if ( filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
             meta = new JobMeta( xmlStream, null, null );
             c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
+          } else {
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
+            return;
           }
           meta.clearChanged();
           meta.setFilename( filePath );
@@ -306,7 +308,6 @@ public class GitController extends AbstractXulEventHandler {
   public void visualdiff() {
     String baseDirectory = uiGit.getDirectory();
     getSelectedChangedObjects().stream()
-      .filter( content -> content.getName().endsWith( Const.STRING_TRANS_DEFAULT_EXT ) || content.getName().endsWith( Const.STRING_JOB_DEFAULT_EXT ) )
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
         EngineMetaInterface metaOld = null, metaNew = null;
@@ -341,6 +342,9 @@ public class GitController extends AbstractXulEventHandler {
             ( (JobMeta) metaOld ).setJobversion( "git: " + commitIdOld );
             ( (JobMeta) metaNew ).setJobversion( "git: " + commitIdNew );
             c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
+          } else {
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
+            return;
           }
           xmlStreamOld.close();
           xmlStreamNew.close();
