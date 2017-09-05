@@ -579,12 +579,18 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void pull() {
+    if ( !uiGit.hasRemote() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
+      return;
+    }
     try {
       PullResult pullResult = uiGit.pull();
       processPullResult( pullResult );
     } catch ( TransportException e ) {
       if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
         pullWithUsernamePassword();
+      } else if ( e.getMessage().contains( "not authorized" ) ) {
+        pushWithUsernamePassword();
       } else {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
@@ -632,14 +638,17 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void push() {
+    if ( !uiGit.hasRemote() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
+      return;
+    }
     try {
       Iterable<PushResult> resultIterable = uiGit.push();
       processPushResult( resultIterable );
     } catch ( TransportException e ) {
-      if ( e instanceof TransportException && !uiGit.hasRemote() ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
-            "Please setup a remote" );
-      } else if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
+      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
+        pushWithUsernamePassword();
+      } else if ( e.getMessage().contains( "not authorized" ) ) {
         pushWithUsernamePassword();
       } else {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );

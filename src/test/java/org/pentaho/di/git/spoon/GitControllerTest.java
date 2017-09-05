@@ -133,6 +133,7 @@ public class GitControllerTest {
   public void shouldFireSourceChangedWhenSuccessful() throws Exception {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
+    doReturn( true ).when( uiGit ).hasRemote();
     PullResult pullResult = mock( PullResult.class );
     when( pullResult.isSuccessful() ).thenReturn( true );
     doReturn( pullResult ).when( uiGit ).pull();
@@ -146,6 +147,7 @@ public class GitControllerTest {
   public void shouldResetHardWhenMergeConflict() throws Exception {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
+    doReturn( true ).when( uiGit ).hasRemote();
     PullResult pullResult = mock( PullResult.class );
     when( pullResult.isSuccessful() ).thenReturn( false );
     doReturn( pullResult ).when( uiGit ).pull();

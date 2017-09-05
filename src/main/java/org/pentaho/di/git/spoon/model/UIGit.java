@@ -87,6 +87,7 @@ public class UIGit extends XulEventSourceAdapter {
   public static final String INDEX = "INDEX";
   private Git git;
   private String directory;
+  private CredentialsProvider credentialsProvider;
 
   public String getDirectory() {
     return directory;
@@ -370,14 +371,14 @@ public class UIGit extends XulEventSourceAdapter {
    * @see <a href="http://www.kernel.org/pub/software/scm/git/docs/git-pull.html">Git documentation about Pull</a>
    */
   public PullResult pull() throws Exception {
-    return git.pull().call();
+    PullCommand cmd = git.pull();
+    cmd.setCredentialsProvider( credentialsProvider );
+    return cmd.call();
   }
 
   public PullResult pull( String username, String password ) throws Exception {
-    PullCommand cmd = git.pull();
-    CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
-    cmd.setCredentialsProvider( credentialsProvider );
-    return cmd.call();
+    credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
+    return pull();
   }
 
   public Ref resetHard() throws Exception {
@@ -385,14 +386,14 @@ public class UIGit extends XulEventSourceAdapter {
   }
 
   public Iterable<PushResult> push() throws Exception {
-    return git.push().call();
+    PushCommand cmd = git.push();
+    cmd.setCredentialsProvider( credentialsProvider );
+    return cmd.call();
   }
 
   public Iterable<PushResult> push( String username, String password ) throws Exception {
-    PushCommand cmd = git.push();
-    CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
-    cmd.setCredentialsProvider( credentialsProvider );
-    return cmd.call();
+    credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
+    return push();
   }
 
   /**
