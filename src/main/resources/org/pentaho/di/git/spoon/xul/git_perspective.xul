@@ -5,7 +5,7 @@
     <toolbar id="git-toolbar" mode="full">
       <toolbarbutton id="git" label="${Git.Repository}" image="org/pentaho/di/git/spoon/images/repository.svg" menu="menu-git-repository-popup"/>
       <toolbarseparator />
-      <toolbarbutton id="config" label="${Git.Config}" image="org/pentaho/di/git/spoon/images/context_menu.svg" onclick="gitController.editRemote()" disabled="true"/>
+      <toolbarbutton id="config" label="${Git.Config}" image="ui/images/context_menu.svg" onclick="gitController.editRemote()" disabled="true"/>
       <toolbarbutton id="pull" label="${Git.Pull}" onclick="gitController.pull()" image="org/pentaho/di/git/spoon/images/pull.svg" disabled="true"/>
       <toolbarbutton id="push" label="${Git.Push}" onclick="gitController.push()" image="org/pentaho/di/git/spoon/images/push.svg" disabled="true"/>
       <toolbarbutton id="branch" label="${Git.Branch}" image="org/pentaho/di/git/spoon/images/branch.svg" disabled="true" menu="branchContextMenu"/>
