@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.6.1 - 2017-09-05
+### Added
+- Ask to add a repository when no repository
+- Restore Stage/Unstage menuitems in the context menu
+- Show a error msg when trying to open/visualdiff a non-Kettle file
+
+### Changed
+- Switching to Git perspective does not trigger refresh, added refresh button for that
+- Cache one pair of username and password (cleared when Spoon terminates)
+
+### Removed
+- Do not show texual diff upon selecting a revision
+
 ## 0.6.0 - 2017-08-30
 ### Changed
 - Diff can now be between arbitrary two commits
