@@ -191,14 +191,12 @@ public class GitController extends AbstractXulEventHandler {
   public void openGit( GitRepository repo ) {
     String baseDirectory = repo.getDirectory();
     try {
-      if ( repo.getType().equals( VCS.GIT ) ) {
+      if ( repo.getType() == null || repo.getType().equals( VCS.GIT ) ) {
         vcs = new UIGit();
       }
       vcs.openRepo( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
-    } catch ( NullPointerException e ) {
-      return;
     } catch ( Exception e ) {
       e.printStackTrace();
     }
