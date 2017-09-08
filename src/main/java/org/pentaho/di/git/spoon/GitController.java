@@ -358,7 +358,7 @@ public class GitController extends AbstractXulEventHandler {
           metaNew.setFilename( filePath );
           c.accept( metaNew );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
-        } catch ( MissingObjectException e ) {
+        } catch ( MissingObjectException | NullPointerException e ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "New file" );
         } catch ( Exception e ) {
           e.printStackTrace();

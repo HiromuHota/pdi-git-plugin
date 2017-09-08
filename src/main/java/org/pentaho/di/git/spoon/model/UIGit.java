@@ -159,7 +159,11 @@ public class UIGit extends XulEventSourceAdapter {
    */
   public String getCommitId( String revstr ) throws Exception {
     final ObjectId id = git.getRepository().resolve( revstr );
-    return id.getName();
+    if ( id == null ) {
+      return null;
+    } else {
+      return id.getName();
+    }
   }
 
   /**
@@ -526,6 +530,9 @@ public class UIGit extends XulEventSourceAdapter {
   }
 
   private AbstractTreeIterator getTreeIterator( String commitId ) throws Exception {
+    if ( commitId == null ) {
+      return new EmptyTreeIterator();
+    }
     if ( commitId.equals( WORKINGTREE ) ) {
       return new FileTreeIterator( git.getRepository() );
     } else if ( commitId.equals( INDEX ) ) {
