@@ -23,13 +23,10 @@ import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RenameDetector;
-import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheIterator;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ConfigConstants;
@@ -61,6 +58,8 @@ import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FileUtils;
+import org.eclipse.jgit.util.RawParseUtils;
+import org.eclipse.jgit.util.SystemReader;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
@@ -70,7 +69,7 @@ import org.pentaho.ui.xul.XulEventSourceAdapter;
 
 import com.google.common.annotations.VisibleForTesting;
 
-public class UIGit extends XulEventSourceAdapter {
+public class UIGit extends XulEventSourceAdapter implements VCS {
 
   static {
     /**
@@ -83,12 +82,14 @@ public class UIGit extends XulEventSourceAdapter {
     HttpTransport.setConnectionFactory( new HttpClientConnectionFactory() );
   }
 
-  public static final String WORKINGTREE = "WORKINGTREE";
-  public static final String INDEX = "INDEX";
   private Git git;
   private String directory;
   private CredentialsProvider credentialsProvider;
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getDirectory()
+   */
+  @Override
   public String getDirectory() {
     return directory;
   }
@@ -98,10 +99,10 @@ public class UIGit extends XulEventSourceAdapter {
     this.directory = directory;
   }
 
-  /**
-   * If git is null or not
-   * @return
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#isOpen()
    */
+  @Override
   public boolean isOpen() {
     return git != null;
   }
@@ -111,22 +112,20 @@ public class UIGit extends XulEventSourceAdapter {
     this.git = git;
   }
 
-  /**
-   * Get the author name as defined in the .git
-   * @return
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getAuthorName()
    */
+  @Override
   public String getAuthorName() {
     Config config = git.getRepository().getConfig();
     return config.get( UserConfig.KEY ).getAuthorName()
         + " <" + config.get( UserConfig.KEY ).getAuthorEmail() + ">";
   }
 
-  /**
-   * Get the author name for a commit
-   * @param commitId
-   * @return
-   * @throws Exception
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getAuthorName(java.lang.String)
    */
+  @Override
   public String getAuthorName( String commitId ) throws Exception {
     final ObjectId id = git.getRepository().resolve( commitId );
     try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
@@ -142,6 +141,10 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getCommitMessage(java.lang.String)
+   */
+  @Override
   public String getCommitMessage( String commitId ) throws Exception {
     final ObjectId id = git.getRepository().resolve( commitId );
     try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
@@ -151,12 +154,10 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
-  /**
-   * Get SHA-1 commit Id
-   * @param revstr: (e.g., HEAD, SHA-1)
-   * @return
-   * @throws Exception
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getCommitId(java.lang.String)
    */
+  @Override
   public String getCommitId( String revstr ) throws Exception {
     final ObjectId id = git.getRepository().resolve( revstr );
     if ( id == null ) {
@@ -166,10 +167,15 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
-  /**
-   * Get the current branch
-   * @return Current branch
+  @Override
+  public String getParentCommitId( String revstr ) throws Exception {
+    return getCommitId( revstr + "~" );
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getBranch()
    */
+  @Override
   public String getBranch() {
     try {
       Ref head = git.getRepository().exactRef( Constants.HEAD );
@@ -184,12 +190,20 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
-  /**
-   * Get a list of local branches
-   * @return
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getLocalBranches()
    */
-  public List<String> getBranches() {
+  @Override
+  public List<String> getLocalBranches() {
     return getBranches( null );
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getBranches()
+   */
+  @Override
+  public List<String> getBranches() {
+    return getBranches( ListMode.ALL );
   }
 
   /**
@@ -197,7 +211,7 @@ public class UIGit extends XulEventSourceAdapter {
    * @param mode
    * @return
    */
-  public List<String> getBranches( ListMode mode ) {
+  private List<String> getBranches( ListMode mode ) {
     try {
       return git.branchList().setListMode( mode ).call().stream()
         .filter( ref -> !ref.getName().endsWith( Constants.HEAD ) )
@@ -209,10 +223,10 @@ public class UIGit extends XulEventSourceAdapter {
     return null;
   }
 
-  public String getFullBranch() throws IOException {
-    return git.getRepository().getFullBranch();
-  }
-
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getRemote()
+   */
+  @Override
   public String getRemote() {
     try {
       StoredConfig config = git.getRepository().getConfig();
@@ -223,7 +237,11 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
-  public RemoteConfig addRemote( String s ) throws Exception {
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#addRemote(java.lang.String)
+   */
+  @Override
+  public void addRemote( String s ) throws Exception {
     // Make sure you have only one URI for push
     removeRemote();
 
@@ -232,26 +250,47 @@ public class UIGit extends XulEventSourceAdapter {
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
     cmd.setUri( uri );
     firePropertyChange( "remote", null, s );
-    return cmd.call();
+    cmd.call();
   }
 
-  public RemoteConfig removeRemote() throws GitAPIException {
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#removeRemote()
+   */
+  @Override
+  public void removeRemote() throws Exception {
     RemoteRemoveCommand cmd = git.remoteRemove();
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
     firePropertyChange( "remote", null, "" );
-    return cmd.call();
+    cmd.call();
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#hasRemote()
+   */
+  @Override
   public boolean hasRemote() {
     StoredConfig config = git.getRepository().getConfig();
     Set<String> remotes = config.getSubsections( ConfigConstants.CONFIG_REMOTE_SECTION );
     return remotes.contains( Constants.DEFAULT_REMOTE_NAME );
   }
 
-  public RevCommit commit( PersonIdent author, String message ) throws Exception {
-    return git.commit().setAuthor( author ).setMessage( message ).call();
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#commit(java.lang.String, java.lang.String)
+   */
+  @Override
+  public void commit( String authorName, String message ) throws Exception {
+    PersonIdent author = RawParseUtils.parsePersonIdent( authorName );
+    // Set the local time
+    PersonIdent author2 = new PersonIdent( author.getName(), author.getEmailAddress(),
+        SystemReader.getInstance().getCurrentTime(),
+        SystemReader.getInstance().getTimezone( SystemReader.getInstance().getCurrentTime() ) );
+    git.commit().setAuthor( author2 ).setMessage( message ).call();
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getRevisions()
+   */
+  @Override
   public UIRepositoryObjectRevisions getRevisions() throws Exception {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     try {
@@ -260,7 +299,7 @@ public class UIGit extends XulEventSourceAdapter {
             WORKINGTREE,
             "*",
             new Date(),
-            " // " + UIGit.WORKINGTREE );
+            " // " + VCS.WORKINGTREE );
         revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
       }
       Iterable<RevCommit> iterable = git.log().call();
@@ -278,7 +317,11 @@ public class UIGit extends XulEventSourceAdapter {
     return revisions;
   }
 
-  public List<UIFile> getUnstagedObjects() throws Exception {
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getUnstagedFiles()
+   */
+  @Override
+  public List<UIFile> getUnstagedFiles() throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
     Status status = git.status().call();
     status.getUntracked().forEach( name -> {
@@ -293,35 +336,30 @@ public class UIGit extends XulEventSourceAdapter {
     return files;
   }
 
-  public List<UIFile> getStagedObjects( String commitId ) throws Exception {
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getStagedFiles()
+   */
+  @Override
+  public List<UIFile> getStagedFiles() throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
-    if ( commitId.equals( WORKINGTREE ) ) {
-      Status status = git.status().call();
-      status.getAdded().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.ADD, true ) );
-      } );
-      status.getChanged().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.MODIFY, true ) );
-      } );
-      status.getRemoved().forEach( name -> {
-        files.add( new UIFile( name, ChangeType.DELETE, true ) );
-      } );
-    } else {
-      List<DiffEntry> diffs = getDiffCommand( commitId + "^", commitId )
-        .setShowNameAndStatusOnly( true )
-        .call();
-      RenameDetector rd = new RenameDetector( git.getRepository() );
-      rd.addAll( diffs );
-      diffs = rd.compute();
-      diffs.forEach( diff -> {
-        files.add( new UIFile( diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath() : diff.getNewPath(),
-            diff.getChangeType(), false ) );
-      } );
-    }
+    Status status = git.status().call();
+    status.getAdded().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.ADD, true ) );
+    } );
+    status.getChanged().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.MODIFY, true ) );
+    } );
+    status.getRemoved().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.DELETE, true ) );
+    } );
     return files;
   }
 
-  public List<UIFile> getStagedObjects( String oldCommitId, String newCommitId ) throws Exception {
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#getStagedFiles(java.lang.String, java.lang.String)
+   */
+  @Override
+  public List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
     List<DiffEntry> diffs = getDiffCommand( oldCommitId, newCommitId )
       .setShowNameAndStatusOnly( true )
@@ -336,76 +374,114 @@ public class UIGit extends XulEventSourceAdapter {
     return files;
   }
 
-  public boolean hasStagedObjects() throws Exception {
-    return getStagedObjects( WORKINGTREE ).size() != 0;
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#hasStagedFiles()
+   */
+  @Override
+  public boolean hasStagedFiles() throws Exception {
+    return !getStagedFiles().isEmpty();
   }
 
-  public void initGit( String baseDirectory ) throws IllegalStateException, GitAPIException {
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#initRepo(java.lang.String)
+   */
+  @Override
+  public void initRepo( String baseDirectory ) throws Exception {
     git = Git.init().setDirectory( new File( baseDirectory ) ).call();
     directory = baseDirectory;
   }
 
-  public void openGit( String baseDirectory ) throws IOException {
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#openRepo(java.lang.String)
+   */
+  @Override
+  public void openRepo( String baseDirectory ) throws Exception {
     git = Git.open( new File( baseDirectory ) );
     directory = baseDirectory;
   }
 
-  public void closeGit() {
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#closeRepo()
+   */
+  @Override
+  public void closeRepo() {
     git.close();
     git = null;
   }
 
-  public DirCache add( String filepattern ) throws Exception {
-    return git.add().addFilepattern( filepattern ).call();
-  }
-
-  public DirCache rm( String filepattern ) throws NoFilepatternException, GitAPIException {
-    return git.rm().addFilepattern( filepattern ).call();
-  }
-
-  public Ref reset( String path ) throws Exception {
-    return git.reset().addPath( path ).call();
-  }
-
-  /**
-   * Equivalent of <tt>git fetch; git merge --ff</tt>
-   *
-   * @return PullResult
-   * @throws Exception
-   * @see <a href="http://www.kernel.org/pub/software/scm/git/docs/git-pull.html">Git documentation about Pull</a>
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#add(java.lang.String)
    */
+  @Override
+  public void add( String filepattern ) throws Exception {
+    git.add().addFilepattern( filepattern ).call();
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#rm(java.lang.String)
+   */
+  @Override
+  public void rm( String filepattern ) throws Exception {
+    git.rm().addFilepattern( filepattern ).call();
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#reset(java.lang.String)
+   */
+  @Override
+  public void reset( String path ) throws Exception {
+    git.reset().addPath( path ).call();
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#resetHard()
+   */
+  @Override
+  public void resetHard() throws Exception {
+    git.reset().setMode( ResetType.HARD ).call();
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#pull()
+   */
+  @Override
   public PullResult pull() throws Exception {
     PullCommand cmd = git.pull();
     cmd.setCredentialsProvider( credentialsProvider );
     return cmd.call();
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#pull(java.lang.String, java.lang.String)
+   */
   public PullResult pull( String username, String password ) throws Exception {
     credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
     return pull();
   }
 
-  public Ref resetHard() throws Exception {
-    return git.reset().setMode( ResetType.HARD ).call();
-  }
-
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#push()
+   */
+  @Override
   public Iterable<PushResult> push() throws Exception {
     PushCommand cmd = git.push();
     cmd.setCredentialsProvider( credentialsProvider );
     return cmd.call();
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#push(java.lang.String, java.lang.String)
+   */
+  @Override
   public Iterable<PushResult> push( String username, String password ) throws Exception {
     credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
     return push();
   }
 
-  /**
-   * Show diff for a commit
-   * @param commitId
-   * @return
-   * @throws Exception
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#show(java.lang.String)
    */
+  @Override
   public String show( String commitId ) throws Exception {
     if ( commitId.equals( WORKINGTREE ) ) {
       return diff( Constants.HEAD, WORKINGTREE );
@@ -414,10 +490,18 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#diff(java.lang.String, java.lang.String)
+   */
+  @Override
   public String diff( String oldCommitId, String newCommitId ) throws Exception {
     return diff( oldCommitId, newCommitId, null );
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#diff(java.lang.String, java.lang.String, java.lang.String)
+   */
+  @Override
   public String diff( String oldCommitId, String newCommitId, String file ) throws Exception {
     // DiffFormatter does not detect renames with path filters on
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -438,6 +522,10 @@ public class UIGit extends XulEventSourceAdapter {
     return out.toString( "UTF-8" );
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#open(java.lang.String, java.lang.String)
+   */
+  @Override
   public InputStream open( String file, String commitId ) throws Exception {
     if ( commitId.equals( WORKINGTREE ) ) {
       String baseDirectory = getDirectory();
@@ -460,13 +548,13 @@ public class UIGit extends XulEventSourceAdapter {
     }
   }
 
-  public static Git cloneRepo( String directory, String uri ) throws Exception {
+  public static void cloneRepo( String directory, String uri ) throws Exception {
     CloneCommand cmd = Git.cloneRepository();
     cmd.setDirectory( new File( directory ) );
     cmd.setURI( uri );
     try {
       Git git = cmd.call();
-      return git;
+      git.close();
     } catch ( Exception e ) {
       try {
         FileUtils.delete( new File( directory ), FileUtils.RECURSIVE );
@@ -474,53 +562,72 @@ public class UIGit extends XulEventSourceAdapter {
       } catch ( IOException e1 ) {
         e1.printStackTrace();
       }
-      return null;
     }
   }
 
-  public static Git cloneRepo( String directory, String uri, String username, String password ) throws Exception {
+  public static void cloneRepo( String directory, String uri, String username, String password ) throws Exception {
     CloneCommand cmd = Git.cloneRepository();
     cmd.setDirectory( new File( directory ) );
     cmd.setURI( uri );
     CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
     cmd.setCredentialsProvider( credentialsProvider );
-    return cmd.call();
+    Git git = cmd.call();
+    git.close();
   }
 
-  /**
-   * Checkout a branch or commit
-   * @param name
-   * @throws Exception
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#checkout(java.lang.String)
    */
+  @Override
   public void checkout( String name ) throws Exception {
     git.checkout().setName( name ).call();
   }
 
-  public Ref createBranch( String value ) throws Exception {
-    return git.branchCreate().setName( value ).call();
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#checkout(java.lang.String, java.lang.String)
+   */
+  @Override
+  public void checkout( String name, String path ) throws Exception {
+    git.checkout().setName( name ).addPath( path ).call();
   }
 
-  public List<String> deleteBranch( String name, boolean force ) throws Exception {
-    return git.branchDelete()
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#createBranch(java.lang.String)
+   */
+  @Override
+  public void createBranch( String value ) throws Exception {
+    git.branchCreate().setName( value ).call();
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#deleteBranch(java.lang.String, boolean)
+   */
+  @Override
+  public void deleteBranch( String name, boolean force ) throws Exception {
+    git.branchDelete()
         .setBranchNames( name )
         .setForce( force )
         .call();
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#mergeBranch(java.lang.String)
+   */
+  @Override
   public MergeResult mergeBranch( String value ) throws Exception {
     return mergeBranch( value, MergeStrategy.RECURSIVE.getName() );
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#mergeBranch(java.lang.String, java.lang.String)
+   */
+  @Override
   public MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception {
     Ref ref = git.getRepository().exactRef( Constants.R_HEADS + value );
     return git.merge()
         .include( ref )
         .setStrategy( MergeStrategy.get( mergeStrategy ) )
         .call();
-  }
-
-  public Ref checkoutPath( String path ) throws Exception {
-    return git.checkout().addPath( path ).call();
   }
 
   private DiffCommand getDiffCommand( String oldCommitId, String newCommitId ) throws Exception {

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.window.Window;
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.git.spoon.dialog.CloneRepositoryDialog;
@@ -138,8 +137,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
       String directory = null;
       try {
         directory = dialog.getDirectory() + File.separator + dialog.getCloneAs();
-        Git git = UIGit.cloneRepo( directory, url );
-        git.close();
+        UIGit.cloneRepo( directory, url );
         showMessageBox( "Success", "Success" );
         saveRepository( repo );
         gitController.openGit( repo );
@@ -166,8 +164,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
       String username = dialog.getUsername();
       String password = dialog.getPassword();
       try {
-        Git git = UIGit.cloneRepo( directory, url, username, password );
-        git.close();
+        UIGit.cloneRepo( directory, url, username, password );
         showMessageBox( "Success", "Success" );
       } catch ( Exception e ) {
         showMessageBox( "Error", e.getLocalizedMessage() );

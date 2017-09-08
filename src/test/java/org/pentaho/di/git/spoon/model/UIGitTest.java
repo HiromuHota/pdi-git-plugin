@@ -59,7 +59,7 @@ public class UIGitTest extends RepositoryTestCase {
   public void testGetBranches() throws Exception {
     initialCommit();
 
-    assertEquals( Constants.MASTER, uiGit.getBranches().get( 0 ) );
+    assertEquals( Constants.MASTER, uiGit.getLocalBranches().get( 0 ) );
   }
 
   @Test
@@ -84,11 +84,9 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testDeleteRemote() throws Exception {
-    RemoteConfig remoteConfig = setupRemote();
-    RemoteConfig remote = uiGit.removeRemote();
+    setupRemote();
+    uiGit.removeRemote();
 
-    // assert that the removed remote is the initial remote
-    assertEquals( remoteConfig.getName(), remote.getName() );
     // assert that there are no remotes left
     assertTrue( RemoteConfig.getAllRemoteConfigs( db.getConfig() ).isEmpty() );
   }
@@ -109,12 +107,20 @@ public class UIGitTest extends RepositoryTestCase {
     PersonIdent author = new PersonIdent( "author", "author@example.com" );
     String message = "Initial commit";
 
-    RevCommit commit = uiGit.commit( author, message );
+    uiGit.commit( author.toExternalString(), message );
+    String commitId = uiGit.getCommitId( Constants.HEAD );
 
-    assertEquals( author, commit.getAuthorIdent() );
-    assertEquals( message, commit.getFullMessage() );
-    assertEquals( message, uiGit.getCommitMessage( commit.getName() ) );
-    assertEquals( "author <author@example.com>", uiGit.getAuthorName( commit.getName() ) );
+    assertTrue( author.toExternalString().contains( uiGit.getAuthorName( commitId ) ) );
+    assertEquals( message, uiGit.getCommitMessage( commitId ) );
+  }
+
+  @Test
+  public void shouldNotCommitWhenAuthorNameMalformed() throws Exception {
+    writeTrashFile( "Test.txt", "Hello world" );
+    uiGit.add( "Test.txt" );
+
+    thrown.expect( NullPointerException.class );
+    uiGit.commit( "random author", "Initial commit" );
   }
 
   @Test
@@ -132,19 +138,19 @@ public class UIGitTest extends RepositoryTestCase {
     File c = writeTrashFile( "c.kjb", "abcdefg" );
 
     // Test for unstaged
-    List<UIFile> unStagedObjects = uiGit.getUnstagedObjects();
+    List<UIFile> unStagedObjects = uiGit.getUnstagedFiles();
     assertEquals( 3, unStagedObjects.size() );
     assertTrue( unStagedObjects.stream().anyMatch( obj -> obj.getName().equals( "a.ktr" ) ) );
 
     // Test for staged
     git.add().addFilepattern( "." ).call();
-    List<UIFile> stagedObjects = uiGit.getStagedObjects( UIGit.WORKINGTREE );
+    List<UIFile> stagedObjects = uiGit.getStagedFiles();
     assertEquals( 3, stagedObjects.size() );
     assertTrue( stagedObjects.stream().anyMatch( obj -> obj.getName().equals( "a.ktr" ) ) );
 
     // Make a commit
     RevCommit commit = git.commit().setMessage( "initial commit" ).call();
-    stagedObjects = uiGit.getStagedObjects( commit.getId().name() );
+    stagedObjects = uiGit.getStagedFiles( commit.getId().name() + "~", commit.getId().name() );
     assertEquals( 3, stagedObjects.size() );
     assertTrue( stagedObjects.stream().anyMatch( obj -> obj.getName().equals( "b.kjb" ) ) );
 
@@ -154,14 +160,14 @@ public class UIGitTest extends RepositoryTestCase {
     FileUtils.writeStringToFile( c, "A change" );
 
     // Test for unstaged
-    unStagedObjects = uiGit.getUnstagedObjects();
+    unStagedObjects = uiGit.getUnstagedFiles();
     assertEquals( ChangeType.DELETE, unStagedObjects.stream().filter( obj -> obj.getName().equals( "b.kjb" ) ).findFirst().get().getChangeType() );
 
     // Test for staged
     git.add().addFilepattern( "." ).call();
     git.rm().addFilepattern( a.getName() ).call();
     git.rm().addFilepattern( b.getName() ).call();
-    stagedObjects = uiGit.getStagedObjects( UIGit.WORKINGTREE );
+    stagedObjects = uiGit.getStagedFiles();
     assertEquals( 4, stagedObjects.size() );
     assertEquals( ChangeType.DELETE, stagedObjects.stream().filter( obj -> obj.getName().equals( "b.kjb" ) ).findFirst().get().getChangeType() );
     assertEquals( ChangeType.ADD, stagedObjects.stream().filter( obj -> obj.getName().equals( "a2.ktr" ) ).findFirst().get().getChangeType() );
@@ -308,7 +314,7 @@ public class UIGitTest extends RepositoryTestCase {
   public void testDiff() throws Exception {
     File file = writeTrashFile( "Test.txt", "Hello world" );
 
-    String diff = uiGit.diff( UIGit.INDEX, UIGit.WORKINGTREE, "Test.txt" );
+    String diff = uiGit.diff( VCS.INDEX, VCS.WORKINGTREE, "Test.txt" );
     assertTrue( diff.contains( "+Hello world" ) );
 
     git.add().addFilepattern( "Test.txt" ).call();
@@ -319,7 +325,7 @@ public class UIGitTest extends RepositoryTestCase {
     git.add().addFilepattern( "Test.txt" ).call();
     RevCommit commit2 = git.commit().setMessage( "second commit" ).call();
 
-    diff = uiGit.diff( commit1.getName(), UIGit.WORKINGTREE );
+    diff = uiGit.diff( commit1.getName(), VCS.WORKINGTREE );
     assertTrue( diff.contains( "-Hello world" ) );
     assertTrue( diff.contains( "+second commit" ) );
     diff = uiGit.diff( commit1.getName(), commit2.getName() );
@@ -327,7 +333,7 @@ public class UIGitTest extends RepositoryTestCase {
 
     // Should detect renames
     file.renameTo( new File( git.getRepository().getWorkTree(), "Test2.txt" ) );
-    diff = uiGit.diff( Constants.HEAD, UIGit.WORKINGTREE, "Test2.txt" );
+    diff = uiGit.diff( Constants.HEAD, VCS.WORKINGTREE, "Test2.txt" );
     assertTrue( diff.contains( "rename" ) );
   }
 
@@ -340,7 +346,7 @@ public class UIGitTest extends RepositoryTestCase {
 
     // Make the second commit
     writeTrashFile( "Test2.txt", "Second commit" );
-    diff = uiGit.show( UIGit.WORKINGTREE );
+    diff = uiGit.show( VCS.WORKINGTREE );
     assertTrue( diff.contains( "+Second commit" ) );
     git.add().addFilepattern( "Test2.txt" ).call();
     commit = git.commit().setMessage( "initial commit" ).call();
@@ -358,7 +364,7 @@ public class UIGitTest extends RepositoryTestCase {
     IOUtils.copy( inputStream, writer, "UTF-8" );
     assertEquals( "Hello world", writer.toString() );
 
-    inputStream = uiGit.open( "Test.txt", UIGit.WORKINGTREE );
+    inputStream = uiGit.open( "Test.txt", VCS.WORKINGTREE );
     writer = new StringWriter();
     IOUtils.copy( inputStream, writer, "UTF-8" );
     assertEquals( "Hello world", writer.toString() );
@@ -380,14 +386,19 @@ public class UIGitTest extends RepositoryTestCase {
     // commit something
     File file = writeTrashFile( "Test.txt", "Hello world" );
     git.add().addFilepattern( "Test.txt" ).call();
-    git.commit().setMessage( "initial commit" ).call();
+    RevCommit commit = git.commit().setMessage( "initial commit" ).call();
 
     // Add some change
     FileUtils.writeStringToFile( file, "Change" );
     assertEquals( "Change", FileUtils.readFileToString( file ) );
 
-    uiGit.checkoutPath( file.getName() );
+    uiGit.checkout( null, file.getName() );
+    assertEquals( "Hello world", FileUtils.readFileToString( file ) );
 
+    uiGit.checkout( Constants.HEAD, file.getName() );
+    assertEquals( "Hello world", FileUtils.readFileToString( file ) );
+
+    uiGit.checkout( commit.getName(), file.getName() );
     assertEquals( "Hello world", FileUtils.readFileToString( file ) );
   }
 
@@ -396,13 +407,15 @@ public class UIGitTest extends RepositoryTestCase {
     initialCommit();
 
     // create a branch
-    Ref ref = uiGit.createBranch( "test" );
-    assertEquals( Constants.R_HEADS + "test", ref.getName() );
+    uiGit.createBranch( "test" );
+    List<String> branches = uiGit.getLocalBranches();
+    assertTrue( branches.contains( "test" ) );
 
     // delete the branch
-    List<String> deleted = uiGit.deleteBranch( "test", true );
-    assertEquals( 1, deleted.size() );
-    assertEquals( Constants.R_HEADS + "test", deleted.get( 0 ) );
+    uiGit.deleteBranch( "test", true );
+    branches = uiGit.getLocalBranches();
+    assertEquals( 1, branches.size() );
+    assertFalse( branches.contains( "test" ) );
   }
 
   private RevCommit initialCommit() throws Exception {
