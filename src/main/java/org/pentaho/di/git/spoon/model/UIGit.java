@@ -668,4 +668,14 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
       return commitId;
     }
   }
+
+  @Override
+  public boolean isClean() {
+    try {
+      return git.status().call().isClean();
+    } catch ( Exception e ) {
+      e.printStackTrace();
+      return false;
+    }
+  }
 }

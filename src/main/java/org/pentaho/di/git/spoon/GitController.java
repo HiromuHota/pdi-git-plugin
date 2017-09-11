@@ -587,6 +587,10 @@ public class GitController extends AbstractXulEventHandler {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "One or more tabs have unsaved changes" );
       return;
     }
+    if ( !vcs.isClean() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      return;
+    }
     if ( !vcs.hasRemote() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
       return;
@@ -753,6 +757,10 @@ public class GitController extends AbstractXulEventHandler {
   public void merge() throws XulException {
     if ( anyChangedTabs() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "One or more tabs have unsaved changes" );
+      return;
+    }
+    if ( !vcs.isClean() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
       return;
     }
     MergeBranchDialog dialog = new MergeBranchDialog( getShell() );

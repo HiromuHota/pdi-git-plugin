@@ -23,6 +23,12 @@ public interface VCS {
   boolean isOpen();
 
   /**
+   * If the repository is clean and not dirty.
+   * @return
+   */
+  boolean isClean();
+
+  /**
    * Get the author name as defined in the .git
    * @return
    */

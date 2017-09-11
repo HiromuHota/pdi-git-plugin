@@ -123,6 +123,7 @@ public class GitControllerTest {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     doReturn( true ).when( uiGit ).hasRemote();
+    doReturn( true ).when( uiGit ).isClean();
     PullResult pullResult = mock( PullResult.class );
     when( pullResult.isSuccessful() ).thenReturn( true );
     doReturn( pullResult ).when( uiGit ).pull();
@@ -140,6 +141,7 @@ public class GitControllerTest {
     PullResult pullResult = mock( PullResult.class );
     when( pullResult.isSuccessful() ).thenReturn( false );
     doReturn( pullResult ).when( uiGit ).pull();
+    doReturn( true ).when( uiGit ).isClean();
     MergeResult mergeResult = mock( MergeResult.class );
     when( mergeResult.getMergeStatus() ).thenReturn( MergeStatus.CONFLICTING );
     when( pullResult.getMergeResult() ).thenReturn( mergeResult );
