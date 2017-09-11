@@ -47,6 +47,7 @@ public class GitControllerTest {
     uiGit = mock( UIGit.class );
     controller.setUIGit( uiGit );
     doNothing().when( controller ).fireSourceChanged();
+    doReturn( false ).when( controller ).anyChangedTabs();
 
     DocumentFactory.registerElementClass( ElementDom4J.class );
     document = mock( Document.class );

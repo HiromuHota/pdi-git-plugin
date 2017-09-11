@@ -30,6 +30,7 @@ import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
@@ -47,6 +48,8 @@ import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObj
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.pentaho.di.ui.spoon.MainSpoonPerspective;
 import org.pentaho.di.ui.spoon.Spoon;
+import org.pentaho.di.ui.spoon.job.JobGraph;
+import org.pentaho.di.ui.spoon.trans.TransGraph;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.binding.Binding;
 import org.pentaho.ui.xul.binding.BindingFactory;
@@ -580,6 +583,10 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void pull() {
+    if ( anyChangedTabs() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "One or more tabs have unsaved changes" );
+      return;
+    }
     if ( !vcs.hasRemote() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
       return;
@@ -744,6 +751,10 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void merge() throws XulException {
+    if ( anyChangedTabs() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "One or more tabs have unsaved changes" );
+      return;
+    }
     MergeBranchDialog dialog = new MergeBranchDialog( getShell() );
     List<String> branches = vcs.getLocalBranches();
     branches.remove( vcs.getBranch() );
@@ -819,5 +830,25 @@ public class GitController extends AbstractXulEventHandler {
 
   public boolean isOpen() {
     return vcs != null;
+  }
+
+  @VisibleForTesting
+  boolean anyChangedTabs() {
+    return Spoon.getInstance().delegates.tabs.getTabs().stream()
+    .map( mapEntry -> {
+      AbstractMeta meta = null;
+      if ( mapEntry != null ) {
+        if ( mapEntry.getObject() instanceof TransGraph ) {
+          meta = (AbstractMeta) ( mapEntry.getObject() ).getMeta();
+        }
+        if ( mapEntry.getObject() instanceof JobGraph ) {
+          meta = (AbstractMeta) ( mapEntry.getObject() ).getMeta();
+        }
+      }
+      return meta;
+    })
+    .filter( meta -> meta != null )
+    .filter( meta -> meta.hasChanged() )
+    .findAny().isPresent();
   }
 }
