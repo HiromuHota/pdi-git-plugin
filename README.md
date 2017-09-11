@@ -134,6 +134,11 @@ Proxy Authentication is currently not supported.
 
 Please create a branch called *develop*, then you will be out of the HEAD detached state.
 
+### How can I revert to one of the commits?
+
+*Revert* (equivalent to `git revert`) has not been and will not be implemented in this plugin because reverting to a commit may conflict and it is not easy to resolve conflicts of Kettle files.
+However, you can still let a Kettle file revert to a past commit: open the interested Kettle file of the particular commit (Context menu > Open), change the Transformation/Job name if you want, save it, stage it, and make a new commit.
+
 # How to compile
 
 ```
