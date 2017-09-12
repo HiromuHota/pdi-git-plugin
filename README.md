@@ -93,7 +93,7 @@ Collectively, they are equivalent of `git checkout origin/feature` then `git che
 ### When pushing, I get an "UnknownHostKey" error
 
 This happens when connecting to the remote repository via SSH.
-Please add the host to `~/.ssh/known_hosts`
+Please add the host to `~/.ssh/known_hosts` in "ssh-rsa" format instead of "ecdsa-sha2-nistp256" format.
 
 ### The remote host has been added, but I still get an "UnknownHostKey" error
 
