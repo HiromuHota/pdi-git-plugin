@@ -718,7 +718,7 @@ public class GitController extends AbstractXulEventHandler {
     String name = esd.open();
     if ( name != null ) {
       try {
-        vcs.checkout( name );
+        vcs.checkout( Constants.R_HEADS + name );
         setBranch( vcs.getBranch() );
         fireSourceChanged();
       } catch ( Exception e ) {
@@ -769,12 +769,11 @@ public class GitController extends AbstractXulEventHandler {
 
   public void checkoutTag() throws Exception {
     List<String> names = vcs.getTags();
-    names.remove( vcs.getBranch() );
     EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to checkout..." );
     String name = esd.open();
     if ( name != null ) {
       try {
-        vcs.checkout( name );
+        vcs.checkout( Constants.R_TAGS + name );
         setBranch( vcs.getBranch() );
         fireSourceChanged();
       } catch ( Exception e ) {
