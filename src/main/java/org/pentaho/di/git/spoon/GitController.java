@@ -541,14 +541,15 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  public void checkout() throws XulException, IllegalArgumentException, InvocationTargetException {
+  public void checkout() {
     String commitId = getFirstSelectedRevision().getName();
     try {
       vcs.checkout( commitId );
+      setBranch( vcs.getBranch() );
+      fireSourceChanged();
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
-    fireSourceChanged();
   }
 
   /**
