@@ -181,4 +181,10 @@ public interface VCS {
 
   MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception;
 
+  List<String> getTags() throws Exception;
+
+  void createTag( String name ) throws Exception;
+
+  void deleteTag( String name ) throws Exception;
+
 }

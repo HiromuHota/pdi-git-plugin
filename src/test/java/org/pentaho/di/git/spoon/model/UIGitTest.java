@@ -418,6 +418,22 @@ public class UIGitTest extends RepositoryTestCase {
     assertFalse( branches.contains( "test" ) );
   }
 
+  @Test
+  public void testCreateDeleteTag() throws Exception {
+    initialCommit();
+
+    // create a tag
+    uiGit.createTag( "test" );
+    List<String> tags = uiGit.getTags();
+    assertTrue( tags.contains( "test" ) );
+
+    // delete the branch
+    uiGit.deleteTag( "test" );
+    tags = uiGit.getTags();
+    assertEquals( 0, tags.size() );
+    assertFalse( tags.contains( "test" ) );
+  }
+
   private RevCommit initialCommit() throws Exception {
     writeTrashFile( "Test.txt", "Hello world" );
     git.add().addFilepattern( "Test.txt" ).call();

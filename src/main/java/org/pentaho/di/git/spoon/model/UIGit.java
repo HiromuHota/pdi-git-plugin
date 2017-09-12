@@ -23,6 +23,7 @@ import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -677,5 +678,22 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
       e.printStackTrace();
       return false;
     }
+  }
+
+  @Override
+  public List<String> getTags() throws Exception {
+    return git.tagList().call()
+      .stream().map( ref -> Repository.shortenRefName( ref.getName() ) )
+      .collect( Collectors.toList() );
+  }
+
+  @Override
+  public void createTag( String name ) throws Exception {
+    git.tag().setName( name ).call();
+  }
+
+  @Override
+  public void deleteTag( String name ) throws Exception {
+    git.tagDelete().setTags( name ).call();
   }
 }

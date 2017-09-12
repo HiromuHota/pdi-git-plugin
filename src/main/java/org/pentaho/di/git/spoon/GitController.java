@@ -95,6 +95,7 @@ public class GitController extends AbstractXulEventHandler {
   private XulButton pullButton;
   private XulButton pushButton;
   private XulButton branchButton;
+  private XulButton tagButton;
   private XulTextbox authorNameTextbox;
   private XulTextbox commitMessageTextbox;
 
@@ -158,6 +159,7 @@ public class GitController extends AbstractXulEventHandler {
     pullButton = (XulButton) document.getElementById( "pull" );
     pushButton = (XulButton) document.getElementById( "push" );
     branchButton = (XulButton) document.getElementById( "branch" );
+    tagButton = (XulButton) document.getElementById( "tag" );
 
     createBindings();
   }
@@ -191,6 +193,7 @@ public class GitController extends AbstractXulEventHandler {
     pullButton.setDisabled( false );
     pushButton.setDisabled( false );
     branchButton.setDisabled( false );
+    tagButton.setDisabled( false );
 
     commitMessageTextbox.setReadonly( false );
     authorNameTextbox.setReadonly( false );
@@ -757,6 +760,53 @@ public class GitController extends AbstractXulEventHandler {
       }
       try {
         vcs.deleteBranch( branch, isForce );
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+      } catch ( Exception e ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    }
+  }
+
+  public void checkoutTag() throws Exception {
+    List<String> names = vcs.getTags();
+    names.remove( vcs.getBranch() );
+    EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to checkout..." );
+    String name = esd.open();
+    if ( name != null ) {
+      try {
+        vcs.checkout( name );
+        setBranch( vcs.getBranch() );
+        fireSourceChanged();
+      } catch ( Exception e ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    }
+  }
+
+  public void createTag() throws XulException {
+    XulPromptBox promptBox = (XulPromptBox) document.createElement( "promptbox" );
+    promptBox.setTitle( BaseMessages.getString( PKG, "Git.Dialog.Tag.Create.Title" ) );
+    promptBox.setButtons( new DialogConstant[] { DialogConstant.OK, DialogConstant.CANCEL } );
+    promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.Tag.Create.Message" ) );
+    promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
+      if ( status.equals( Status.ACCEPT ) ) {
+        try {
+          vcs.createTag( value );
+        } catch ( Exception e ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+        }
+      }
+    } );
+    promptBox.open();
+  }
+
+  public void deleteTag() throws Exception {
+    List<String> names = vcs.getTags();
+    EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to delete..." );
+    String name = esd.open();
+    if ( name != null ) {
+      try {
+        vcs.deleteTag( name );
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );

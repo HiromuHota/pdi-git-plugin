@@ -9,6 +9,7 @@
       <toolbarbutton id="pull" label="${Git.Pull}" onclick="gitController.pull()" image="org/pentaho/di/git/spoon/images/pull.svg" disabled="true"/>
       <toolbarbutton id="push" label="${Git.Push}" onclick="gitController.push()" image="org/pentaho/di/git/spoon/images/push.svg" disabled="true"/>
       <toolbarbutton id="branch" label="${Git.Branch}" image="org/pentaho/di/git/spoon/images/branch.svg" disabled="true" menu="branchContextMenu"/>
+      <toolbarbutton id="tag" label="${Git.Tag}" image="org/pentaho/di/git/spoon/images/tag.svg" disabled="true" menu="tagContextMenu"/>
       <toolbarseparator />
     </toolbar>
     <label value="${Git.Repository}: "/>
@@ -64,6 +65,11 @@
     <menuitem label="${Git.Create}" command="gitController.createBranch()"/>
     <menuitem label="${Git.Merge}" command="gitController.merge()"/>
     <menuitem label="${Git.Delete}" command="gitController.deleteBranch()"/>
+  </menupopup>
+  <menupopup id="tagContextMenu">
+    <menuitem label="${Git.Checkout}" command="gitController.checkoutTag()"/>
+    <menuitem label="${Git.Create}" command="gitController.createTag()"/>
+    <menuitem label="${Git.Delete}" command="gitController.deleteTag()"/>
   </menupopup>
   <menupopup id="changedContextMenu">
     <menuitem id="menuitem-addtoindex" label="${Git.ContextMenu.AddToIndex}" command="gitController.addToIndex()"/>
