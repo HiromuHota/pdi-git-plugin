@@ -12,6 +12,7 @@ import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
+import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.api.PullResult;
 import org.junit.Before;
 import org.junit.Test;
@@ -157,6 +158,7 @@ public class GitControllerTest {
     when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     doReturn( true ).when( uiGit ).hasRemote();
     PushResult result = mock( PushResult.class );
+    doReturn( new URIish( "https://test.example.com" ) ).when( result ).getURI();
     RemoteRefUpdate update = mock( RemoteRefUpdate.class );
     when( update.getStatus() ).thenReturn( Status.OK );
     when( result.getRemoteUpdates() ).thenReturn( Arrays.asList( update ) );

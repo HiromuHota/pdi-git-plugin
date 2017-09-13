@@ -78,7 +78,22 @@ Note that even just a x-y location change of step/job entry is recognized as a c
 <img src="src/main/resources/org/pentaho/di/git/spoon/images/pull.png" width="16"> **Pull** and <img src="src/main/resources/org/pentaho/di/git/spoon/images/push.png" width="16"> **Push** allows you to sync between the opened, local repository and the remote one.
 <b>Pull</b> is equivalent of `git fetch; git merge --ff`.
 If an error (e.g., merge conflict) happens, the operation will be just cancelled.
-Note that "origin" is always the source of <b>Pull</b> and the target of <b>Push</b>.
+
+The remote `origin` is always the source of <b>Pull</b> and the target of <b>Push</b>, but these commands behave slightly differently depending on how `origin` is configured in `.git/config`.
+
+Here is the typical config (see [here](https://git-scm.com/book/id/v2/Git-Internals-The-Refspec)):
+
+```
+[remote "origin"]
+  url = git@github.com:HiromuHota/testrepo.git
+  fetch = +refs/heads/*:refs/remotes/origin/*
+```
+
+, but `push` and `pushurl` can also be defined.
+
+If `push` is defined **Push** respects it, otherwise **Push** pushes the current branch (e.g., `refs/heads/master:refs/heads/master`).
+If `pushurl`s are defined they become the target of **Push**, otherwise `url` is used.
+**Pull** always respects `fetch`s.
 
 ## Branches
 

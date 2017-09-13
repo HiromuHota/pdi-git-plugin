@@ -686,17 +686,20 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   private void processPushResult( Iterable<PushResult> resultIterable ) throws Exception {
-    PushResult result = resultIterable.iterator().next(); // should be only one element (remote=origin)
-    for ( RemoteRefUpdate update : result.getRemoteUpdates() ) {
-      if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
-            BaseMessages.getString( PKG, "Dialog.Success" ) );
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
-            update.getStatus().toString()
-            + ( update.getMessage() == null ? "" : "\n" + update.getMessage() ) );
-      }
-    }
+    resultIterable.forEach( result -> { // for each (push)url
+      result.getRemoteUpdates().forEach( update -> { // for each refspec
+        if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
+              result.getURI().toString() + "\n" +
+              BaseMessages.getString( PKG, "Dialog.Success" ) );
+        } else {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+              result.getURI().toString() + "\n" +
+              update.getStatus().toString()
+              + ( update.getMessage() == null ? "" : "\n" + update.getMessage() ) );
+        }
+      } );
+    } );
   }
 
   public void checkoutBranch() {
