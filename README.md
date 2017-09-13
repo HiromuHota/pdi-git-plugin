@@ -76,24 +76,23 @@ Note that even just a x-y location change of step/job entry is recognized as a c
 ## Remote
 
 <img src="src/main/resources/org/pentaho/di/git/spoon/images/pull.png" width="16"> **Pull** and <img src="src/main/resources/org/pentaho/di/git/spoon/images/push.png" width="16"> **Push** allows you to sync between the opened, local repository and the remote one.
-<b>Pull</b> is equivalent of `git fetch; git merge --ff`.
+The remote `origin` is the source of <b>Pull</b> and the target of <b>Push</b> unless configured otherwise, so **Pull** is equivalent of `git pull origin <branch> --ff` and **Push** is equivalent of `git push origin <branch>`, where `<branch>` is the current branch.
 If an error (e.g., merge conflict) happens, the operation will be just cancelled.
 
-The remote `origin` is always the source of <b>Pull</b> and the target of <b>Push</b>, but these commands behave slightly differently depending on how `origin` is configured in `.git/config`.
-
-Here is the typical config (see [here](https://git-scm.com/book/id/v2/Git-Internals-The-Refspec)):
+These commands, however, behave differently depending on how `origin` and branches are configured.
+Here is an example `.git/config` (see [here](https://git-scm.com/docs/git-config) for more details):
 
 ```
+[branch "master"]
+  mergeoptions = --no-ff
 [remote "origin"]
-  url = git@github.com:HiromuHota/testrepo.git
+  url = git@example.com:hiromu/testrepo.git
   fetch = +refs/heads/*:refs/remotes/origin/*
+  pushurl = git@example.com:hiromu/testrepo.git
+  pushurl = git@example.com:hiromu/testrepo2.git
 ```
 
-, but `push` and `pushurl` can also be defined.
-
-If `push` is defined **Push** respects it, otherwise **Push** pushes the current branch (e.g., `refs/heads/master:refs/heads/master`).
-If `pushurl`s are defined they become the target of **Push**, otherwise `url` is used.
-**Pull** always respects `fetch`s.
+With this example config, **Pull** uses the non fast-forward mode when merging into `master`, **Push** pushes the current branch to two remotes.
 
 ## Branches
 
