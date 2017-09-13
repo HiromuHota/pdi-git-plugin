@@ -718,7 +718,7 @@ public class GitController extends AbstractXulEventHandler {
     String name = esd.open();
     if ( name != null ) {
       try {
-        vcs.checkout( Constants.R_HEADS + name );
+        vcs.checkoutBranch( name );
         setBranch( vcs.getBranch() );
         fireSourceChanged();
       } catch ( Exception e ) {
@@ -773,7 +773,7 @@ public class GitController extends AbstractXulEventHandler {
     String name = esd.open();
     if ( name != null ) {
       try {
-        vcs.checkout( Constants.R_TAGS + name );
+        vcs.checkoutTag( name );
         setBranch( vcs.getBranch() );
         fireSourceChanged();
       } catch ( Exception e ) {
