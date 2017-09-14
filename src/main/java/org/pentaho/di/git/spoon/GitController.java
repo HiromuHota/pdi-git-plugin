@@ -791,6 +791,7 @@ public class GitController extends AbstractXulEventHandler {
       if ( status.equals( Status.ACCEPT ) ) {
         try {
           vcs.createTag( value );
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
         } catch ( Exception e ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
         }
