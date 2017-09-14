@@ -76,7 +76,8 @@ Note that even just a x-y location change of step/job entry is recognized as a c
 ## Remote
 
 <img src="src/main/resources/org/pentaho/di/git/spoon/images/pull.png" width="16"> **Pull** and <img src="src/main/resources/org/pentaho/di/git/spoon/images/push.png" width="16"> **Push** allows you to sync between the opened, local repository and the remote one.
-The remote `origin` is the source of <b>Pull</b> and the target of <b>Push</b> unless configured otherwise, so **Pull** is equivalent of `git pull origin <branch> --ff` and **Push** is equivalent of `git push origin <branch>`, where `<branch>` is the current branch.
+**Pull** and **Push** are equivalent of `git pull` and `git push`, respectively.
+Thus, the remote `origin` is the source of <b>Pull</b> and the target of <b>Push</b> unless configured otherwise.
 If an error (e.g., merge conflict) happens, the operation will be just cancelled.
 
 These commands, however, behave differently depending on how `origin` and branches are configured.
@@ -92,7 +93,7 @@ Here is an example `.git/config` (see [here](https://git-scm.com/docs/git-config
   pushurl = git@example.com:hiromu/testrepo2.git
 ```
 
-With this example config, **Pull** uses the non fast-forward mode when merging into `master`, **Push** pushes the current branch to two remotes.
+With this example config, **Pull** uses the non fast-forward mode instead of the default fast-forward mode when merging into `master`, **Push** pushes the current branch to two remotes.
 
 ## Branches
 
