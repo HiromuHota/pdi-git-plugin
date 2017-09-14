@@ -663,20 +663,25 @@ public class GitController extends AbstractXulEventHandler {
       return;
     }
     String name = null;
-    if ( type.equals( "branch") ) {
-      List<String> names = vcs.getLocalBranches();
-      EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to push..." );
-      name = esd.open();
-      if ( name == null ) {
-        return;
-      }
-    } else if ( type.equals( "tag" ) ) {
-      List<String> names = vcs.getTags();
-      EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select the tag to push..." );
-      name = esd.open();
-      if ( name == null ) {
-        return;
-      }
+    List<String> names;
+    EnterSelectionDialog esd;
+    switch( type ) {
+      case VCS.TYPE_BRANCH:
+        names = vcs.getLocalBranches();
+        esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to push..." );
+        name = esd.open();
+        if ( name == null ) {
+          return;
+        }
+        break;
+      case VCS.TYPE_TAG:
+        names = vcs.getTags();
+        esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select the tag to push..." );
+        name = esd.open();
+        if ( name == null ) {
+          return;
+        }
+        break;
     }
     try {
       Iterable<PushResult> resultIterable = vcs.push( name );
