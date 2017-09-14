@@ -654,12 +654,32 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void push() {
+    push( "default" );
+  }
+
+  public void push( String type ) {
     if ( !vcs.hasRemote() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
       return;
     }
+    String name = null;
+    if ( type.equals( "branch") ) {
+      List<String> names = vcs.getLocalBranches();
+      EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to push..." );
+      name = esd.open();
+      if ( name == null ) {
+        return;
+      }
+    } else if ( type.equals( "tag" ) ) {
+      List<String> names = vcs.getTags();
+      EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select the tag to push..." );
+      name = esd.open();
+      if ( name == null ) {
+        return;
+      }
+    }
     try {
-      Iterable<PushResult> resultIterable = vcs.push();
+      Iterable<PushResult> resultIterable = vcs.push( name );
       processPushResult( resultIterable );
     } catch ( TransportException e ) {
       if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
@@ -718,7 +738,7 @@ public class GitController extends AbstractXulEventHandler {
     String name = esd.open();
     if ( name != null ) {
       try {
-        vcs.checkoutBranch( name );
+        vcs.checkout( name );
         setBranch( vcs.getBranch() );
         fireSourceChanged();
       } catch ( Exception e ) {
@@ -773,7 +793,7 @@ public class GitController extends AbstractXulEventHandler {
     String name = esd.open();
     if ( name != null ) {
       try {
-        vcs.checkoutTag( name );
+        vcs.checkout( name );
         setBranch( vcs.getBranch() );
         fireSourceChanged();
       } catch ( Exception e ) {

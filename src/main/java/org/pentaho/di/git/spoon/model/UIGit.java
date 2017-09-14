@@ -24,6 +24,7 @@ import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.TagCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -48,6 +49,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.HttpTransport;
 import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -216,7 +218,7 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
     try {
       return git.branchList().setListMode( mode ).call().stream()
         .filter( ref -> !ref.getName().endsWith( Constants.HEAD ) )
-        .map( ref -> Repository.shortenRefName( ref.getName() ) )
+        .map( ref -> ref.getName() )
         .collect( Collectors.toList() );
     } catch ( Exception e ) {
       e.printStackTrace();
@@ -465,9 +467,7 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
    */
   @Override
   public Iterable<PushResult> push() throws Exception {
-    PushCommand cmd = git.push();
-    cmd.setCredentialsProvider( credentialsProvider );
-    return cmd.call();
+    return push( null );
   }
 
   /* (non-Javadoc)
@@ -477,6 +477,24 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
   public Iterable<PushResult> push( String username, String password ) throws Exception {
     credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
     return push();
+  }
+
+  @Override
+  public Iterable<PushResult> push( String name ) throws Exception {
+    PushCommand cmd = git.push();
+    cmd.setCredentialsProvider( credentialsProvider );
+    if ( name != null ) {
+      cmd.setRefSpecs( new RefSpec( name ) );
+    }
+    return cmd.call();
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.di.git.spoon.model.VCS#push(java.lang.String, java.lang.String)
+   */
+  @Override
+  public Iterable<PushResult> push( String name, String username, String password ) throws Exception {
+    return push( username, password );
   }
 
   /* (non-Javadoc)
@@ -691,10 +709,15 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
   }
 
   @Override
-  public List<String> getTags() throws Exception {
-    return git.tagList().call()
-      .stream().map( ref -> Repository.shortenRefName( ref.getName() ) )
-      .collect( Collectors.toList() );
+  public List<String> getTags() {
+    try {
+      return git.tagList().call()
+        .stream().map( ref -> ref.getName() )
+        .collect( Collectors.toList() );
+    } catch ( GitAPIException e ) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
 

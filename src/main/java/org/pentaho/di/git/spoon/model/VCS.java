@@ -144,6 +144,10 @@ public interface VCS {
 
   Iterable<PushResult> push( String username, String password ) throws Exception;
 
+  Iterable<PushResult> push( String name ) throws Exception;
+
+  Iterable<PushResult> push( String name, String username, String password ) throws Exception;
+
   /**
    * Show diff for a commit
    * @param commitId
@@ -188,7 +192,7 @@ public interface VCS {
 
   MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception;
 
-  List<String> getTags() throws Exception;
+  List<String> getTags();
 
   /**
    * Checkout a branch. Use this instead of {@link #checkout(String)} whenever possible

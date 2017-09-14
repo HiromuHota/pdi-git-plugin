@@ -65,11 +65,13 @@
     <menuitem label="${Git.Create}" command="gitController.createBranch()"/>
     <menuitem label="${Git.Merge}" command="gitController.merge()"/>
     <menuitem label="${Git.Delete}" command="gitController.deleteBranch()"/>
+    <menuitem label="${Git.Push}" command="gitController.push('branch')"/>
   </menupopup>
   <menupopup id="tagContextMenu">
     <menuitem label="${Git.Checkout}" command="gitController.checkoutTag()"/>
     <menuitem label="${Git.Create}" command="gitController.createTag()"/>
     <menuitem label="${Git.Delete}" command="gitController.deleteTag()"/>
+    <menuitem label="${Git.Push}" command="gitController.push('tag')"/>
   </menupopup>
   <menupopup id="changedContextMenu">
     <menuitem id="menuitem-addtoindex" label="${Git.ContextMenu.AddToIndex}" command="gitController.addToIndex()"/>
