@@ -687,18 +687,24 @@ public class GitController extends AbstractXulEventHandler {
 
   private void processPushResult( Iterable<PushResult> resultIterable ) throws Exception {
     resultIterable.forEach( result -> { // for each (push)url
-      result.getRemoteUpdates().forEach( update -> { // for each refspec
-        if ( update.getStatus() == RemoteRefUpdate.Status.OK ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ),
-              result.getURI().toString() + "\n" +
-              BaseMessages.getString( PKG, "Dialog.Success" ) );
-        } else {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
-              result.getURI().toString() + "\n" +
-              update.getStatus().toString()
-              + ( update.getMessage() == null ? "" : "\n" + update.getMessage() ) );
-        }
-      } );
+      StringBuilder sb = new StringBuilder();
+      result.getRemoteUpdates().stream()
+        .filter( update -> update.getStatus() != RemoteRefUpdate.Status.OK )
+        .filter( update -> update.getStatus() != RemoteRefUpdate.Status.UP_TO_DATE )
+        .forEach( update -> { // for each failed refspec
+          sb.append(
+            result.getURI().toString()
+            + "\n" + update.getSrcRef().toString()
+            + "\n" + update.getStatus().toString()
+            + ( update.getMessage() == null ? "" : "\n" + update.getMessage() )
+            + "\n\n"
+          );
+        } );
+      if ( sb.length() == 0 ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), sb.toString() );
+      }
     } );
   }
 
