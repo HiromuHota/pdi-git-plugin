@@ -59,7 +59,7 @@ public class UIGitTest extends RepositoryTestCase {
   public void testGetBranches() throws Exception {
     initialCommit();
 
-    assertEquals( Constants.R_HEADS + Constants.MASTER, uiGit.getLocalBranches().get( 0 ) );
+    assertEquals( Constants.MASTER, uiGit.getLocalBranches().get( 0 ) );
   }
 
   @Test
@@ -409,7 +409,7 @@ public class UIGitTest extends RepositoryTestCase {
     // create a branch
     uiGit.createBranch( "test" );
     List<String> branches = uiGit.getLocalBranches();
-    assertTrue( branches.contains( Constants.R_HEADS + "test" ) );
+    assertTrue( branches.contains( "test" ) );
 
     // delete the branch
     uiGit.deleteBranch( "test", true );
@@ -425,7 +425,7 @@ public class UIGitTest extends RepositoryTestCase {
     // create a tag
     uiGit.createTag( "test" );
     List<String> tags = uiGit.getTags();
-    assertTrue( tags.contains( Constants.R_TAGS + "test" ) );
+    assertTrue( tags.contains( "test" ) );
 
     // delete the branch
     uiGit.deleteTag( "test" );

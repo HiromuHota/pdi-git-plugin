@@ -684,6 +684,7 @@ public class GitController extends AbstractXulEventHandler {
         break;
     }
     try {
+      name = name == null ? null : vcs.getRefName( name, type );
       Iterable<PushResult> resultIterable = vcs.push( name );
       processPushResult( resultIterable );
     } catch ( TransportException e ) {
@@ -743,6 +744,7 @@ public class GitController extends AbstractXulEventHandler {
     String name = esd.open();
     if ( name != null ) {
       try {
+        name = vcs.getRefName( name, VCS.TYPE_BRANCH );
         vcs.checkout( name );
         setBranch( vcs.getBranch() );
         fireSourceChanged();
@@ -798,6 +800,7 @@ public class GitController extends AbstractXulEventHandler {
     String name = esd.open();
     if ( name != null ) {
       try {
+        name = vcs.getRefName( name, VCS.TYPE_TAG );
         vcs.checkout( name );
         setBranch( vcs.getBranch() );
         fireSourceChanged();

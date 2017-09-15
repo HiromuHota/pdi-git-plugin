@@ -218,7 +218,7 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
     try {
       return git.branchList().setListMode( mode ).call().stream()
         .filter( ref -> !ref.getName().endsWith( Constants.HEAD ) )
-        .map( ref -> ref.getName() )
+        .map( ref -> Repository.shortenRefName( ref.getName() ) )
         .collect( Collectors.toList() );
     } catch ( Exception e ) {
       e.printStackTrace();
@@ -712,7 +712,7 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
   public List<String> getTags() {
     try {
       return git.tagList().call()
-        .stream().map( ref -> ref.getName() )
+        .stream().map( ref -> Repository.shortenRefName( ref.getName() ) )
         .collect( Collectors.toList() );
     } catch ( GitAPIException e ) {
       e.printStackTrace();
@@ -734,5 +734,19 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
   @Override
   public void deleteTag( String name ) throws Exception {
     git.tagDelete().setTags( name ).call();
+  }
+
+  @Override
+  public String getRefName( String name, String type ) throws Exception {
+    switch ( type ) {
+    case TYPE_TAG:
+      return Constants.R_TAGS + name;
+    case TYPE_BRANCH:
+      return Constants.R_HEADS + name;
+    case TYPE_REMOTE:
+      return Constants.R_REMOTES + name;
+    default:
+      throw new Exception( "type should be tag, branch, or remote" );
+    }
   }
 }

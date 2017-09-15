@@ -15,6 +15,7 @@ public interface VCS {
   String GIT = "Git";
   String TYPE_TAG = "tag";
   String TYPE_BRANCH = "branch";
+  String TYPE_REMOTE = "remote";
 
   String getDirectory();
 
@@ -61,6 +62,15 @@ public interface VCS {
    * @throws Exception
    */
   String getParentCommitId( String revstr ) throws Exception;
+
+  /**
+   * Get a RefName from shortened name (e.g., master -> refs/heads/master)
+   * @param name (e.g., master)
+   * @param type
+   * @return
+   * @throws Exception
+   */
+  String getRefName( String name, String type ) throws Exception;
 
   /**
    * Get the current branch
