@@ -737,7 +737,7 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
   }
 
   @Override
-  public String getRefName( String name, String type ) throws Exception {
+  public String getRefName( String name, String type ) {
     switch ( type ) {
     case TYPE_TAG:
       return Constants.R_TAGS + name;
@@ -746,7 +746,7 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
     case TYPE_REMOTE:
       return Constants.R_REMOTES + name;
     default:
-      throw new Exception( "type should be tag, branch, or remote" );
+      return null;
     }
   }
 }

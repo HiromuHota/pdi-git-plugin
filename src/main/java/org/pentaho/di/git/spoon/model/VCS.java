@@ -70,7 +70,7 @@ public interface VCS {
    * @return
    * @throws Exception
    */
-  String getRefName( String name, String type ) throws Exception;
+  String getRefName( String name, String type );
 
   /**
    * Get the current branch

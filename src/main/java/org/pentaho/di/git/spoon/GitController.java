@@ -545,13 +545,38 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void checkout() {
-    String commitId = getFirstSelectedRevision().getName();
-    try {
-      vcs.checkout( commitId );
-      setBranch( vcs.getBranch() );
-      fireSourceChanged();
-    } catch ( Exception e ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    checkout( "default" );
+  }
+
+  public void checkout( String type ) {
+    String name = null;
+    List<String> names;
+    EnterSelectionDialog esd;
+    switch ( type ) {
+    case VCS.TYPE_BRANCH:
+      names = vcs.getBranches();
+      names.remove( vcs.getBranch() );
+      esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
+      name = esd.open();
+      name = vcs.getRefName( name, type );
+      break;
+    case VCS.TYPE_TAG:
+      names = vcs.getTags();
+      esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to checkout..." );
+      name = esd.open();
+      name = vcs.getRefName( name, type );
+      break;
+    default:
+      name = getFirstSelectedRevision().getName();
+    }
+    if ( name != null ) {
+      try {
+        vcs.checkout( name );
+        setBranch( vcs.getBranch() );
+        fireSourceChanged();
+      } catch ( Exception e ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
     }
   }
 
@@ -737,23 +762,6 @@ public class GitController extends AbstractXulEventHandler {
     } );
   }
 
-  public void checkoutBranch() {
-    List<String> names = vcs.getBranches();
-    names.remove( vcs.getBranch() );
-    EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
-    String name = esd.open();
-    if ( name != null ) {
-      try {
-        name = vcs.getRefName( name, VCS.TYPE_BRANCH );
-        vcs.checkout( name );
-        setBranch( vcs.getBranch() );
-        fireSourceChanged();
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
-    }
-  }
-
   public void createBranch() throws XulException {
     XulPromptBox promptBox = (XulPromptBox) document.createElement( "promptbox" );
     promptBox.setTitle( BaseMessages.getString( PKG, "Git.Dialog.Branch.Create.Title" ) );
@@ -788,22 +796,6 @@ public class GitController extends AbstractXulEventHandler {
       try {
         vcs.deleteBranch( branch, isForce );
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
-    }
-  }
-
-  public void checkoutTag() throws Exception {
-    List<String> names = vcs.getTags();
-    EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to checkout..." );
-    String name = esd.open();
-    if ( name != null ) {
-      try {
-        name = vcs.getRefName( name, VCS.TYPE_TAG );
-        vcs.checkout( name );
-        setBranch( vcs.getBranch() );
-        fireSourceChanged();
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
