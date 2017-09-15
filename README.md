@@ -97,11 +97,16 @@ With this example config, **Pull** uses the non fast-forward mode instead of the
 
 ## Branches
 
-<img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16"> **Branch** has branch operations: **Checkout** switches between branches, **Create / Delete** can create / delete a branch, **Merge** can merge a branch into the current one.
+<img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16"> **Branch** has branch operations: **Checkout** switches between branches, **Create / Delete** can create / delete a branch, **Merge** can merge a branch into the current one, **Push** can push a specific branch.
 
 Switching to a remote branch, say `origin/feature`, gets you in a detached HEAD state.
 Use **Branch > Create** to create a local branch, say `feature`, then you will get out of the state.
 Collectively, they are equivalent of `git checkout origin/feature` then `git checkout -b feature`.
+
+## Tags
+
+<img src="src/main/resources/org/pentaho/di/git/spoon/images/tag.png" width="16"> **Tag** has tagging operations similar to
+<img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16"> **Branch** except **Merge** is not available.
 
 ## FAQ
 
