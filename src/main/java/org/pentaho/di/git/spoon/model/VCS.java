@@ -137,7 +137,15 @@ public interface VCS {
 
   void rm( String filepattern ) throws Exception;
 
-  void reset( String path ) throws Exception;
+  void reset( String name ) throws Exception;
+
+  /**
+   * Reset a file to a commit
+   * @param name of the commit
+   * @param path of the file
+   * @throws Exception
+   */
+  void reset( String name, String path ) throws Exception;
 
   void resetHard() throws Exception;
 

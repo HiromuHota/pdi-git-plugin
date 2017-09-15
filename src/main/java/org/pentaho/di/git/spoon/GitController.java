@@ -133,7 +133,7 @@ public class GitController extends AbstractXulEventHandler {
         UIFile file = (UIFile) selectedItem.getBoundObject();
         try {
           if ( file.getIsStaged() ) {
-            vcs.reset( file.getName() );
+            vcs.reset( Constants.HEAD, file.getName() );
           } else {
             vcs.add( file.getName() );
           }
@@ -268,7 +268,7 @@ public class GitController extends AbstractXulEventHandler {
   public void removeFromIndex() throws Exception {
     List<UIFile> contents = getSelectedChangedFiles();
     for ( UIFile content : contents ) {
-      vcs.reset( content.getName() );
+      vcs.reset( Constants.HEAD, content.getName() );
     }
     fireSourceChanged();
   }
@@ -578,6 +578,30 @@ public class GitController extends AbstractXulEventHandler {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
+  }
+
+  /**
+   * Reset to the selected commit
+   * @throws XulException
+   */
+  public void reset() throws XulException {
+    XulConfirmBox confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
+    confirmBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.Discard" ) );
+    confirmBox.setMessage( "Are you sure?" );
+    confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
+    confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
+    confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
+      if ( returnCode.equals( Status.ACCEPT ) ) {
+        String commitId = getFirstSelectedRevision().getName();
+        try {
+          vcs.reset( commitId );
+          setBranch( vcs.getBranch() );
+          fireSourceChanged();
+        } catch ( Exception e ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+        }
+      }
+    } );
   }
 
   /**

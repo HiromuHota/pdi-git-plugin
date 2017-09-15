@@ -428,12 +428,21 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
     git.rm().addFilepattern( filepattern ).call();
   }
 
-  /* (non-Javadoc)
+  /**
+   * Reset to a commit (mixed)
    * @see org.pentaho.di.git.spoon.model.VCS#reset(java.lang.String)
    */
   @Override
-  public void reset( String path ) throws Exception {
-    git.reset().addPath( path ).call();
+  public void reset( String name ) throws Exception {
+    git.reset().setRef( name ).call();
+  }
+
+  /**
+   * Reset a file to a commit (mixed)
+   */
+  @Override
+  public void reset( String name, String path ) throws Exception {
+    git.reset().setRef( name ).addPath( path ).call();
   }
 
   /* (non-Javadoc)

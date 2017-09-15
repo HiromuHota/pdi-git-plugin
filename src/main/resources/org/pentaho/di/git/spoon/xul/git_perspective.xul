@@ -82,6 +82,7 @@
   </menupopup>
   <menupopup id="revisionContextMenu">
     <menuitem label="${Git.ContextMenu.Checkout}" command="gitController.checkout()"/>
+    <menuitem label="${Git.ContextMenu.Reset}" command="gitController.reset()"/>
   </menupopup>
 
 </window>
