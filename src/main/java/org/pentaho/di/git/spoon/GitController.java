@@ -78,7 +78,6 @@ public class GitController extends AbstractXulEventHandler {
 
   private VCS vcs;
   private String path;
-  private String diff;
   private String authorName;
   private String commitMessage;
   private List<UIRepositoryObjectRevision> selectedRevisions;
@@ -102,6 +101,7 @@ public class GitController extends AbstractXulEventHandler {
   private Binding revisionBinding;
   private Binding changedBinding;
   private Binding branchBinding;
+  private Binding diffBinding;
 
   public GitController() {
     setName( "gitController" );
@@ -175,7 +175,7 @@ public class GitController extends AbstractXulEventHandler {
     bf.setBindingType( Binding.Type.ONE_WAY );
     bf.createBinding( this, "path", pathLabel, "value" );
     branchBinding = bf.createBinding( this, "branch", branchLabel, "value" );
-    bf.createBinding( this, "diff", diffText, "value" );
+    diffBinding = bf.createBinding( this, "diff", diffText, "value" );
     revisionBinding = bf.createBinding( this, "revisions", revisionTable, "elements" );
     changedBinding = bf.createBinding( this, "changedFiles", changedTable, "elements" );
 
@@ -213,7 +213,6 @@ public class GitController extends AbstractXulEventHandler {
     }
     setActive();
     setPath( repo );
-    setDiff( "" );
     setAuthorName( vcs.getAuthorName() );
     setCommitMessage( "" );
     fireSourceChanged();
@@ -389,7 +388,6 @@ public class GitController extends AbstractXulEventHandler {
   public void setSelectedRevisions( List<UIRepositoryObjectRevision> selectedRevisions ) throws Exception {
     this.selectedRevisions = selectedRevisions;
     changedBinding.fireSourceChanged();
-    setDiff( "" );
   }
 
   public List<UIFile> getSelectedChangedFiles() {
@@ -398,20 +396,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void setSelectedChangedFiles( List<UIFile> selectedFiles ) throws Exception {
     this.selectedChangedFiles = selectedFiles;
-    if ( selectedFiles.size() != 0 ) {
-      if ( isOnlyWIP() ) {
-        if ( selectedFiles.get( 0 ).getIsStaged() ) {
-          setDiff( vcs.diff( Constants.HEAD, VCS.INDEX, selectedFiles.get( 0 ).getName() ) );
-        } else {
-          setDiff( vcs.diff( VCS.INDEX, VCS.WORKINGTREE, selectedFiles.get( 0 ).getName() ) );
-        }
-      } else {
-        String newCommitId = getFirstSelectedRevision().getName();
-        String oldCommitId = getSelectedRevisions().size() == 1 ? vcs.getParentCommitId( newCommitId )
-          : getLastSelectedRevision().getName();
-        setDiff( vcs.diff( oldCommitId, newCommitId, selectedFiles.get( 0 ).getName() ) );
-      }
-    }
+    diffBinding.fireSourceChanged();
   }
 
   /**
@@ -448,12 +433,31 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public String getDiff() {
-    return this.diff;
-  }
-
-  public void setDiff( String diff ) {
-    this.diff = diff;
-    firePropertyChange( "diff", null, diff );
+    if ( !isOpen() ) {
+      return "";
+    } else {
+      try {
+        List<UIFile> selectedFiles = getSelectedChangedFiles();
+        if ( selectedFiles.size() != 0 ) {
+          if ( isOnlyWIP() ) {
+            if ( selectedFiles.get( 0 ).getIsStaged() ) {
+              return vcs.diff( Constants.HEAD, VCS.INDEX, selectedFiles.get( 0 ).getName() );
+            } else {
+              return vcs.diff( VCS.INDEX, VCS.WORKINGTREE, selectedFiles.get( 0 ).getName() );
+            }
+          } else {
+            String newCommitId = getFirstSelectedRevision().getName();
+            String oldCommitId = getSelectedRevisions().size() == 1 ? vcs.getParentCommitId( newCommitId )
+              : getLastSelectedRevision().getName();
+            return vcs.diff( oldCommitId, newCommitId, selectedFiles.get( 0 ).getName() );
+          }
+        } else {
+          return "";
+        }
+      } catch ( Exception e ) {
+        return e.getMessage();
+      }
+    }
   }
 
   public String getAuthorName() {
