@@ -249,7 +249,7 @@ public class UIGitTest extends RepositoryTestCase {
     }
 
     uiGit.push();
-    uiGit.checkout( uiGit.getRefName( Constants.DEFAULT_REMOTE_NAME + "/" + Constants.MASTER, VCS.TYPE_REMOTE ) );
+    uiGit.checkout( uiGit.getExpandedName( Constants.DEFAULT_REMOTE_NAME + "/" + Constants.MASTER, VCS.TYPE_REMOTE ) );
     assertTrue( uiGit.getBranch().contains( Constants.HEAD ) );
 
     assertEquals( commit.getId(),
@@ -314,7 +314,7 @@ public class UIGitTest extends RepositoryTestCase {
     assertTrue( diff.contains( "+Hello world" ) );
 
     // abbreviated commit id should work
-    String diff2 = uiGit.diff( null, UIGit.abbreviate( commit1.getName() ), "Test.txt" );
+    String diff2 = uiGit.diff( null, uiGit.getShortenedName( commit1.getName(), VCS.TYPE_COMMIT ), "Test.txt" );
     assertEquals( diff, diff2 );
 
     // Add another line
@@ -372,9 +372,9 @@ public class UIGitTest extends RepositoryTestCase {
     initialCommit();
 
     git.branchCreate().setName( "develop" ).call();
-    uiGit.checkout( uiGit.getRefName( "master", VCS.TYPE_BRANCH ) );
+    uiGit.checkout( uiGit.getExpandedName( "master", VCS.TYPE_BRANCH ) );
     assertEquals( "master", uiGit.getBranch() );
-    uiGit.checkout( uiGit.getRefName( "develop", VCS.TYPE_BRANCH ) );
+    uiGit.checkout( uiGit.getExpandedName( "develop", VCS.TYPE_BRANCH ) );
     assertEquals( "develop", uiGit.getBranch() );
   }
 
@@ -424,7 +424,7 @@ public class UIGitTest extends RepositoryTestCase {
     List<String> tags = uiGit.getTags();
     assertTrue( tags.contains( "test" ) );
 
-    uiGit.checkout( uiGit.getRefName( "test", VCS.TYPE_TAG ) );
+    uiGit.checkout( uiGit.getExpandedName( "test", VCS.TYPE_TAG ) );
     assertTrue( uiGit.getBranch().contains( Constants.HEAD ) );
 
     // delete the branch

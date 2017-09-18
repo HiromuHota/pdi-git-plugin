@@ -16,6 +16,7 @@ public interface VCS {
   String TYPE_TAG = "tag";
   String TYPE_BRANCH = "branch";
   String TYPE_REMOTE = "remote";
+  String TYPE_COMMIT = "commit";
 
   String getDirectory();
 
@@ -58,13 +59,15 @@ public interface VCS {
   String getParentCommitId( String revstr ) throws Exception;
 
   /**
-   * Get a RefName from shortened name (e.g., master -> refs/heads/master)
+   * Get an expanded name from shortened name (e.g., master -> refs/heads/master)
    * @param name (e.g., master)
    * @param type
    * @return
    * @throws Exception
    */
-  String getRefName( String name, String type );
+  String getExpandedName( String name, String type ) throws Exception;
+
+  String getShortenedName( String name, String type );
 
   /**
    * Get the current branch

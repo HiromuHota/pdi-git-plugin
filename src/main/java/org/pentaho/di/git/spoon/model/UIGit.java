@@ -677,11 +677,13 @@ public class UIGit implements VCS {
     }
   }
 
-  public static String abbreviate( String commitId ) {
-    if ( commitId.length() == Constants.OBJECT_ID_STRING_LENGTH ) {
-      return commitId.substring( 0, 7 );
-    } else {
-      return commitId;
+  @Override
+  public String getShortenedName( String name, String type ) {
+    switch( type ) {
+    case TYPE_COMMIT:
+      return name.substring( 0, 7 );
+    default:
+      return Repository.shortenRefName( name );
     }
   }
 
@@ -718,7 +720,7 @@ public class UIGit implements VCS {
   }
 
   @Override
-  public String getRefName( String name, String type ) {
+  public String getExpandedName( String name, String type ) throws Exception {
     switch ( type ) {
     case TYPE_TAG:
       return Constants.R_TAGS + name;
@@ -727,7 +729,7 @@ public class UIGit implements VCS {
     case TYPE_REMOTE:
       return Constants.R_REMOTES + name;
     default:
-      return null;
+      return getCommitId( name );
     }
   }
 }

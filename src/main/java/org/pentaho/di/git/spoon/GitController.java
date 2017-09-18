@@ -296,7 +296,7 @@ public class GitController extends AbstractXulEventHandler {
           meta.clearChanged();
           meta.setFilename( filePath );
           if ( !isOnlyWIP() ) {
-            meta.setName( String.format( "%s (%s)", meta.getName(), UIGit.abbreviate( commitId ) ) );
+            meta.setName( String.format( "%s (%s)", meta.getName(), vcs.getShortenedName( commitId, VCS.TYPE_COMMIT ) ) );
           }
           c.accept( meta );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
@@ -355,11 +355,13 @@ public class GitController extends AbstractXulEventHandler {
           xmlStreamNew.close();
 
           metaOld.clearChanged();
-          metaOld.setName( String.format( "%s (%s -> %s)", metaOld.getName(), UIGit.abbreviate( commitIdOld ), UIGit.abbreviate( commitIdNew ) ) );
+          metaOld.setName( String.format( "%s (%s -> %s)", metaOld.getName(),
+              vcs.getShortenedName( commitIdOld, VCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdNew, VCS.TYPE_COMMIT ) ) );
           metaOld.setFilename( filePath );
           c.accept( metaOld );
           metaNew.clearChanged();
-          metaNew.setName( String.format( "%s (%s -> %s)", metaNew.getName(), UIGit.abbreviate( commitIdNew ), UIGit.abbreviate( commitIdOld ) ) );
+          metaNew.setName( String.format( "%s (%s -> %s)", metaNew.getName(),
+              vcs.getShortenedName( commitIdNew, VCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdOld, VCS.TYPE_COMMIT ) ) );
           metaNew.setFilename( filePath );
           c.accept( metaNew );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
@@ -545,7 +547,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void checkout() {
-    checkout( "default" );
+    checkout( VCS.TYPE_COMMIT );
   }
 
   public void checkout( String type ) {
@@ -561,7 +563,6 @@ public class GitController extends AbstractXulEventHandler {
       if ( name == null ) {
         return;
       }
-      name = vcs.getRefName( name, type );
       break;
     case VCS.TYPE_TAG:
       names = vcs.getTags();
@@ -570,12 +571,12 @@ public class GitController extends AbstractXulEventHandler {
       if ( name == null ) {
         return;
       }
-      name = vcs.getRefName( name, type );
       break;
     default:
       name = getFirstSelectedRevision().getName();
     }
     try {
+      name = vcs.getExpandedName( name, type );
       vcs.checkout( name );
       setBranch( vcs.getBranch() );
       fireSourceChanged();
@@ -738,7 +739,7 @@ public class GitController extends AbstractXulEventHandler {
         break;
     }
     try {
-      name = name == null ? null : vcs.getRefName( name, type );
+      name = name == null ? null : vcs.getExpandedName( name, type );
       Iterable<PushResult> resultIterable = vcs.push( name );
       processPushResult( resultIterable );
     } catch ( TransportException e ) {
