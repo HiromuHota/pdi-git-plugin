@@ -67,11 +67,10 @@ import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
-import org.pentaho.ui.xul.XulEventSourceAdapter;
 
 import com.google.common.annotations.VisibleForTesting;
 
-public class UIGit extends XulEventSourceAdapter implements VCS {
+public class UIGit implements VCS {
 
   static {
     /**
@@ -243,7 +242,6 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
     RemoteAddCommand cmd = git.remoteAdd();
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
     cmd.setUri( uri );
-    firePropertyChange( "remote", null, s );
     cmd.call();
   }
 
@@ -254,7 +252,6 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
   public void removeRemote() throws Exception {
     RemoteRemoveCommand cmd = git.remoteRemove();
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
-    firePropertyChange( "remote", null, "" );
     cmd.call();
   }
 
