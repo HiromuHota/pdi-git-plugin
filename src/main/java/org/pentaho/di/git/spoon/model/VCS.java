@@ -20,12 +20,6 @@ public interface VCS {
   String getDirectory();
 
   /**
-   * If git is null or not
-   * @return
-   */
-  boolean isOpen();
-
-  /**
    * If the repository is clean and not dirty.
    * @return
    */

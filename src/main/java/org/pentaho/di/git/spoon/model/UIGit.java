@@ -101,14 +101,6 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
     this.directory = directory;
   }
 
-  /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#isOpen()
-   */
-  @Override
-  public boolean isOpen() {
-    return git != null;
-  }
-
   @VisibleForTesting
   void setGit( Git git ) {
     this.git = git;

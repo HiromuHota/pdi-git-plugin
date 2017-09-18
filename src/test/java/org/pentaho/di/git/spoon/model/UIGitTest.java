@@ -63,30 +63,12 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testGetRemote() throws Exception {
-    RemoteConfig remote = setupRemote();
+  public void testAddRemoveRemote() throws Exception {
+    URIish uri = new URIish( db2.getDirectory().toURI().toURL().toString() );
+    uiGit.addRemote( uri.toString() );
+    assertEquals( uri.toString(), uiGit.getRemote() );
 
-    assertEquals( remote.getURIs().get( 0 ).toString(), uiGit.getRemote() );
-  }
-
-  @Test
-  public void testSetRemote() throws Exception {
-    RemoteConfig remote = setupRemote();
-
-    // assert that the added remote represents the remote repository
-    assertEquals( Constants.DEFAULT_REMOTE_NAME, remote.getName() );
-    assertEquals( 1, remote.getFetchRefSpecs().size() );
-    assertEquals( 1, remote.getURIs().size() );
-    assertEquals(
-      String.format( "+refs/heads/*:refs/remotes/%s/*", Constants.DEFAULT_REMOTE_NAME ),
-      remote.getFetchRefSpecs().get( 0 ).toString() );
-  }
-
-  @Test
-  public void testDeleteRemote() throws Exception {
-    setupRemote();
     uiGit.removeRemote();
-
     // assert that there are no remotes left
     assertTrue( RemoteConfig.getAllRemoteConfigs( db.getConfig() ).isEmpty() );
   }
@@ -107,9 +89,12 @@ public class UIGitTest extends RepositoryTestCase {
     PersonIdent author = new PersonIdent( "author", "author@example.com" );
     String message = "Initial commit";
 
+    assertTrue( uiGit.hasStagedFiles() );
+
     uiGit.commit( author.toExternalString(), message );
     String commitId = uiGit.getCommitId( Constants.HEAD );
 
+    assertTrue( uiGit.isClean() );
     assertTrue( author.toExternalString().contains( uiGit.getAuthorName( commitId ) ) );
     assertEquals( message, uiGit.getCommitMessage( commitId ) );
   }
@@ -250,6 +235,8 @@ public class UIGitTest extends RepositoryTestCase {
     cmd.setUri( uri );
     cmd.call();
 
+    assertTrue( uiGit.hasRemote() );
+
     // create some refs via commits and tag
     RevCommit commit = git.commit().setMessage( "initial commit" ).call();
     Ref tagRef = git.tag().setName( "tag" ).call();
@@ -319,6 +306,14 @@ public class UIGitTest extends RepositoryTestCase {
 
     git.add().addFilepattern( "Test.txt" ).call();
     RevCommit commit1 = git.commit().setMessage( "initial commit" ).call();
+
+    // git show the first commit
+    diff = uiGit.diff( null, commit1.getName(), "Test.txt" );
+    assertTrue( diff.contains( "+Hello world" ) );
+
+    // abbreviated commit id should work
+    String diff2 = uiGit.diff( null, UIGit.abbreviate( commit1.getName() ), "Test.txt" );
+    assertEquals( diff, diff2 );
 
     // Add another line
     FileUtils.writeStringToFile( file, "second commit" );
