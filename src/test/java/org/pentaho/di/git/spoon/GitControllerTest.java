@@ -202,7 +202,6 @@ public class GitControllerTest {
     doReturn( new UIRepositoryObjectRevision( rev ) ).when( controller ).getFirstSelectedRevision();
     doCallRealMethod().when( uiGit ).getExpandedName( anyString(), anyString() );
     doReturn( "000000" ).when( uiGit ).getCommitId( "000" );
-    doNothing().when( controller ).setBranch( anyString() );
 
     controller.checkout();
     verify( uiGit ).checkout( "000000" );

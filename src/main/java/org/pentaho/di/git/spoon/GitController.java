@@ -78,7 +78,6 @@ public class GitController extends AbstractXulEventHandler {
 
   private VCS vcs;
   private String path;
-  private String branch;
   private String diff;
   private String authorName;
   private String commitMessage;
@@ -102,6 +101,7 @@ public class GitController extends AbstractXulEventHandler {
   private BindingFactory bf = new SwtBindingFactory();
   private Binding revisionBinding;
   private Binding changedBinding;
+  private Binding branchBinding;
 
   public GitController() {
     setName( "gitController" );
@@ -174,7 +174,7 @@ public class GitController extends AbstractXulEventHandler {
     bf.setDocument( this.getXulDomContainer().getDocumentRoot() );
     bf.setBindingType( Binding.Type.ONE_WAY );
     bf.createBinding( this, "path", pathLabel, "value" );
-    bf.createBinding( this, "branch", branchLabel, "value" );
+    branchBinding = bf.createBinding( this, "branch", branchLabel, "value" );
     bf.createBinding( this, "diff", diffText, "value" );
     revisionBinding = bf.createBinding( this, "revisions", revisionTable, "elements" );
     changedBinding = bf.createBinding( this, "changedFiles", changedTable, "elements" );
@@ -213,7 +213,6 @@ public class GitController extends AbstractXulEventHandler {
     }
     setActive();
     setPath( repo );
-    setBranch( vcs.getBranch() );
     setDiff( "" );
     setAuthorName( vcs.getAuthorName() );
     setCommitMessage( "" );
@@ -247,6 +246,8 @@ public class GitController extends AbstractXulEventHandler {
   public void fireSourceChanged() {
     try {
       revisionBinding.fireSourceChanged();
+      branchBinding.fireSourceChanged();
+      ( (SwtElement) document.getElementById( "branchLabel" ).getParent() ).layout();
     } catch ( Exception e ) {
       e.printStackTrace();
     }
@@ -439,13 +440,11 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public String getBranch() {
-    return this.branch;
-  }
-
-  public void setBranch( String branch ) {
-    this.branch = branch;
-    firePropertyChange( "branch", null, branch );
-    ( (SwtElement) document.getElementById( "branchLabel" ).getParent() ).layout();
+    if ( !isOpen() ) {
+      return null;
+    } else {
+      return vcs.getBranch();
+    }
   }
 
   public String getDiff() {
@@ -578,7 +577,6 @@ public class GitController extends AbstractXulEventHandler {
     try {
       name = vcs.getExpandedName( name, type );
       vcs.checkout( name );
-      setBranch( vcs.getBranch() );
       fireSourceChanged();
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -600,7 +598,6 @@ public class GitController extends AbstractXulEventHandler {
         String commitId = getFirstSelectedRevision().getName();
         try {
           vcs.reset( commitId );
-          setBranch( vcs.getBranch() );
           fireSourceChanged();
         } catch ( Exception e ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -802,7 +799,6 @@ public class GitController extends AbstractXulEventHandler {
         try {
           vcs.createBranch( value );
           vcs.checkout( value );
-          setBranch( value );
           fireSourceChanged();
         } catch ( Exception e ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
