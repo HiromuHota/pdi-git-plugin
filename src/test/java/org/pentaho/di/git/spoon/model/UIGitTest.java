@@ -249,6 +249,8 @@ public class UIGitTest extends RepositoryTestCase {
     }
 
     uiGit.push();
+    uiGit.checkout( uiGit.getRefName( Constants.DEFAULT_REMOTE_NAME + "/" + Constants.MASTER, VCS.TYPE_REMOTE ) );
+    assertTrue( uiGit.getBranch().contains( Constants.HEAD ) );
 
     assertEquals( commit.getId(),
         db2.resolve( commit.getId().getName() + "^{commit}" ) );
@@ -370,9 +372,9 @@ public class UIGitTest extends RepositoryTestCase {
     initialCommit();
 
     git.branchCreate().setName( "develop" ).call();
-    uiGit.checkout( "master" );
+    uiGit.checkout( uiGit.getRefName( "master", VCS.TYPE_BRANCH ) );
     assertEquals( "master", uiGit.getBranch() );
-    uiGit.checkout( "develop" );
+    uiGit.checkout( uiGit.getRefName( "develop", VCS.TYPE_BRANCH ) );
     assertEquals( "develop", uiGit.getBranch() );
   }
 
@@ -421,6 +423,9 @@ public class UIGitTest extends RepositoryTestCase {
     uiGit.createTag( "test" );
     List<String> tags = uiGit.getTags();
     assertTrue( tags.contains( "test" ) );
+
+    uiGit.checkout( uiGit.getRefName( "test", VCS.TYPE_TAG ) );
+    assertTrue( uiGit.getBranch().contains( Constants.HEAD ) );
 
     // delete the branch
     uiGit.deleteTag( "test" );
