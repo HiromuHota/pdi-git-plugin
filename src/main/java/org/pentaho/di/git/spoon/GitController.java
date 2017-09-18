@@ -247,7 +247,6 @@ public class GitController extends AbstractXulEventHandler {
   public void fireSourceChanged() {
     try {
       revisionBinding.fireSourceChanged();
-      changedBinding.fireSourceChanged();
     } catch ( Exception e ) {
       e.printStackTrace();
     }
@@ -517,7 +516,7 @@ public class GitController extends AbstractXulEventHandler {
         setAuthorName( vcs.getAuthorName( commitId ) );
         setCommitMessage( vcs.getCommitMessage( commitId ) );
 
-        changedFiles.addAll( vcs.getStagedFiles( vcs.getParentCommitId( getFirstSelectedRevision().getName() ), getFirstSelectedRevision().getName() ) );
+        changedFiles.addAll( vcs.getStagedFiles( vcs.getParentCommitId( commitId ), commitId ) );
       } else {
         setAuthorName( "" );
         setCommitMessage( "" );
