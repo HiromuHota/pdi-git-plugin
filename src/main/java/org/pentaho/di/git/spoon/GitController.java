@@ -558,25 +558,29 @@ public class GitController extends AbstractXulEventHandler {
       names.remove( vcs.getBranch() );
       esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
       name = esd.open();
+      if ( name == null ) {
+        return;
+      }
       name = vcs.getRefName( name, type );
       break;
     case VCS.TYPE_TAG:
       names = vcs.getTags();
       esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to checkout..." );
       name = esd.open();
+      if ( name == null ) {
+        return;
+      }
       name = vcs.getRefName( name, type );
       break;
     default:
       name = getFirstSelectedRevision().getName();
     }
-    if ( name != null ) {
-      try {
-        vcs.checkout( name );
-        setBranch( vcs.getBranch() );
-        fireSourceChanged();
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
+    try {
+      vcs.checkout( name );
+      setBranch( vcs.getBranch() );
+      fireSourceChanged();
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
