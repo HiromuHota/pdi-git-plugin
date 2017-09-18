@@ -30,10 +30,19 @@ The information of repositories will be stored in `$HOME/.pentaho/metastore/pent
 <img src="https://github.com/pentaho/pentaho-kettle/raw/7.1.0.0-R/ui/package-res/ui/images/context_menu.png" width="16"> **Config** allows you to configure the opened Git repository.
 Currently, a remote repository named "origin" can be set.
 
+## Commit history
+
+The commit history is listed in reverse chronological order.
+Selecting one of the commits shows a list of changed files in that particular commit.
+If there are any changes in the working tree, WORKINGTREE is added to the top of the list, where you can see those changes.
+Right-click on a commit pops up a context menu, where you can choose **checkout** to checkout that particular commit.
+Or you can choose **reset to this commit**, equivalent of `git reset --mixed <commit>`, to reset the current branch head to this commit.
+
 ## Working with files
 
+If you have changed files but WORKINGTREE is not listed, push **Refresh** to reflect the changes in the Git perspective.
+Make sure no commit other than WORKINGTREE is selected in the commit history.
 Stage changed files by checking the checkbox on the left side of each file, write a good commit message, change the author name if necessary, and finally <b>Commit</b>.
-Right-click on a commit pops up a context menu, where you can choose **checkout** to checkout that particular commit.
 
 ## Diff
 
