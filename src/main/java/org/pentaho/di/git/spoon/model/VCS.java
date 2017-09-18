@@ -191,13 +191,6 @@ public interface VCS {
    */
   void checkout( String name, String path ) throws Exception;
 
-  /**
-   * Checkout a branch. Use this instead of {@link #checkout(String)} whenever possible
-   * @param name
-   * @throws Exception
-   */
-  void checkoutBranch( String name ) throws Exception;
-
   void createBranch( String value ) throws Exception;
 
   void deleteBranch( String name, boolean force ) throws Exception;
@@ -207,13 +200,6 @@ public interface VCS {
   MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception;
 
   List<String> getTags();
-
-  /**
-   * Checkout a branch. Use this instead of {@link #checkout(String)} whenever possible
-   * @param name
-   * @throws Exception
-   */
-  void checkoutTag( String name ) throws Exception;
 
   void createTag( String name ) throws Exception;
 

@@ -610,16 +610,6 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
     git.checkout().setName( name ).addPath( path ).call();
   }
 
-  @Override
-  public void checkoutBranch( String name ) throws Exception {
-    ObjectId id = git.getRepository().resolve( Constants.R_REMOTES + name );
-    if ( id != null ) { // remote branch
-      checkout( id.getName() );
-    } else { // local branch
-      checkout( Constants.R_HEADS + name );
-    }
-  }
-
   /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.VCS#createBranch(java.lang.String)
    */
@@ -718,12 +708,6 @@ public class UIGit extends XulEventSourceAdapter implements VCS {
       e.printStackTrace();
     }
     return null;
-  }
-
-
-  @Override
-  public void checkoutTag( String name ) throws Exception {
-    checkout( Constants.R_TAGS + name );
   }
 
   @Override
