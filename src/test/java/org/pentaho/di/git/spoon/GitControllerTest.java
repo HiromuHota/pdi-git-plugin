@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
@@ -18,6 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.repository.pur.PurObjectRevision;
+import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
 import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.components.XulConfirmBox;
@@ -191,6 +194,18 @@ public class GitControllerTest {
 
     verify( uiGit ).addRemote( anyString() );
     verify( uiGit ).removeRemote();
+  }
+
+  @Test
+  public void testCheckout() throws Exception {
+    PurObjectRevision rev = new PurObjectRevision( "000", "test", new Date(), "hoge" );
+    doReturn( new UIRepositoryObjectRevision( rev ) ).when( controller ).getFirstSelectedRevision();
+    doCallRealMethod().when( uiGit ).getExpandedName( anyString(), anyString() );
+    doReturn( "000000" ).when( uiGit ).getCommitId( "000" );
+    doNothing().when( controller ).setBranch( anyString() );
+
+    controller.checkout();
+    verify( uiGit ).checkout( "000000" );
   }
 
   private static class XulConfirmBoxMock extends MessageDialogBase implements XulConfirmBox {

@@ -377,7 +377,8 @@ public class GitController extends AbstractXulEventHandler {
     return selectedRevisions;
   }
 
-  private UIRepositoryObjectRevision getFirstSelectedRevision() {
+  @VisibleForTesting
+  UIRepositoryObjectRevision getFirstSelectedRevision() {
     return getSelectedRevisions().get( 0 );
   }
 
