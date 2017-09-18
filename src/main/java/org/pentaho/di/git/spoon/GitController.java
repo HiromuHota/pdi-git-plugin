@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationListener;
@@ -160,8 +161,6 @@ public class GitController extends AbstractXulEventHandler {
     pushButton = (XulButton) document.getElementById( "push" );
     branchButton = (XulButton) document.getElementById( "branch" );
     tagButton = (XulButton) document.getElementById( "tag" );
-
-    createBindings();
   }
 
   private void createBindings() {
@@ -194,6 +193,7 @@ public class GitController extends AbstractXulEventHandler {
     pushButton.setDisabled( false );
     branchButton.setDisabled( false );
     tagButton.setDisabled( false );
+    ( (XulButton) document.getElementById( "refresh" ) ).setDisabled( false );
 
     commitMessageTextbox.setReadonly( false );
     authorNameTextbox.setReadonly( false );
@@ -210,6 +210,10 @@ public class GitController extends AbstractXulEventHandler {
       initGit( baseDirectory );
     } catch ( Exception e ) {
       e.printStackTrace();
+    }
+    // Create bindings if first time
+    if ( isOpen() && changedBinding == null ) {
+      createBindings();
     }
     setActive();
     setPath( repo );
@@ -405,7 +409,7 @@ public class GitController extends AbstractXulEventHandler {
    * @return
    */
   private Boolean isOnlyWIP() {
-    return getSelectedRevisions().isEmpty()
+    return CollectionUtils.isEmpty( getSelectedRevisions() )
         || ( getFirstSelectedRevision().getName().equals( VCS.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
   }
 
@@ -425,38 +429,30 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public String getBranch() {
-    if ( !isOpen() ) {
-      return null;
-    } else {
-      return vcs.getBranch();
-    }
+    return vcs.getBranch();
   }
 
   public String getDiff() {
-    if ( !isOpen() ) {
-      return "";
-    } else {
-      try {
-        List<UIFile> selectedFiles = getSelectedChangedFiles();
-        if ( selectedFiles.size() != 0 ) {
-          if ( isOnlyWIP() ) {
-            if ( selectedFiles.get( 0 ).getIsStaged() ) {
-              return vcs.diff( Constants.HEAD, VCS.INDEX, selectedFiles.get( 0 ).getName() );
-            } else {
-              return vcs.diff( VCS.INDEX, VCS.WORKINGTREE, selectedFiles.get( 0 ).getName() );
-            }
+    try {
+      List<UIFile> selectedFiles = getSelectedChangedFiles();
+      if ( selectedFiles.size() != 0 ) {
+        if ( isOnlyWIP() ) {
+          if ( selectedFiles.get( 0 ).getIsStaged() ) {
+            return vcs.diff( Constants.HEAD, VCS.INDEX, selectedFiles.get( 0 ).getName() );
           } else {
-            String newCommitId = getFirstSelectedRevision().getName();
-            String oldCommitId = getSelectedRevisions().size() == 1 ? vcs.getParentCommitId( newCommitId )
-              : getLastSelectedRevision().getName();
-            return vcs.diff( oldCommitId, newCommitId, selectedFiles.get( 0 ).getName() );
+            return vcs.diff( VCS.INDEX, VCS.WORKINGTREE, selectedFiles.get( 0 ).getName() );
           }
         } else {
-          return "";
+          String newCommitId = getFirstSelectedRevision().getName();
+          String oldCommitId = getSelectedRevisions().size() == 1 ? vcs.getParentCommitId( newCommitId )
+            : getLastSelectedRevision().getName();
+          return vcs.diff( oldCommitId, newCommitId, selectedFiles.get( 0 ).getName() );
         }
-      } catch ( Exception e ) {
-        return e.getMessage();
+      } else {
+        return "";
       }
+    } catch ( Exception e ) {
+      return e.getMessage();
     }
   }
 
@@ -479,17 +475,10 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public UIRepositoryObjectRevisions getRevisions() throws Exception {
-    if ( !isOpen() ) {
-      return null;
-    } else {
-      return vcs.getRevisions();
-    }
+    return vcs.getRevisions();
   }
 
   public List<UIFile> getChangedFiles() throws Exception {
-    if ( getSelectedRevisions() == null ) { // when Spoon is starting
-      return null;
-    }
     List<UIFile> changedFiles = new ArrayList<UIFile>();
     if ( isOnlyWIP() ) {
       addToIndexMenuItem.setDisabled( false );
