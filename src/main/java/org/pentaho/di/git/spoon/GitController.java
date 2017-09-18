@@ -606,6 +606,7 @@ public class GitController extends AbstractXulEventHandler {
         }
       }
     } );
+    confirmBox.open();
   }
 
   /**
