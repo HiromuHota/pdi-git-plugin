@@ -318,6 +318,10 @@ public class GitController extends AbstractXulEventHandler {
     getSelectedChangedFiles().stream()
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
+        if ( !filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) && !filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
+          return;
+        }
         EngineMetaInterface metaOld = null, metaNew = null;
         Consumer<EngineMetaInterface> c = null;
         try {
@@ -342,7 +346,7 @@ public class GitController extends AbstractXulEventHandler {
             ( (TransMeta) metaOld ).setTransversion( "git: " + commitIdOld );
             ( (TransMeta) metaNew ).setTransversion( "git: " + commitIdNew );
             c = meta -> Spoon.getInstance().addTransGraph( (TransMeta) meta );
-          } else if ( filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
+          } else {
             metaOld = new JobMeta( xmlStreamOld, null, null );
             metaNew = new JobMeta( xmlStreamNew, null, null );
             metaOld = PdiDiff.compareJobEntries( (JobMeta) metaOld, (JobMeta) metaNew, true );
@@ -350,9 +354,6 @@ public class GitController extends AbstractXulEventHandler {
             ( (JobMeta) metaOld ).setJobversion( "git: " + commitIdOld );
             ( (JobMeta) metaNew ).setJobversion( "git: " + commitIdNew );
             c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
-          } else {
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
-            return;
           }
           xmlStreamOld.close();
           xmlStreamNew.close();

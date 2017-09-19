@@ -15,8 +15,10 @@ import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.pur.PurObjectRevision;
@@ -205,6 +207,16 @@ public class GitControllerTest {
 
     controller.checkout();
     verify( uiGit ).checkout( "000000" );
+  }
+
+  @Test
+  public void testVisualDiff() throws Exception {
+    XulMessageBox message = spy( new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT ) );
+    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
+    UIFile file = new UIFile( "test.txt", ChangeType.MODIFY, true );
+    doReturn( Collections.singletonList( file ) ).when( controller ).getSelectedChangedFiles();
+    controller.visualdiff();
+    verify( message ).setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
   }
 
   private static class XulConfirmBoxMock extends MessageDialogBase implements XulConfirmBox {
