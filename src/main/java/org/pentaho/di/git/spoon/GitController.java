@@ -582,7 +582,7 @@ public class GitController extends AbstractXulEventHandler {
    */
   public void reset() throws XulException {
     XulConfirmBox confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
-    confirmBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.Discard" ) );
+    confirmBox.setTitle( BaseMessages.getString( PKG, "Git.ContextMenu.Reset" ) );
     confirmBox.setMessage( "Are you sure?" );
     confirmBox.setAcceptLabel( BaseMessages.getString( PKG, "Dialog.Ok" ) );
     confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
