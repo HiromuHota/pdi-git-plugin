@@ -547,25 +547,25 @@ public class GitController extends AbstractXulEventHandler {
     List<String> names;
     EnterSelectionDialog esd;
     switch ( type ) {
-    case VCS.TYPE_BRANCH:
-      names = vcs.getBranches();
-      names.remove( vcs.getBranch() );
-      esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
-      name = esd.open();
-      if ( name == null ) {
-        return;
-      }
-      break;
-    case VCS.TYPE_TAG:
-      names = vcs.getTags();
-      esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to checkout..." );
-      name = esd.open();
-      if ( name == null ) {
-        return;
-      }
-      break;
-    default:
-      name = getFirstSelectedRevision().getName();
+      case VCS.TYPE_BRANCH:
+        names = vcs.getBranches();
+        names.remove( vcs.getBranch() );
+        esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
+        name = esd.open();
+        if ( name == null ) {
+          return;
+        }
+        break;
+      case VCS.TYPE_TAG:
+        names = vcs.getTags();
+        esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to checkout..." );
+        name = esd.open();
+        if ( name == null ) {
+          return;
+        }
+        break;
+      default:
+        name = getFirstSelectedRevision().getName();
     }
     try {
       name = vcs.getExpandedName( name, type );
@@ -710,7 +710,7 @@ public class GitController extends AbstractXulEventHandler {
     String name = null;
     List<String> names;
     EnterSelectionDialog esd;
-    switch( type ) {
+    switch ( type ) {
       case VCS.TYPE_BRANCH:
         names = vcs.getLocalBranches();
         esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to push..." );
@@ -953,7 +953,7 @@ public class GitController extends AbstractXulEventHandler {
         }
       }
       return meta;
-    })
+    } )
     .filter( meta -> meta != null )
     .filter( meta -> meta.hasChanged() )
     .findAny().isPresent();
