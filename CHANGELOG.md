@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.7.0 - 2017-09-19
+### Added
+- Tagging feature
+- Menuitems to push specific branch/tag
+- A context menuitem "Reset to this commit"
+
+### Changed
+- To avoid accidental loss of work, abort merge/pull if one or more tabs have unsaved changes
+- Do not merge (and pull) when the working tree is dirty
+
 ## 0.6.1 - 2017-09-05
 ### Added
 - Ask to add a repository when no repository
