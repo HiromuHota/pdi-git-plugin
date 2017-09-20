@@ -303,7 +303,7 @@ public class UIGitTest extends RepositoryTestCase {
   public void testDiff() throws Exception {
     File file = writeTrashFile( "Test.txt", "Hello world" );
 
-    String diff = uiGit.diff( VCS.INDEX, VCS.WORKINGTREE, "Test.txt" );
+    String diff = uiGit.diff( VCS.INDEX, uiGit.getShortenedName( VCS.WORKINGTREE, VCS.TYPE_COMMIT ), "Test.txt" );
     assertTrue( diff.contains( "+Hello world" ) );
 
     git.add().addFilepattern( "Test.txt" ).call();

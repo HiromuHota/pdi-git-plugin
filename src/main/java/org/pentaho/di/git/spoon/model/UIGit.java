@@ -679,10 +679,9 @@ public class UIGit implements VCS {
 
   @Override
   public String getShortenedName( String name, String type ) {
-    switch( type ) {
-    case TYPE_COMMIT:
+    if ( name.length() == Constants.OBJECT_ID_STRING_LENGTH ) {
       return name.substring( 0, 7 );
-    default:
+    } else {
       return Repository.shortenRefName( name );
     }
   }
