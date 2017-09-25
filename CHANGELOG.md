@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.7.1 - 2017-09-25
+### Fixed
+- Fix the bug that visual diff does not work when WORKINGTREE or HEAD is compared
+
 ## 0.7.0 - 2017-09-19
 ### Added
 - Tagging feature
