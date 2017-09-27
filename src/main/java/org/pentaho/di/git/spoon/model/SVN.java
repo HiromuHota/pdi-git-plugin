@@ -154,7 +154,7 @@ public class SVN extends VCS implements IVCS {
     List<UIFile> files = new ArrayList<UIFile>();
     svnClient.getStatus( root, true, false, false,
       false, false, ( String path, ISVNStatus status ) -> {
-        files.add( new UIFile( path, convertTypeToGit( status.getTextStatus().toString() ), true ) );
+        files.add( new UIFile( path.replaceFirst( directory, "" ), convertTypeToGit( status.getTextStatus().toString() ), true ) );
       } );
     return files;
   }
@@ -165,7 +165,7 @@ public class SVN extends VCS implements IVCS {
     Arrays.stream( svnClient.diffSummarize( new SVNUrl( directory ), new SVNRevision.Number( Long.parseLong( oldCommitId ) ),
         new SVNUrl( directory ), new SVNRevision.Number( Long.parseLong( newCommitId ) ),
         100, true ) ).forEach( diffStatus -> {
-          files.add( new UIFile( diffStatus.getPath(), convertTypeToGit( diffStatus.getDiffKind().toString() ), false ) );
+          files.add( new UIFile( diffStatus.getPath().replaceFirst( directory, "" ), convertTypeToGit( diffStatus.getDiffKind().toString() ), false ) );
         }
     );
     return files;
