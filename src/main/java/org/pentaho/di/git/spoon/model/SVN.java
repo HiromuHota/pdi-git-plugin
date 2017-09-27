@@ -74,7 +74,12 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public String getBranch() {
-    // TODO Auto-generated method stub
+    try {
+      return svnClient.getInfo( root ).getUrlString().replaceFirst( getRemote() + "/", "" );
+    } catch ( SVNClientException e ) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     return null;
   }
 
