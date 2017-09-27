@@ -452,28 +452,11 @@ public class UIGit implements VCS {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#pull(java.lang.String, java.lang.String)
-   */
-  public PullResult pull( String username, String password ) throws Exception {
-    credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
-    return pull();
-  }
-
-  /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.VCS#push()
    */
   @Override
   public Iterable<PushResult> push() throws Exception {
     return push( null );
-  }
-
-  /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#push(java.lang.String, java.lang.String)
-   */
-  @Override
-  public Iterable<PushResult> push( String username, String password ) throws Exception {
-    credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
-    return push();
   }
 
   @Override
@@ -484,14 +467,6 @@ public class UIGit implements VCS {
       cmd.setRefSpecs( new RefSpec( name ) );
     }
     return cmd.call();
-  }
-
-  /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#push(java.lang.String, java.lang.String)
-   */
-  @Override
-  public Iterable<PushResult> push( String name, String username, String password ) throws Exception {
-    return push( username, password );
   }
 
   /* (non-Javadoc)
@@ -730,5 +705,10 @@ public class UIGit implements VCS {
     default:
       return getCommitId( name );
     }
+  }
+
+  @Override
+  public void setCredential( String username, String password ) {
+    credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
   }
 }

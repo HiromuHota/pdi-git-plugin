@@ -650,9 +650,13 @@ public class GitController extends AbstractXulEventHandler {
       processPullResult( pullResult );
     } catch ( TransportException e ) {
       if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
-        pullWithUsernamePassword();
-      } else if ( e.getMessage().contains( "not authorized" ) ) {
-        pushWithUsernamePassword();
+        if ( promptUsernamePassword() ) {
+          pull();
+        }
+      } else if ( e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
+        if ( promptUsernamePassword() ) {
+          pull();
+        }
       } else {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
@@ -662,20 +666,6 @@ public class GitController extends AbstractXulEventHandler {
       } else {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
             "Please setup a remote" );
-      }
-    }
-  }
-
-  private void pullWithUsernamePassword() {
-    UsernamePasswordDialog dialog = new UsernamePasswordDialog( getShell() );
-    if ( dialog.open() == Window.OK ) {
-      String username = dialog.getUsername();
-      String password = dialog.getPassword();
-      try {
-        PullResult pullResult = vcs.pull( username, password );
-        processPullResult( pullResult );
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
   }
@@ -735,9 +725,13 @@ public class GitController extends AbstractXulEventHandler {
       processPushResult( resultIterable );
     } catch ( TransportException e ) {
       if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
-        pushWithUsernamePassword();
-      } else if ( e.getMessage().contains( "not authorized" ) ) {
-        pushWithUsernamePassword();
+        if ( promptUsernamePassword() ) {
+          push( type );
+        }
+      } else if ( e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
+        if ( promptUsernamePassword() ) {
+          push( type );
+        }
       } else {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
@@ -746,18 +740,19 @@ public class GitController extends AbstractXulEventHandler {
     }
   }
 
-  private void pushWithUsernamePassword() {
+  /**
+   * Prompt the user to set username and password
+   * @return true on success
+   */
+  private boolean promptUsernamePassword() {
     UsernamePasswordDialog dialog = new UsernamePasswordDialog( getShell() );
     if ( dialog.open() == Window.OK ) {
       String username = dialog.getUsername();
       String password = dialog.getPassword();
-      try {
-        Iterable<PushResult> resultIterable = vcs.push( username, password );
-        processPushResult( resultIterable );
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
+      vcs.setCredential( username, password );
+      return true;
     }
+    return false;
   }
 
   private void processPushResult( Iterable<PushResult> resultIterable ) throws Exception {

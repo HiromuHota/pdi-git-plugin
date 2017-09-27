@@ -99,6 +99,8 @@ public interface VCS {
 
   UIRepositoryObjectRevisions getRevisions() throws Exception;
 
+  void setCredential( String username, String password );
+
   /**
    * Get the list of unstaged files
    * @return
@@ -155,15 +157,9 @@ public interface VCS {
    */
   PullResult pull() throws Exception;
 
-  PullResult pull( String username, String password ) throws Exception;
-
   Iterable<PushResult> push() throws Exception;
 
-  Iterable<PushResult> push( String username, String password ) throws Exception;
-
   Iterable<PushResult> push( String name ) throws Exception;
-
-  Iterable<PushResult> push( String name, String username, String password ) throws Exception;
 
   /**
    * Show diff for a commit
