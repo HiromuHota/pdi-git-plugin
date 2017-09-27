@@ -87,9 +87,9 @@
       <version>${dependency.jgit.revision}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.subversion</groupId>
-      <artifactId>javahl</artifactId>
-      <version>1.9.4</version>
+      <groupId>org.tigris.svnclientadapter</groupId>
+      <artifactId>adapter-javahl</artifactId>
+      <version>1.9.4-2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>

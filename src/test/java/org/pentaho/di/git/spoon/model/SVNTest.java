@@ -19,7 +19,10 @@ public class SVNTest {
 
   @Test
   public void testCommit() throws Exception {
-    vcs.commit( "user", "password", "message" );
+    UIRepositoryObjectRevisions revisions = vcs.getRevisions();
+    vcs.setCredential( "user", "password" );
+    vcs.commit( "user", "message" );
+    assertEquals( revisions.size() + 1, vcs.getRevisions().size() );
   }
 
   @Test

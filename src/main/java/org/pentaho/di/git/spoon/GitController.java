@@ -60,6 +60,7 @@ import org.pentaho.ui.xul.swt.custom.DialogConstant;
 import org.pentaho.ui.xul.swt.tags.SwtTreeItem;
 import org.pentaho.ui.xul.util.XulDialogCallback.Status;
 import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
+import org.tigris.subversion.svnclientadapter.SVNClientException;
 
 import com.google.common.annotations.VisibleForTesting;
 

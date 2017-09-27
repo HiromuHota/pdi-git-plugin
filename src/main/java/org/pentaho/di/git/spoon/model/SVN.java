@@ -3,30 +3,37 @@ package org.pentaho.di.git.spoon.model;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
-import org.tmatesoft.svn.core.SVNDepth;
-import org.tmatesoft.svn.core.SVNException;
-import org.tmatesoft.svn.core.SVNLogEntryPath;
-import org.tmatesoft.svn.core.wc.SVNClientManager;
-import org.tmatesoft.svn.core.wc.SVNRevision;
+import org.tigris.subversion.svnclientadapter.ISVNClientAdapter;
+import org.tigris.subversion.svnclientadapter.ISVNStatus;
+import org.tigris.subversion.svnclientadapter.SVNClientAdapterFactory;
+import org.tigris.subversion.svnclientadapter.SVNClientException;
+import org.tigris.subversion.svnclientadapter.SVNRevision;
+import org.tigris.subversion.svnclientadapter.SVNStatusKind;
+import org.tigris.subversion.svnclientadapter.javahl.JhlClientAdapterFactory;
 
 public class SVN extends VCS implements IVCS {
 
-  private SVNClientManager clientManager = SVNClientManager.newInstance();
+  private ISVNClientAdapter svnClient;
   private String directory;
   private File root;
 
   public SVN() {
-
+    try {
+      JhlClientAdapterFactory.setup();
+      svnClient = SVNClientAdapterFactory.createSVNClient( JhlClientAdapterFactory.JAVAHL_CLIENT );
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    }
   }
 
   @Override
@@ -105,26 +112,21 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public void commit( String authorName, String message ) {
-    try {
-      clientManager.getCommitClient().doCommit( new File[]{ root }, true, message, null, null, false, false, SVNDepth.INFINITY );
-    } catch ( SVNException e ) {
-      promptUsernamePassword();
-      commit( authorName, message );
-    }
+  public void commit( String authorName, String message ) throws Exception {
+    svnClient.commit( new File[]{ root }, message, true );
   }
 
   @Override
   public UIRepositoryObjectRevisions getRevisions() throws Exception {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     long startRevision = 1;
-    clientManager.getLogClient().doLog( new File[]{ root }, SVNRevision.create( startRevision ), SVNRevision.WORKING,
-        false, false, 100, logEntry -> {
+    Arrays.stream( svnClient.getLogMessages( root, new SVNRevision.Number( startRevision ), SVNRevision.HEAD,
+      false, false, 100 ) ).forEach( logMessage -> {
         PurObjectRevision rev = new PurObjectRevision(
-          logEntry.getRevision(),
-          logEntry.getAuthor(),
-          logEntry.getDate(),
-          logEntry.getMessage() );
+          logMessage.getRevision().toString(),
+          logMessage.getAuthor(),
+          logMessage.getDate(),
+          logMessage.getMessage() );
         revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
       } );
     if ( getStagedFiles().size() != 0 ) {
@@ -147,23 +149,22 @@ public class SVN extends VCS implements IVCS {
   @Override
   public List<UIFile> getStagedFiles() throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
-    clientManager.getStatusClient().doStatus( root, SVNRevision.WORKING, SVNDepth.INFINITY, false,
-      false, false, false, status -> {
-        files.add( new UIFile( status.getRepositoryRelativePath(), convertTypeToGit( status.getNodeStatus().getCode() ), true ) );
-      },
-      null );
+    svnClient.getStatus( root, true, false, false,
+      false, false, ( String path, ISVNStatus status ) -> {
+        files.add( new UIFile( path, convertTypeToGit( status.getTextStatus() ), true ) );
+      } );
     return files;
   }
 
   @Override
   public List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
-    clientManager.getDiffClient().doDiffStatus( new File( directory ), SVNRevision.create( Long.parseLong( oldCommitId ) ),
-        new File( directory ), SVNRevision.create( Long.parseLong( newCommitId ) ),
-        SVNDepth.INFINITY, true, diffStatus -> {
-        files.add( new UIFile( diffStatus.getPath(), convertTypeToGit( diffStatus.getModificationType().getCode() ), false ) );
-      }
-    );
+//    clientManager.getDiffClient().doDiffStatus( new File( directory ), SVNRevision.create( Long.parseLong( oldCommitId ) ),
+//        new File( directory ), SVNRevision.create( Long.parseLong( newCommitId ) ),
+//        SVNDepth.INFINITY, true, diffStatus -> {
+//        files.add( new UIFile( diffStatus.getPath(), convertTypeToGit( diffStatus.getModificationType().getCode() ), false ) );
+//      }
+//    );
     return files;
   }
 
@@ -215,14 +216,7 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public boolean pull() {
-    try {
-      clientManager.getUpdateClient().doUpdate( root, SVNRevision.HEAD, SVNDepth.INFINITY, false, false );
-    } catch ( SVNException e ) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return false;
-    }
-    return true;
+    return false;
   }
 
   @Override
@@ -279,18 +273,17 @@ public class SVN extends VCS implements IVCS {
 
   }
 
-  private static ChangeType convertTypeToGit( char type ) {
-    switch ( type ) {
-      case SVNLogEntryPath.TYPE_ADDED:
-        return ChangeType.ADD;
-      case SVNLogEntryPath.TYPE_DELETED:
-        return ChangeType.DELETE;
-      case SVNLogEntryPath.TYPE_MODIFIED:
-        return ChangeType.MODIFY;
-      case SVNLogEntryPath.TYPE_REPLACED:
-        return ChangeType.MODIFY;
-      default:
-        return null;
+  private static ChangeType convertTypeToGit( SVNStatusKind type ) {
+    if ( type == SVNStatusKind.ADDED ) {
+      return ChangeType.ADD;
+    } else if ( type == SVNStatusKind.DELETED ) {
+      return ChangeType.DELETE;
+    } else if ( type == SVNStatusKind.MODIFIED ) {
+      return ChangeType.MODIFY;
+    } else if ( type == SVNStatusKind.REPLACED ) {
+      return ChangeType.MODIFY;
+    } else {
+      return null;
     }
   }
 
@@ -313,24 +306,6 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public void setCredential(String username, String password) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void reset(String name, String path) throws Exception {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public boolean push(String type) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
   public List<String> getTags() {
     // TODO Auto-generated method stub
     return null;
@@ -349,14 +324,14 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public void setShell(Shell shell) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
   public boolean merge() {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public void setCredential( String username, String password ) {
+    svnClient.setUsername( username );
+    svnClient.setPassword( password );
   }
 }
