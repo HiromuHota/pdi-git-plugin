@@ -18,8 +18,6 @@ import org.tigris.subversion.svnclientadapter.ISVNStatus;
 import org.tigris.subversion.svnclientadapter.SVNClientAdapterFactory;
 import org.tigris.subversion.svnclientadapter.SVNClientException;
 import org.tigris.subversion.svnclientadapter.SVNRevision;
-import org.tigris.subversion.svnclientadapter.SVNUrl;
-import org.tigris.subversion.svnclientadapter.javahl.AbstractJhlClientAdapter;
 import org.tigris.subversion.svnclientadapter.javahl.JhlClientAdapterFactory;
 
 public class SVN extends VCS implements IVCS {
@@ -163,7 +161,7 @@ public class SVN extends VCS implements IVCS {
   @Override
   public List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) throws Exception {
     List<UIFile> files = new ArrayList<UIFile>();
-    Arrays.stream( ( (AbstractJhlClientAdapter) svnClient).diffSummarize( root, null, new SVNRevision.Number( Long.parseLong( oldCommitId ) ),
+    Arrays.stream( svnClient.diffSummarize( svnClient.getInfo( root ).getRepository(), null, new SVNRevision.Number( Long.parseLong( oldCommitId ) ),
          new SVNRevision.Number( Long.parseLong( newCommitId ) ),
         100, true ) ).forEach( diffStatus -> {
           files.add( new UIFile( diffStatus.getPath().replaceFirst( directory, "" ), convertTypeToGit( diffStatus.getDiffKind().toString() ), false ) );
