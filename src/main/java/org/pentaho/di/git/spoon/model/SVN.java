@@ -341,4 +341,10 @@ public class SVN extends VCS implements IVCS {
     svnClient.setUsername( username );
     svnClient.setPassword( password );
   }
+
+  @Override
+  public void setCredential( String username, String password ) {
+    svnClient.setUsername( username );
+    svnClient.setPassword( password );
+  }
 }
