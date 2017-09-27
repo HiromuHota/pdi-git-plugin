@@ -23,17 +23,20 @@ import org.tigris.subversion.svnclientadapter.javahl.JhlClientAdapterFactory;
 
 public class SVN extends VCS implements IVCS {
 
+  static {
+    try {
+      JhlClientAdapterFactory.setup();
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    }
+  }
+
   private ISVNClientAdapter svnClient;
   private String directory;
   private File root;
 
   public SVN() {
-    try {
-      JhlClientAdapterFactory.setup();
-      svnClient = SVNClientAdapterFactory.createSVNClient( JhlClientAdapterFactory.JAVAHL_CLIENT );
-    } catch ( SVNClientException e ) {
-      e.printStackTrace();
-    }
+    svnClient = SVNClientAdapterFactory.createSVNClient( JhlClientAdapterFactory.JAVAHL_CLIENT );
   }
 
   @Override
