@@ -88,8 +88,18 @@
     </dependency>
     <dependency>
       <groupId>org.tigris.svnclientadapter</groupId>
+      <artifactId>adapter-base</artifactId>
+      <version>1.9.4-2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tigris.svnclientadapter</groupId>
       <artifactId>adapter-javahl</artifactId>
       <version>1.9.4-2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.subversion</groupId>
+      <artifactId>javahl</artifactId>
+      <version>1.9.4</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
