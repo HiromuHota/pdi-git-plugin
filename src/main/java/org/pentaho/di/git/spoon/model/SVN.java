@@ -92,7 +92,12 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public String getRemote() {
-    // TODO Auto-generated method stub
+    try {
+      return svnClient.getInfo( root ).getRepository().toString();
+    } catch ( SVNClientException e ) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     return null;
   }
 

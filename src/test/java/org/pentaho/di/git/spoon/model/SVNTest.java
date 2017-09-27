@@ -44,4 +44,10 @@ public class SVNTest {
   public void testPull() throws Exception {
     vcs.pull();
   }
+
+  @Test
+  public void testGetRemote() {
+    String remote = vcs.getRemote();
+    assertNotNull( remote );
+  }
 }
