@@ -70,7 +70,7 @@ import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObj
 
 import com.google.common.annotations.VisibleForTesting;
 
-public class UIGit implements IVCS {
+public class UIGit extends VCS implements IVCS {
 
   static {
     /**

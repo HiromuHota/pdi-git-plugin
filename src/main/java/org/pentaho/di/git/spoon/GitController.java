@@ -205,6 +205,7 @@ public class GitController extends AbstractXulEventHandler {
       if ( repo.getType() == null || repo.getType().equals( IVCS.GIT ) ) {
         vcs = new UIGit();
       }
+      vcs.setShell( getShell() );
       vcs.openRepo( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );

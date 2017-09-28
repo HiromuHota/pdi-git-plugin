@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
 public interface IVCS {
@@ -204,4 +205,5 @@ public interface IVCS {
 
   void deleteTag( String name ) throws Exception;
 
+  void setShell( Shell shell );
 }
