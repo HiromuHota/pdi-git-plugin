@@ -55,6 +55,7 @@ import org.eclipse.jgit.transport.HttpTransport;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.http.apache.HttpClientConnectionFactory;
@@ -72,6 +73,7 @@ import org.pentaho.di.git.spoon.GitController;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
+import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
@@ -516,18 +518,87 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#push()
    */
   @Override
-  public Iterable<PushResult> push() throws Exception {
-    return push( null );
+  public boolean push() {
+    return push( "default" );
   }
 
   @Override
-  public Iterable<PushResult> push( String name ) throws Exception {
-    PushCommand cmd = git.push();
-    cmd.setCredentialsProvider( credentialsProvider );
-    if ( name != null ) {
-      cmd.setRefSpecs( new RefSpec( name ) );
+  public boolean push( String type ) {
+    if ( !hasRemote() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
+      return false;
     }
-    return cmd.call();
+    String name = null;
+    List<String> names;
+    EnterSelectionDialog esd;
+    switch ( type ) {
+      case IVCS.TYPE_BRANCH:
+        names = getLocalBranches();
+        esd = new EnterSelectionDialog( shell, names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to push..." );
+        name = esd.open();
+        if ( name == null ) {
+          return false;
+        }
+        break;
+      case IVCS.TYPE_TAG:
+        names = getTags();
+        esd = new EnterSelectionDialog( shell, names.toArray( new String[names.size()] ), "Select Tag", "Select the tag to push..." );
+        name = esd.open();
+        if ( name == null ) {
+          return false;
+        }
+        break;
+    }
+    try {
+      name = name == null ? null : getExpandedName( name, type );
+
+      PushCommand cmd = git.push();
+      cmd.setCredentialsProvider( credentialsProvider );
+      if ( name != null ) {
+        cmd.setRefSpecs( new RefSpec( name ) );
+      }
+      Iterable<PushResult> resultIterable = cmd.call();
+      processPushResult( resultIterable );
+      return true;
+    } catch ( TransportException e ) {
+      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
+        if ( promptUsernamePassword() ) {
+          push( type );
+        }
+      } else if ( e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
+        if ( promptUsernamePassword() ) {
+          push( type );
+        }
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
+    return false;
+  }
+
+  private void processPushResult( Iterable<PushResult> resultIterable ) throws Exception {
+    resultIterable.forEach( result -> { // for each (push)url
+      StringBuilder sb = new StringBuilder();
+      result.getRemoteUpdates().stream()
+        .filter( update -> update.getStatus() != RemoteRefUpdate.Status.OK )
+        .filter( update -> update.getStatus() != RemoteRefUpdate.Status.UP_TO_DATE )
+        .forEach( update -> { // for each failed refspec
+          sb.append(
+            result.getURI().toString()
+            + "\n" + update.getSrcRef().toString()
+            + "\n" + update.getStatus().toString()
+            + ( update.getMessage() == null ? "" : "\n" + update.getMessage() )
+            + "\n\n"
+          );
+        } );
+      if ( sb.length() == 0 ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), sb.toString() );
+      }
+    } );
   }
 
   /* (non-Javadoc)

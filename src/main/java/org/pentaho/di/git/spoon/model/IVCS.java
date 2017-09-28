@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
@@ -157,9 +156,9 @@ public interface IVCS {
    */
   boolean pull();
 
-  Iterable<PushResult> push() throws Exception;
+  boolean push();
 
-  Iterable<PushResult> push( String name ) throws Exception;
+  boolean push( String type );
 
   /**
    * Show diff for a commit

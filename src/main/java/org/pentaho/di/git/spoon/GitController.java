@@ -17,13 +17,10 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
-import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.transport.PushResult;
-import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -32,7 +29,6 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
 import org.pentaho.di.git.spoon.dialog.MergeBranchDialog;
-import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
@@ -644,88 +640,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void push( String type ) {
-    if ( !vcs.hasRemote() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
-      return;
-    }
-    String name = null;
-    List<String> names;
-    EnterSelectionDialog esd;
-    switch ( type ) {
-      case IVCS.TYPE_BRANCH:
-        names = vcs.getLocalBranches();
-        esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to push..." );
-        name = esd.open();
-        if ( name == null ) {
-          return;
-        }
-        break;
-      case IVCS.TYPE_TAG:
-        names = vcs.getTags();
-        esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select the tag to push..." );
-        name = esd.open();
-        if ( name == null ) {
-          return;
-        }
-        break;
-    }
-    try {
-      name = name == null ? null : vcs.getExpandedName( name, type );
-      Iterable<PushResult> resultIterable = vcs.push( name );
-      processPushResult( resultIterable );
-    } catch ( TransportException e ) {
-      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
-        if ( promptUsernamePassword() ) {
-          push( type );
-        }
-      } else if ( e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
-        if ( promptUsernamePassword() ) {
-          push( type );
-        }
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
-    } catch ( Exception e ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-    }
-  }
-
-  /**
-   * Prompt the user to set username and password
-   * @return true on success
-   */
-  private boolean promptUsernamePassword() {
-    UsernamePasswordDialog dialog = new UsernamePasswordDialog( getShell() );
-    if ( dialog.open() == Window.OK ) {
-      String username = dialog.getUsername();
-      String password = dialog.getPassword();
-      vcs.setCredential( username, password );
-      return true;
-    }
-    return false;
-  }
-
-  private void processPushResult( Iterable<PushResult> resultIterable ) throws Exception {
-    resultIterable.forEach( result -> { // for each (push)url
-      StringBuilder sb = new StringBuilder();
-      result.getRemoteUpdates().stream()
-        .filter( update -> update.getStatus() != RemoteRefUpdate.Status.OK )
-        .filter( update -> update.getStatus() != RemoteRefUpdate.Status.UP_TO_DATE )
-        .forEach( update -> { // for each failed refspec
-          sb.append(
-            result.getURI().toString()
-            + "\n" + update.getSrcRef().toString()
-            + "\n" + update.getStatus().toString()
-            + ( update.getMessage() == null ? "" : "\n" + update.getMessage() )
-            + "\n\n"
-          );
-        } );
-      if ( sb.length() == 0 ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), sb.toString() );
-      }
-    } );
+    vcs.push( name );
   }
 
   public void createBranch() throws XulException {

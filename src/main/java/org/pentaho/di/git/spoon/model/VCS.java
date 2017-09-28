@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
@@ -233,15 +232,13 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public Iterable<PushResult> push() throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+  public boolean push() {
+    return false;
   }
 
   @Override
-  public Iterable<PushResult> push(String name) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+  public boolean push( String type ) {
+    return false;
   }
 
   @Override

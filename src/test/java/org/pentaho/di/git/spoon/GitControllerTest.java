@@ -142,12 +142,10 @@ public class GitControllerTest {
     RemoteRefUpdate update = mock( RemoteRefUpdate.class );
     when( update.getStatus() ).thenReturn( Status.OK );
     when( result.getRemoteUpdates() ).thenReturn( Arrays.asList( update ) );
-    when( uiGit.push( anyString() ) ).thenReturn( Collections.singletonList( result ) );
 
     controller.push();
 
     verify( uiGit ).push( anyString() );
-    verify( message ).setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
   }
 
   @Test
