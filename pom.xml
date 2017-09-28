@@ -4,7 +4,7 @@
 
   <groupId>pentaho-kettle</groupId>
   <artifactId>pdi-git-plugin</artifactId>
-  <version>0.7.1</version>
+  <version>0.7.2</version>
   <packaging>jar</packaging>
 
   <name>pdi-git-plugin</name>

@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.7.2 - 2017-09-28
+### Fixed
+- Fix a typo bug that tries to push instead of pull when the cached credential does not get authenticated
+
 ## 0.7.1 - 2017-09-25
 ### Fixed
 - Fix the bug that visual diff does not work when WORKINGTREE or HEAD is compared
