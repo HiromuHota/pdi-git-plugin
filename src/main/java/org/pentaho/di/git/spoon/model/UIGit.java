@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.DiffCommand;
 import org.eclipse.jgit.api.Git;
@@ -70,6 +71,7 @@ import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.git.spoon.GitController;
+import org.pentaho.di.git.spoon.dialog.MergeBranchDialog;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
@@ -733,24 +735,43 @@ public class UIGit extends VCS implements IVCS {
         .call();
   }
 
-  /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#mergeBranch(java.lang.String)
-   */
-  @Override
-  public MergeResult mergeBranch( String value ) throws Exception {
-    return mergeBranch( value, MergeStrategy.RECURSIVE.getName() );
-  }
-
-  /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#mergeBranch(java.lang.String, java.lang.String)
-   */
-  @Override
-  public MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception {
+  private MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception {
     Ref ref = git.getRepository().exactRef( Constants.R_HEADS + value );
     return git.merge()
         .include( ref )
         .setStrategy( MergeStrategy.get( mergeStrategy ) )
         .call();
+  }
+
+  @Override
+  public boolean merge() {
+    if ( !isClean() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      return false;
+    }
+    MergeBranchDialog dialog = new MergeBranchDialog( shell );
+    List<String> branches = getLocalBranches();
+    branches.remove( getBranch() );
+    dialog.setBranches( branches );
+    if ( dialog.open() == Window.OK ) {
+      String branch = dialog.getSelectedBranch();
+      String mergeStrategy = dialog.getSelectedMergeStrategy();
+      try {
+        MergeResult result = mergeBranch( branch, mergeStrategy );
+        if ( result.getMergeStatus().isSuccessful() ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+          return true;
+        } else {
+          if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
+            resetHard();
+          }
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
+        }
+      } catch ( Exception e ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    }
+    return false;
   }
 
   private DiffCommand getDiffCommand( String oldCommitId, String newCommitId ) throws Exception {

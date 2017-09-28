@@ -15,8 +15,6 @@ import org.eclipse.jface.viewers.ColumnViewerEditorDeactivationEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
@@ -28,7 +26,6 @@ import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
-import org.pentaho.di.git.spoon.dialog.MergeBranchDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
@@ -719,31 +716,8 @@ public class GitController extends AbstractXulEventHandler {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "One or more tabs have unsaved changes" );
       return;
     }
-    if ( !vcs.isClean() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
-      return;
-    }
-    MergeBranchDialog dialog = new MergeBranchDialog( getShell() );
-    List<String> branches = vcs.getLocalBranches();
-    branches.remove( vcs.getBranch() );
-    dialog.setBranches( branches );
-    if ( dialog.open() == Window.OK ) {
-      String branch = dialog.getSelectedBranch();
-      String mergeStrategy = dialog.getSelectedMergeStrategy();
-      try {
-        MergeResult result = vcs.mergeBranch( branch, mergeStrategy );
-        if ( result.getMergeStatus().isSuccessful() ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-          fireSourceChanged();
-        } else {
-          if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
-            vcs.resetHard();
-          }
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
-        }
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
+    if ( vcs.merge() ) {
+      fireSourceChanged();
     }
   }
 

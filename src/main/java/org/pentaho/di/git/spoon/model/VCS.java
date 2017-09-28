@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.eclipse.jface.window.Window;
-import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
@@ -290,18 +289,6 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public MergeResult mergeBranch(String value) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public MergeResult mergeBranch(String value, String mergeStrategy) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public List<String> getTags() {
     // TODO Auto-generated method stub
     return null;
@@ -322,6 +309,11 @@ public class VCS implements IVCS {
   @Override
   public void setShell( Shell shell ) {
     this.shell = shell;
+  }
+
+  @Override
+  public boolean merge() {
+    return false;
   }
 
 }

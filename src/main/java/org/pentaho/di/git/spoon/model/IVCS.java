@@ -3,7 +3,6 @@ package org.pentaho.di.git.spoon.model;
 import java.io.InputStream;
 import java.util.List;
 
-import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
@@ -193,10 +192,6 @@ public interface IVCS {
 
   void deleteBranch( String name, boolean force ) throws Exception;
 
-  MergeResult mergeBranch( String value ) throws Exception;
-
-  MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception;
-
   List<String> getTags();
 
   void createTag( String name ) throws Exception;
@@ -204,4 +199,6 @@ public interface IVCS {
   void deleteTag( String name ) throws Exception;
 
   void setShell( Shell shell );
+
+  boolean merge();
 }
