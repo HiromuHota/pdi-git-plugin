@@ -2,11 +2,13 @@ package org.pentaho.di.git.spoon.model;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.pentaho.di.i18n.BaseMessages;
@@ -15,11 +17,14 @@ import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.tigris.subversion.svnclientadapter.ISVNClientAdapter;
+import org.tigris.subversion.svnclientadapter.ISVNDirEntry;
 import org.tigris.subversion.svnclientadapter.ISVNLogMessage;
 import org.tigris.subversion.svnclientadapter.ISVNStatus;
 import org.tigris.subversion.svnclientadapter.SVNClientAdapterFactory;
 import org.tigris.subversion.svnclientadapter.SVNClientException;
+import org.tigris.subversion.svnclientadapter.SVNNodeKind;
 import org.tigris.subversion.svnclientadapter.SVNRevision;
+import org.tigris.subversion.svnclientadapter.SVNUrl;
 import org.tigris.subversion.svnclientadapter.javahl.JhlClientAdapterFactory;
 
 public class SVN extends VCS implements IVCS {
@@ -93,8 +98,21 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public List<String> getBranches() {
-    // TODO Auto-generated method stub
-    return null;
+    ISVNDirEntry[] dirEntries = null;
+    SVNUrl url = null;
+    try {
+      url = new SVNUrl( getRemote() );
+      dirEntries = svnClient.getList( url, SVNRevision.HEAD, true );
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+      return null;
+    } catch ( MalformedURLException e ) {
+      e.printStackTrace();
+    }
+    return Arrays.stream( dirEntries )
+      .filter( dirEntry -> dirEntry.getNodeKind() == SVNNodeKind.DIR )
+      .map( dirEntry -> dirEntry.getPath() )
+      .collect( Collectors.toList() );
   }
 
   @Override
@@ -291,8 +309,7 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public void checkout( String name ) throws Exception {
-    // TODO Auto-generated method stub
-
+    svnClient.switchToUrl( root, new SVNUrl( getRemote() + "/" + name ), SVNRevision.HEAD, true );
   }
 
   @Override
@@ -331,12 +348,6 @@ public class SVN extends VCS implements IVCS {
   public boolean isClean() {
     // TODO Auto-generated method stub
     return false;
-  }
-
-  @Override
-  public String getExpandedName(String name, String type) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   @Override

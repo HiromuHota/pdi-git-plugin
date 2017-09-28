@@ -84,9 +84,8 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public String getExpandedName(String name, String type) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+  public String getExpandedName( String name, String type ) {
+    return name;
   }
 
   @Override

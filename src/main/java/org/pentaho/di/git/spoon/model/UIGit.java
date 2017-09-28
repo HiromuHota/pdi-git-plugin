@@ -850,16 +850,21 @@ public class UIGit extends VCS implements IVCS {
   }
 
   @Override
-  public String getExpandedName( String name, String type ) throws Exception {
+  public String getExpandedName( String name, String type ) {
     switch ( type ) {
-    case TYPE_TAG:
-      return Constants.R_TAGS + name;
-    case TYPE_BRANCH:
-      return Constants.R_HEADS + name;
-    case TYPE_REMOTE:
-      return Constants.R_REMOTES + name;
-    default:
-      return getCommitId( name );
+      case TYPE_TAG:
+        return Constants.R_TAGS + name;
+      case TYPE_BRANCH:
+        return Constants.R_HEADS + name;
+      case TYPE_REMOTE:
+        return Constants.R_REMOTES + name;
+      default:
+        try {
+          return getCommitId( name );
+        } catch ( Exception e ) {
+          e.printStackTrace();
+          return name;
+        }
     }
   }
 

@@ -64,7 +64,7 @@ public interface IVCS {
    * @return
    * @throws Exception
    */
-  String getExpandedName( String name, String type ) throws Exception;
+  String getExpandedName( String name, String type );
 
   String getShortenedName( String name, String type );
 
