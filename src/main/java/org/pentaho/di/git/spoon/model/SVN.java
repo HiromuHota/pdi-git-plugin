@@ -126,8 +126,17 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public void commit( String authorName, String message ) throws Exception {
-    svnClient.commit( new File[]{ root }, message, true );
+  public boolean commit( String authorName, String message ) {
+    try {
+      svnClient.commit( new File[]{ root }, message, true );
+      return true;
+    } catch ( SVNClientException e ) {
+      if ( promptUsernamePassword() ) {
+        return commit( authorName, message );
+      } else {
+        return false;
+      }
+    }
   }
 
   @Override

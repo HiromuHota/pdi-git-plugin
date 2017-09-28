@@ -279,13 +279,19 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#commit(java.lang.String, java.lang.String)
    */
   @Override
-  public void commit( String authorName, String message ) throws Exception {
+  public boolean commit( String authorName, String message ) {
     PersonIdent author = RawParseUtils.parsePersonIdent( authorName );
     // Set the local time
     PersonIdent author2 = new PersonIdent( author.getName(), author.getEmailAddress(),
         SystemReader.getInstance().getCurrentTime(),
         SystemReader.getInstance().getTimezone( SystemReader.getInstance().getCurrentTime() ) );
-    git.commit().setAuthor( author2 ).setMessage( message ).call();
+    try {
+      git.commit().setAuthor( author2 ).setMessage( message ).call();
+      return true;
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      return false;
+    }
   }
 
   /* (non-Javadoc)

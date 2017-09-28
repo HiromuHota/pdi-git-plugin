@@ -138,9 +138,8 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void commit(String authorName, String message) throws Exception {
-    // TODO Auto-generated method stub
-    
+  public boolean commit( String authorName, String message ) {
+    return false;
   }
 
   @Override

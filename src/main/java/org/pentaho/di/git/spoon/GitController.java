@@ -529,9 +529,10 @@ public class GitController extends AbstractXulEventHandler {
     }
 
     try {
-      vcs.commit( getAuthorName(), getCommitMessage() );
-      setCommitMessage( "" );
-      fireSourceChanged();
+      if ( vcs.commit( getAuthorName(), getCommitMessage() ) ) {
+        setCommitMessage( "" );
+        fireSourceChanged();
+      }
     } catch ( NullPointerException e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           "Malformed author name" );

@@ -94,7 +94,7 @@ public interface IVCS {
 
   boolean hasRemote();
 
-  void commit( String authorName, String message ) throws Exception;
+  boolean commit( String authorName, String message );
 
   UIRepositoryObjectRevisions getRevisions();
 
