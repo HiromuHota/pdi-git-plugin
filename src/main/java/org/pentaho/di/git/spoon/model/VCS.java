@@ -3,23 +3,42 @@ package org.pentaho.di.git.spoon.model;
 import java.io.InputStream;
 import java.util.List;
 
+import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
+
+import com.google.common.annotations.VisibleForTesting;
 
 public class VCS implements IVCS {
 
   protected Shell shell;
 
-  protected void showMessageBox( String title, String message ) {
+  @VisibleForTesting
+  void showMessageBox( String title, String message ) {
     MessageBox messageBox = new MessageBox( shell, SWT.OK );
     messageBox.setText( title );
     messageBox.setMessage( message );
     messageBox.open();
+  }
+
+  /**
+   * Prompt the user to set username and password
+   * @return true on success
+   */
+  protected boolean promptUsernamePassword() {
+    UsernamePasswordDialog dialog = new UsernamePasswordDialog( shell );
+    if ( dialog.open() == Window.OK ) {
+      String username = dialog.getUsername();
+      String password = dialog.getPassword();
+      setCredential( username, password );
+      return true;
+    }
+    return false;
   }
 
   @Override
@@ -209,9 +228,8 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public PullResult pull() throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+  public boolean pull() {
+    return false;
   }
 
   @Override

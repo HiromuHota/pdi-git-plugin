@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import org.eclipse.jgit.api.DiffCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
@@ -24,6 +26,7 @@ import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -41,11 +44,13 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.UserConfig;
 import org.eclipse.jgit.merge.MergeStrategy;
+import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.HttpTransport;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
@@ -63,6 +68,8 @@ import org.eclipse.jgit.util.FileUtils;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.git.spoon.GitController;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
@@ -71,6 +78,8 @@ import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObj
 import com.google.common.annotations.VisibleForTesting;
 
 public class UIGit extends VCS implements IVCS {
+
+  private static final Class<?> PKG = GitController.class;
 
   static {
     /**
@@ -445,10 +454,62 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#pull()
    */
   @Override
-  public PullResult pull() throws Exception {
+  public boolean pull() {
+    if ( !isClean() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      return false;
+    }
+    if ( !hasRemote() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
+      return false;
+    }
+
     PullCommand cmd = git.pull();
     cmd.setCredentialsProvider( credentialsProvider );
-    return cmd.call();
+    try {
+      PullResult pullResult = cmd.call();
+      return processPullResult( pullResult );
+    } catch ( TransportException e ) {
+      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
+        if ( promptUsernamePassword() ) {
+          pull();
+        }
+      } else if ( e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
+        if ( promptUsernamePassword() ) {
+          pull();
+        }
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    } catch ( Exception e ) {
+      if ( hasRemote() ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+            "Please setup a remote" );
+      }
+    }
+    return false;
+  }
+
+  private boolean processPullResult( PullResult pullResult ) throws Exception {
+    FetchResult fetchResult = pullResult.getFetchResult();
+    MergeResult mergeResult = pullResult.getMergeResult();
+    if ( pullResult.isSuccessful() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+      return true;
+    } else {
+      String msg = mergeResult.getMergeStatus().toString();
+      if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
+        resetHard();
+      } else if ( mergeResult.getFailingPaths().size() != 0 ) {
+        for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
+          msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
+        }
+      }
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
+      return false;
+    }
   }
 
   /* (non-Javadoc)

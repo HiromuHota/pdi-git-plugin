@@ -1,6 +1,7 @@
 package org.pentaho.di.git.spoon.model;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -10,21 +11,16 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.junit.RepositoryTestCase;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.junit.Before;
@@ -42,7 +38,8 @@ public class UIGitTest extends RepositoryTestCase {
   public void setUp() throws Exception {
     super.setUp();
     git = new Git( db );
-    uiGit = new UIGit();
+    uiGit = spy( new UIGit() );
+    doNothing().when( uiGit ).showMessageBox( anyString(), anyString() );
     uiGit.setGit( git );
     uiGit.setDirectory( git.getRepository().getDirectory().getParent() );
 
@@ -178,12 +175,7 @@ public class UIGitTest extends RepositoryTestCase {
     git2.commit().setMessage( "Some change in remote" ).call();
     git2.close();
 
-    pullResult = uiGit.pull();
-
-    assertFalse( pullResult.getFetchResult().getTrackingRefUpdates().isEmpty() );
-    assertEquals( pullResult.getMergeResult().getMergeStatus(),
-                    MergeStatus.FAST_FORWARD );
-    assertEquals( RepositoryState.SAFE, db.getRepositoryState() );
+    assertTrue( uiGit.pull() );
   }
 
   @Test
@@ -197,32 +189,36 @@ public class UIGitTest extends RepositoryTestCase {
     FileUtils.writeStringToFile( sourceFile, "Hello world" );
     git2.add().addFilepattern( "SomeFile.txt" ).call();
     git2.commit().setMessage( "Initial commit for source" ).call();
-    PullResult pullResult = git.pull().call();
+    git.pull().call();
 
     // change the source file
     FileUtils.writeStringToFile( sourceFile, "Another change" );
     git2.add().addFilepattern( "SomeFile.txt" ).call();
-    RevCommit sourceCommit = git2.commit().setMessage( "Some change in remote" ).call();
-    git2.close();
+    git2.commit().setMessage( "Some change in remote" ).call();
 
     File targetFile = new File( db.getWorkTree(), "OtherFile.txt" );
     FileUtils.writeStringToFile( targetFile, "Unconflicting change" );
     git.add().addFilepattern( "OtherFile.txt" ).call();
-    RevCommit targetCommit = git.commit().setMessage( "Unconflicting change in local" ).call();
+    git.commit().setMessage( "Unconflicting change in local" ).call();
 
-    pullResult = uiGit.pull();
+    assertTrue( uiGit.pull() );
 
-    MergeResult mergeResult = pullResult.getMergeResult();
-    ObjectId[] mergedCommits = mergeResult.getMergedCommits();
-    assertEquals( targetCommit.getId(), mergedCommits[0] );
-    assertEquals( sourceCommit.getId(), mergedCommits[1] );
-    try ( RevWalk rw = new RevWalk( db ) ) {
-      RevCommit mergeCommit = rw.parseCommit( mergeResult.getNewHead() );
-      URIish uri = new URIish(
-          db2.getDirectory().toURI().toURL() );
-      String message = "Merge branch 'master' of " + uri;
-      assertEquals( message, mergeCommit.getShortMessage() );
-    }
+    // shouldResetHardWhenMergeConflict
+    //  Change at local
+    targetFile = new File( db.getWorkTree(), "SomeFile.txt" );
+    FileUtils.writeStringToFile( targetFile, "Another change\nChange A" );
+    git.add().addFilepattern( "SomeFile.txt" ).call();
+    git.commit().setMessage( "Change A at local" ).call();
+
+    //  Change the source file in a way that conflicts with the change at local
+    FileUtils.writeStringToFile( sourceFile, "Another change\nChange B" );
+    git2.add().addFilepattern( "SomeFile.txt" ).call();
+    git2.commit().setMessage( "Change B at remote" ).call();
+
+    assertFalse( uiGit.pull() );
+    verify( uiGit ).resetHard();
+
+    git2.close();
   }
 
   @Test

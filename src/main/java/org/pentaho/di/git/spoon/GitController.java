@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -18,14 +17,11 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
-import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
-import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.swt.widgets.Control;
@@ -638,55 +634,8 @@ public class GitController extends AbstractXulEventHandler {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "One or more tabs have unsaved changes" );
       return;
     }
-    if ( !vcs.isClean() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
-      return;
-    }
-    if ( !vcs.hasRemote() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
-      return;
-    }
-    try {
-      PullResult pullResult = vcs.pull();
-      processPullResult( pullResult );
-    } catch ( TransportException e ) {
-      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
-        if ( promptUsernamePassword() ) {
-          pull();
-        }
-      } else if ( e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
-        if ( promptUsernamePassword() ) {
-          pull();
-        }
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
-    } catch ( Exception e ) {
-      if ( vcs.hasRemote() ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
-            "Please setup a remote" );
-      }
-    }
-  }
-
-  private void processPullResult( PullResult pullResult ) throws Exception {
-    FetchResult fetchResult = pullResult.getFetchResult();
-    MergeResult mergeResult = pullResult.getMergeResult();
-    if ( pullResult.isSuccessful() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+    if ( vcs.pull() ) {
       fireSourceChanged();
-    } else {
-      String msg = mergeResult.getMergeStatus().toString();
-      if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
-        vcs.resetHard();
-      } else if ( mergeResult.getFailingPaths().size() != 0 ) {
-        for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
-          msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
-        }
-      }
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
     }
   }
 

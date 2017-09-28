@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
@@ -152,11 +151,11 @@ public interface IVCS {
   /**
    * Equivalent of <tt>git fetch; git merge --ff</tt>
    *
-   * @return PullResult
+   * @return true on success
    * @throws Exception
    * @see <a href="http://www.kernel.org/pub/software/scm/git/docs/git-pull.html">Git documentation about Pull</a>
    */
-  PullResult pull() throws Exception;
+  boolean pull();
 
   Iterable<PushResult> push() throws Exception;
 

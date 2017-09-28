@@ -8,13 +8,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
-import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.URIish;
-import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.junit.Before;
 import org.junit.Test;
@@ -126,35 +123,13 @@ public class GitControllerTest {
 
   @Test
   public void shouldFireSourceChangedWhenSuccessful() throws Exception {
-    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     doReturn( true ).when( uiGit ).hasRemote();
     doReturn( true ).when( uiGit ).isClean();
-    PullResult pullResult = mock( PullResult.class );
-    when( pullResult.isSuccessful() ).thenReturn( true );
-    doReturn( pullResult ).when( uiGit ).pull();
+    doReturn( true ).when( uiGit ).pull();
 
     controller.pull();
 
     verify( controller ).fireSourceChanged();
-  }
-
-  @Test
-  public void shouldResetHardWhenMergeConflict() throws Exception {
-    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
-    doReturn( true ).when( uiGit ).hasRemote();
-    PullResult pullResult = mock( PullResult.class );
-    when( pullResult.isSuccessful() ).thenReturn( false );
-    doReturn( pullResult ).when( uiGit ).pull();
-    doReturn( true ).when( uiGit ).isClean();
-    MergeResult mergeResult = mock( MergeResult.class );
-    when( mergeResult.getMergeStatus() ).thenReturn( MergeStatus.CONFLICTING );
-    when( pullResult.getMergeResult() ).thenReturn( mergeResult );
-
-    controller.pull();
-
-    verify( uiGit ).resetHard();
   }
 
   @Test
