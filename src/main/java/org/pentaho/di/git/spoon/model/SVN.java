@@ -9,11 +9,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.tigris.subversion.svnclientadapter.ISVNClientAdapter;
+import org.tigris.subversion.svnclientadapter.ISVNLogMessage;
 import org.tigris.subversion.svnclientadapter.ISVNStatus;
 import org.tigris.subversion.svnclientadapter.SVNClientAdapterFactory;
 import org.tigris.subversion.svnclientadapter.SVNClientException;
@@ -129,19 +131,36 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public UIRepositoryObjectRevisions getRevisions() throws Exception {
+  public UIRepositoryObjectRevisions getRevisions() {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     long startRevision = 1;
-    Arrays.stream( svnClient.getLogMessages( root, new SVNRevision.Number( startRevision ), SVNRevision.HEAD,
-      false, false, 100 ) ).forEach( logMessage -> {
-        PurObjectRevision rev = new PurObjectRevision(
+    ISVNLogMessage[] messages = null;
+    try {
+      messages = svnClient.getLogMessages( root, new SVNRevision.Number( startRevision ), SVNRevision.HEAD, false, false, 100 );
+    } catch ( SVNClientException e ) {
+      if ( e.getMessage().contains( "Authorization" ) ) {
+        promptUsernamePassword();
+        return getRevisions();
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    }
+    Arrays.stream( messages ).forEach( logMessage -> {
+      PurObjectRevision rev = new PurObjectRevision(
           logMessage.getRevision().toString(),
           logMessage.getAuthor(),
           logMessage.getDate(),
           logMessage.getMessage() );
-        revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
-      } );
-    if ( getStagedFiles().size() != 0 ) {
+      revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
+    } );
+    List<UIFile> stagedFiles = null;
+    try {
+      stagedFiles = getStagedFiles();
+    } catch ( Exception e ) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    if ( stagedFiles.size() != 0 ) {
       PurObjectRevision rev = new PurObjectRevision(
           WORKINGTREE,
           "*",
@@ -339,12 +358,6 @@ public class SVN extends VCS implements IVCS {
   public boolean merge() {
     // TODO Auto-generated method stub
     return false;
-  }
-
-  @Override
-  public void setCredential( String username, String password ) {
-    svnClient.setUsername( username );
-    svnClient.setPassword( password );
   }
 
   @Override

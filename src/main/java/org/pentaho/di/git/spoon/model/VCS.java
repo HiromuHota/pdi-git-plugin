@@ -7,6 +7,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.pentaho.di.git.spoon.GitController;
 import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
@@ -14,6 +15,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 public class VCS implements IVCS {
 
+  protected static final Class<?> PKG = GitController.class;
   protected Shell shell;
 
   @VisibleForTesting
@@ -142,7 +144,7 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public UIRepositoryObjectRevisions getRevisions() throws Exception {
+  public UIRepositoryObjectRevisions getRevisions() {
     // TODO Auto-generated method stub
     return null;
   }

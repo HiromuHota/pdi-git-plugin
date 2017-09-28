@@ -96,7 +96,7 @@ public interface IVCS {
 
   void commit( String authorName, String message ) throws Exception;
 
-  UIRepositoryObjectRevisions getRevisions() throws Exception;
+  UIRepositoryObjectRevisions getRevisions();
 
   void setCredential( String username, String password );
 

@@ -70,7 +70,6 @@ import org.eclipse.jgit.util.FileUtils;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
 import org.pentaho.di.core.Const;
-import org.pentaho.di.git.spoon.GitController;
 import org.pentaho.di.git.spoon.dialog.MergeBranchDialog;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectRevision;
@@ -82,8 +81,6 @@ import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObj
 import com.google.common.annotations.VisibleForTesting;
 
 public class UIGit extends VCS implements IVCS {
-
-  private static final Class<?> PKG = GitController.class;
 
   static {
     /**
@@ -295,7 +292,7 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#getRevisions()
    */
   @Override
-  public UIRepositoryObjectRevisions getRevisions() throws Exception {
+  public UIRepositoryObjectRevisions getRevisions() {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     try {
       if ( !git.status().call().isClean() ) {

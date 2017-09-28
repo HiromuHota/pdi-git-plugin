@@ -60,7 +60,6 @@ import org.pentaho.ui.xul.swt.custom.DialogConstant;
 import org.pentaho.ui.xul.swt.tags.SwtTreeItem;
 import org.pentaho.ui.xul.util.XulDialogCallback.Status;
 import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
-import org.tigris.subversion.svnclientadapter.SVNClientException;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -476,26 +475,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public UIRepositoryObjectRevisions getRevisions() {
-    try {
-      return vcs.getRevisions();
-    } catch ( Exception e ) {
-      if ( e.getMessage().contains( "Authorization" ) ) {
-        UsernamePasswordDialog dialog = new UsernamePasswordDialog( getShell() );
-        if ( dialog.open() == Window.OK ) {
-          String username = dialog.getUsername();
-          String password = dialog.getPassword();
-          vcs.setCredential( username, password );
-          try {
-            return vcs.getRevisions();
-          } catch ( Exception e1 ) {
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e1.getMessage() );
-          }
-        }
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
-    }
-    return null;
+    return vcs.getRevisions();
   }
 
   public List<UIFile> getChangedFiles() throws Exception {
