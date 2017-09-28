@@ -40,7 +40,7 @@ import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
-import org.pentaho.di.git.spoon.model.VCS;
+import org.pentaho.di.git.spoon.model.IVCS;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
@@ -77,7 +77,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private static final Class<?> PKG = GitController.class;
 
-  private VCS vcs;
+  private IVCS vcs;
   private String path;
   private String authorName;
   private String commitMessage;
@@ -202,7 +202,7 @@ public class GitController extends AbstractXulEventHandler {
   public void openGit( GitRepository repo ) {
     String baseDirectory = repo.getDirectory();
     try {
-      if ( repo.getType() == null || repo.getType().equals( VCS.GIT ) ) {
+      if ( repo.getType() == null || repo.getType().equals( IVCS.GIT ) ) {
         vcs = new UIGit();
       }
       vcs.openRepo( baseDirectory );
@@ -282,7 +282,7 @@ public class GitController extends AbstractXulEventHandler {
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
         String commitId;
-        commitId = isOnlyWIP() ? VCS.WORKINGTREE : getFirstSelectedRevision().getName();
+        commitId = isOnlyWIP() ? IVCS.WORKINGTREE : getFirstSelectedRevision().getName();
         try ( InputStream xmlStream = vcs.open( content.getName(), commitId ) ) {
           EngineMetaInterface meta = null;
           Consumer<EngineMetaInterface> c = null;
@@ -299,7 +299,7 @@ public class GitController extends AbstractXulEventHandler {
           meta.clearChanged();
           meta.setFilename( filePath );
           if ( !isOnlyWIP() ) {
-            meta.setName( String.format( "%s (%s)", meta.getName(), vcs.getShortenedName( commitId, VCS.TYPE_COMMIT ) ) );
+            meta.setName( String.format( "%s (%s)", meta.getName(), vcs.getShortenedName( commitId, IVCS.TYPE_COMMIT ) ) );
           }
           c.accept( meta );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
@@ -328,7 +328,7 @@ public class GitController extends AbstractXulEventHandler {
           InputStream xmlStreamOld, xmlStreamNew;
           String commitIdOld, commitIdNew;
           if ( isOnlyWIP() ) {
-            commitIdNew = VCS.WORKINGTREE;
+            commitIdNew = IVCS.WORKINGTREE;
             commitIdOld = Constants.HEAD;
           } else {
             commitIdNew = getFirstSelectedRevision().getName();
@@ -360,12 +360,12 @@ public class GitController extends AbstractXulEventHandler {
 
           metaOld.clearChanged();
           metaOld.setName( String.format( "%s (%s -> %s)", metaOld.getName(),
-              vcs.getShortenedName( commitIdOld, VCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdNew, VCS.TYPE_COMMIT ) ) );
+              vcs.getShortenedName( commitIdOld, IVCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdNew, IVCS.TYPE_COMMIT ) ) );
           metaOld.setFilename( filePath );
           c.accept( metaOld );
           metaNew.clearChanged();
           metaNew.setName( String.format( "%s (%s -> %s)", metaNew.getName(),
-              vcs.getShortenedName( commitIdNew, VCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdOld, VCS.TYPE_COMMIT ) ) );
+              vcs.getShortenedName( commitIdNew, IVCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdOld, IVCS.TYPE_COMMIT ) ) );
           metaNew.setFilename( filePath );
           c.accept( metaNew );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
@@ -411,7 +411,7 @@ public class GitController extends AbstractXulEventHandler {
    */
   private Boolean isOnlyWIP() {
     return CollectionUtils.isEmpty( getSelectedRevisions() )
-        || ( getFirstSelectedRevision().getName().equals( VCS.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
+        || ( getFirstSelectedRevision().getName().equals( IVCS.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
   }
 
   private Shell getShell() {
@@ -439,9 +439,9 @@ public class GitController extends AbstractXulEventHandler {
       if ( selectedFiles.size() != 0 ) {
         if ( isOnlyWIP() ) {
           if ( selectedFiles.get( 0 ).getIsStaged() ) {
-            return vcs.diff( Constants.HEAD, VCS.INDEX, selectedFiles.get( 0 ).getName() );
+            return vcs.diff( Constants.HEAD, IVCS.INDEX, selectedFiles.get( 0 ).getName() );
           } else {
-            return vcs.diff( VCS.INDEX, VCS.WORKINGTREE, selectedFiles.get( 0 ).getName() );
+            return vcs.diff( IVCS.INDEX, IVCS.WORKINGTREE, selectedFiles.get( 0 ).getName() );
           }
         } else {
           String newCommitId = getFirstSelectedRevision().getName();
@@ -540,7 +540,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void checkout() {
-    checkout( VCS.TYPE_COMMIT );
+    checkout( IVCS.TYPE_COMMIT );
   }
 
   public void checkout( String type ) {
@@ -548,7 +548,7 @@ public class GitController extends AbstractXulEventHandler {
     List<String> names;
     EnterSelectionDialog esd;
     switch ( type ) {
-      case VCS.TYPE_BRANCH:
+      case IVCS.TYPE_BRANCH:
         names = vcs.getBranches();
         names.remove( vcs.getBranch() );
         esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
@@ -557,7 +557,7 @@ public class GitController extends AbstractXulEventHandler {
           return;
         }
         break;
-      case VCS.TYPE_TAG:
+      case IVCS.TYPE_TAG:
         names = vcs.getTags();
         esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to checkout..." );
         name = esd.open();
@@ -702,7 +702,7 @@ public class GitController extends AbstractXulEventHandler {
     List<String> names;
     EnterSelectionDialog esd;
     switch ( type ) {
-      case VCS.TYPE_BRANCH:
+      case IVCS.TYPE_BRANCH:
         names = vcs.getLocalBranches();
         esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to push..." );
         name = esd.open();
@@ -710,7 +710,7 @@ public class GitController extends AbstractXulEventHandler {
           return;
         }
         break;
-      case VCS.TYPE_TAG:
+      case IVCS.TYPE_TAG:
         names = vcs.getTags();
         esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select the tag to push..." );
         name = esd.open();
@@ -927,7 +927,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   @VisibleForTesting
-  void setUIGit( VCS uiGit ) {
+  void setUIGit( IVCS uiGit ) {
     this.vcs = uiGit;
   }
 

@@ -8,7 +8,7 @@ import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
-public interface VCS {
+public interface IVCS {
 
   String WORKINGTREE = "WORKINGTREE";
   String INDEX = "INDEX";

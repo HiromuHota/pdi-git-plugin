@@ -70,7 +70,7 @@ import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObj
 
 import com.google.common.annotations.VisibleForTesting;
 
-public class UIGit implements VCS {
+public class UIGit implements IVCS {
 
   static {
     /**
@@ -290,7 +290,7 @@ public class UIGit implements VCS {
             WORKINGTREE,
             "*",
             new Date(),
-            " // " + VCS.WORKINGTREE );
+            " // " + IVCS.WORKINGTREE );
         revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
       }
       Iterable<RevCommit> iterable = git.log().call();
@@ -418,7 +418,7 @@ public class UIGit implements VCS {
 
   /**
    * Reset to a commit (mixed)
-   * @see org.pentaho.di.git.spoon.model.VCS#reset(java.lang.String)
+   * @see org.pentaho.di.git.spoon.model.IVCS#reset(java.lang.String)
    */
   @Override
   public void reset( String name ) throws Exception {
