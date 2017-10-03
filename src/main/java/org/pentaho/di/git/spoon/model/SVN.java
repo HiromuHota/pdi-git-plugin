@@ -1,7 +1,6 @@
 package org.pentaho.di.git.spoon.model;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,30 +45,6 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public String getDirectory() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String getAuthorName() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String getAuthorName( String commitId ) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String getCommitMessage( String commitId ) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public String getCommitId( String revstr ) throws Exception {
     return revstr;
   }
@@ -87,12 +62,6 @@ public class SVN extends VCS implements IVCS {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return null;
-  }
-
-  @Override
-  public List<String> getLocalBranches() {
-    // TODO Auto-generated method stub
     return null;
   }
 
@@ -124,18 +93,6 @@ public class SVN extends VCS implements IVCS {
       e.printStackTrace();
     }
     return null;
-  }
-
-  @Override
-  public void addRemote( String s ) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void removeRemote() throws Exception {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -232,12 +189,6 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public void initRepo( String baseDirectory ) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public void openRepo( String baseDirectory ) throws Exception {
     directory = baseDirectory;
     root = new File( directory );
@@ -249,85 +200,8 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public void add( String filepattern ) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void rm( String filepattern ) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void reset( String path ) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void resetHard() throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public boolean pull() {
-    return false;
-  }
-
-  @Override
-  public boolean push() {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public String show( String commitId ) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String diff( String oldCommitId, String newCommitId ) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String diff( String oldCommitId, String newCommitId, String file ) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public InputStream open( String file, String commitId ) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public void checkout( String name ) throws Exception {
     svnClient.switchToUrl( root, new SVNUrl( getRemote() + "/" + name ), SVNRevision.HEAD, true );
-  }
-
-  @Override
-  public void checkout( String name, String path ) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void createBranch( String value ) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void deleteBranch( String name, boolean force ) throws Exception {
-    // TODO Auto-generated method stub
-
   }
 
   private static ChangeType convertTypeToGit( String type ) {
@@ -342,42 +216,6 @@ public class SVN extends VCS implements IVCS {
     } else {
       return null;
     }
-  }
-
-  @Override
-  public boolean isClean() {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public String getShortenedName(String name, String type) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public List<String> getTags() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void createTag(String name) throws Exception {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void deleteTag(String name) throws Exception {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public boolean merge() {
-    // TODO Auto-generated method stub
-    return false;
   }
 
   @Override
