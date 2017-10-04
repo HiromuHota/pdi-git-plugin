@@ -45,6 +45,24 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
+  public String getAuthorName( String commitId ) {
+    UIRepositoryObjectRevisions revisions = getRevisions();
+    UIRepositoryObjectRevision revision = revisions.stream()
+        .filter( rev -> rev.getName().equals( commitId ) )
+        .findFirst().get();
+    return revision.getLogin();
+  }
+
+  @Override
+  public String getCommitMessage( String commitId ) {
+    UIRepositoryObjectRevisions revisions = getRevisions();
+    UIRepositoryObjectRevision revision = revisions.stream()
+        .filter( rev -> rev.getName().equals( commitId ) )
+        .findFirst().get();
+    return revision.getComment();
+  }
+
+  @Override
   public String getCommitId( String revstr ) throws Exception {
     return revstr;
   }
@@ -222,5 +240,23 @@ public class SVN extends VCS implements IVCS {
   public void setCredential( String username, String password ) {
     svnClient.setUsername( username );
     svnClient.setPassword( password );
+  }
+
+  private ISVNLogMessage resolve( String commitId ) {
+    UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
+    ISVNLogMessage[] messages = null;
+    try {
+      messages = svnClient.getLogMessages( root, new SVNRevision.Number( Long.parseLong( commitId ) ), SVNRevision.HEAD, false, false, 1 );
+    } catch ( SVNClientException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
+    Arrays.stream( messages ).forEach( logMessage -> {
+      PurObjectRevision rev = new PurObjectRevision(
+          logMessage.getRevision().toString(),
+          logMessage.getAuthor(),
+          logMessage.getDate(),
+          logMessage.getMessage() );
+      revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
+    } );
   }
 }

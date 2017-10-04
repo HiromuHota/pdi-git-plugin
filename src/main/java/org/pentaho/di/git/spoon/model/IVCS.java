@@ -37,9 +37,9 @@ public interface IVCS {
    * @return
    * @throws Exception
    */
-  String getAuthorName( String commitId ) throws Exception;
+  String getAuthorName( String commitId );
 
-  String getCommitMessage( String commitId ) throws Exception;
+  String getCommitMessage( String commitId );
 
   /**
    * Get SHA-1 commit Id

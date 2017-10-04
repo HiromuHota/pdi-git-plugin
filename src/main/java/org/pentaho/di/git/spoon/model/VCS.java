@@ -60,14 +60,12 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public String getAuthorName(String commitId) throws Exception {
-    // TODO Auto-generated method stub
+  public String getAuthorName( String commitId ) {
     return null;
   }
 
   @Override
-  public String getCommitMessage(String commitId) throws Exception {
-    // TODO Auto-generated method stub
+  public String getCommitMessage( String commitId ) {
     return null;
   }
 

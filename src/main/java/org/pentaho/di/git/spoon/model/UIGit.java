@@ -33,6 +33,10 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RenameDetector;
 import org.eclipse.jgit.dircache.DirCacheIterator;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
@@ -129,32 +133,24 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#getAuthorName(java.lang.String)
    */
   @Override
-  public String getAuthorName( String commitId ) throws Exception {
-    final ObjectId id = git.getRepository().resolve( commitId );
-    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
-      RevObject obj = rw.parseAny( id );
-      RevCommit commit = (RevCommit) obj;
-      PersonIdent author = commit.getAuthorIdent();
-      final StringBuilder r = new StringBuilder();
-      r.append( author.getName() );
-      r.append( " <" ); //$NON-NLS-1$
-      r.append( author.getEmailAddress() );
-      r.append( ">" ); //$NON-NLS-1$
-      return r.toString();
-    }
+  public String getAuthorName( String commitId ) {
+    RevCommit commit = resolve( commitId );
+    PersonIdent author = commit.getAuthorIdent();
+    final StringBuilder r = new StringBuilder();
+    r.append( author.getName() );
+    r.append( " <" ); //$NON-NLS-1$
+    r.append( author.getEmailAddress() );
+    r.append( ">" ); //$NON-NLS-1$
+    return r.toString();
   }
 
   /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.VCS#getCommitMessage(java.lang.String)
    */
   @Override
-  public String getCommitMessage( String commitId ) throws Exception {
-    final ObjectId id = git.getRepository().resolve( commitId );
-    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
-      RevObject obj = rw.parseAny( id );
-      RevCommit commit = (RevCommit) obj;
-      return commit.getFullMessage();
-    }
+  public String getCommitMessage( String commitId ) {
+    RevCommit commit = resolve( commitId );
+    return commit.getFullMessage();
   }
 
   /* (non-Javadoc)
@@ -871,5 +867,30 @@ public class UIGit extends VCS implements IVCS {
   @Override
   public void setCredential( String username, String password ) {
     credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
+  }
+
+  private RevCommit resolve( String commitId ) {
+    ObjectId id = null;
+    try {
+      id = git.getRepository().resolve( commitId );
+    } catch ( RevisionSyntaxException e1 ) {
+      e1.printStackTrace();
+    } catch ( AmbiguousObjectException e1 ) {
+      e1.printStackTrace();
+    } catch ( IncorrectObjectTypeException e1 ) {
+      e1.printStackTrace();
+    } catch ( IOException e1 ) {
+      e1.printStackTrace();
+    }
+    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
+      RevObject obj = rw.parseAny( id );
+      RevCommit commit = (RevCommit) obj;
+      return commit;
+    } catch ( MissingObjectException e ) {
+      e.printStackTrace();
+    } catch ( IOException e ) {
+      e.printStackTrace();
+    }
+    return null;
   }
 }
