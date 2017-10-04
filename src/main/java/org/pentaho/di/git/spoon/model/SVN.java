@@ -23,6 +23,7 @@ import org.tigris.subversion.svnclientadapter.SVNClientAdapterFactory;
 import org.tigris.subversion.svnclientadapter.SVNClientException;
 import org.tigris.subversion.svnclientadapter.SVNNodeKind;
 import org.tigris.subversion.svnclientadapter.SVNRevision;
+import org.tigris.subversion.svnclientadapter.SVNStatusKind;
 import org.tigris.subversion.svnclientadapter.SVNUrl;
 import org.tigris.subversion.svnclientadapter.javahl.JhlClientAdapterFactory;
 
@@ -176,7 +177,14 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public List<UIFile> getUnstagedFiles() throws Exception {
-    return new ArrayList<UIFile>();
+    List<UIFile> files = new ArrayList<UIFile>();
+    svnClient.getStatus( root, true, false, false,
+      false, false, ( String path, ISVNStatus status ) -> {
+        if ( status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
+          files.add( new UIFile( path.replaceFirst( directory, "" ), convertTypeToGit( status.getTextStatus().toString() ), false ) );
+        }
+      } );
+    return files;
   }
 
   @Override
@@ -184,7 +192,9 @@ public class SVN extends VCS implements IVCS {
     List<UIFile> files = new ArrayList<UIFile>();
     svnClient.getStatus( root, true, false, false,
       false, false, ( String path, ISVNStatus status ) -> {
-        files.add( new UIFile( path.replaceFirst( directory, "" ), convertTypeToGit( status.getTextStatus().toString() ), true ) );
+        if ( !status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
+          files.add( new UIFile( path.replaceFirst( directory, "" ), convertTypeToGit( status.getTextStatus().toString() ), true ) );
+        }
       } );
     return files;
   }
@@ -223,7 +233,7 @@ public class SVN extends VCS implements IVCS {
   }
 
   private static ChangeType convertTypeToGit( String type ) {
-    if ( type.equals( "added" ) ) {
+    if ( type.equals( "added" ) | type.equals( "unversioned" ) ) {
       return ChangeType.ADD;
     } else if ( type.equals( "deleted" ) ) {
       return ChangeType.DELETE;

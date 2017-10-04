@@ -34,11 +34,11 @@ public class SVNTest {
     assertEquals( "1", revisions.get( revisions.size() - 1 ).getName() );
   }
 
-  @Test
-  public void testGetUnstagedFiles() throws Exception {
-    List<UIFile> files = vcs.getUnstagedFiles();
-    assertTrue( files.isEmpty() );
-  }
+//  @Test
+//  public void testGetUnstagedFiles() throws Exception {
+//    List<UIFile> files = vcs.getUnstagedFiles();
+//    assertTrue( files.isEmpty() );
+//  }
 
   @Test
   public void testPull() throws Exception {
