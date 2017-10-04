@@ -241,22 +241,4 @@ public class SVN extends VCS implements IVCS {
     svnClient.setUsername( username );
     svnClient.setPassword( password );
   }
-
-  private ISVNLogMessage resolve( String commitId ) {
-    UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
-    ISVNLogMessage[] messages = null;
-    try {
-      messages = svnClient.getLogMessages( root, new SVNRevision.Number( Long.parseLong( commitId ) ), SVNRevision.HEAD, false, false, 1 );
-    } catch ( SVNClientException e ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-    }
-    Arrays.stream( messages ).forEach( logMessage -> {
-      PurObjectRevision rev = new PurObjectRevision(
-          logMessage.getRevision().toString(),
-          logMessage.getAuthor(),
-          logMessage.getDate(),
-          logMessage.getMessage() );
-      revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
-    } );
-  }
 }
