@@ -169,7 +169,7 @@ public interface IVCS {
 
   String diff( String oldCommitId, String newCommitId ) throws Exception;
 
-  String diff( String oldCommitId, String newCommitId, String file ) throws Exception;
+  String diff( String oldCommitId, String newCommitId, String file );
 
   InputStream open( String file, String commitId ) throws Exception;
 

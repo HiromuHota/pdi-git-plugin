@@ -242,7 +242,7 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public String diff(String oldCommitId, String newCommitId, String file) throws Exception {
+  public String diff(String oldCommitId, String newCommitId, String file) {
     // TODO Auto-generated method stub
     return null;
   }

@@ -652,24 +652,33 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#diff(java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
-  public String diff( String oldCommitId, String newCommitId, String file ) throws Exception {
+  public String diff( String oldCommitId, String newCommitId, String file ) {
     // DiffFormatter does not detect renames with path filters on
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     DiffFormatter formatter = new DiffFormatter( out );
     formatter.setRepository( git.getRepository() );
     formatter.setDetectRenames( true );
-    List<DiffEntry> diffs = formatter.scan( getTreeIterator( oldCommitId ), getTreeIterator( newCommitId ) );
-
-    if ( file == null ) {
-      formatter.format( diffs );
-    } else {
-      formatter.format(
-          diffs.stream()
-          .filter( diff -> diff.getNewPath().equals( file ) )
-          .collect( Collectors.toList() ) );
+    List<DiffEntry> diffs;
+    try {
+      diffs = formatter.scan( getTreeIterator( oldCommitId ), getTreeIterator( newCommitId ) );
+      if ( file == null ) {
+        formatter.format( diffs );
+      } else {
+        formatter.format(
+            diffs.stream()
+            .filter( diff -> diff.getNewPath().equals( file ) )
+            .collect( Collectors.toList() ) );
+      }
+      formatter.close();
+      return out.toString( "UTF-8" );
+    } catch ( IOException e ) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch ( Exception e ) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
-    formatter.close();
-    return out.toString( "UTF-8" );
+    return "";
   }
 
   /* (non-Javadoc)

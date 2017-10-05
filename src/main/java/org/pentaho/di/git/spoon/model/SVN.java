@@ -1,6 +1,8 @@
 package org.pentaho.di.git.spoon.model;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +13,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.subversion.javahl.ClientException;
+import org.apache.subversion.javahl.types.Depth;
+import org.apache.subversion.javahl.types.Revision;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectRevision;
@@ -67,6 +71,26 @@ public class SVN extends VCS implements IVCS {
     } catch ( ClientException e ) {
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public String diff( String oldCommitId, String newCommitId, String file ) {
+    AbstractJhlClientAdapter client = (AbstractJhlClientAdapter) svnClient;
+    OutputStream outStream = new ByteArrayOutputStream();
+    try {
+      client.getSVNClient().diff(
+          svnClient.getInfo( root ).getRepository().toString() + File.separator + file,
+          null, Revision.getInstance( Long.parseLong( oldCommitId ) ), Revision.getInstance( Long.parseLong( newCommitId ) ),
+          null, outStream, Depth.infinityOrImmediates( true ), null, true, false, false, false, false, false );
+      return outStream.toString();
+    } catch ( ClientException e ) {
+      e.printStackTrace();
+    } catch ( NumberFormatException e ) {
+      e.printStackTrace();
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    }
+    return "";
   }
 
   @Override
