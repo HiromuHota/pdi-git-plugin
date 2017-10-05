@@ -138,12 +138,11 @@ public interface IVCS {
   void reset( String name );
 
   /**
-   * Reset a file to a commit
-   * @param name of the commit
+   * Reset a file to HEAD
    * @param path of the file
    * @throws Exception
    */
-  void reset( String name, String path );
+  void resetPath( String path );
 
   void resetHard() throws Exception;
 

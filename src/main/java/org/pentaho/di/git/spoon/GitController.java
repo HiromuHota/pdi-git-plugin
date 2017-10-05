@@ -124,7 +124,7 @@ public class GitController extends AbstractXulEventHandler {
         UIFile file = (UIFile) selectedItem.getBoundObject();
         try {
           if ( file.getIsStaged() ) {
-            vcs.reset( Constants.HEAD, file.getName() );
+            vcs.resetPath( file.getName() );
           } else {
             vcs.add( file.getName() );
           }
@@ -270,7 +270,7 @@ public class GitController extends AbstractXulEventHandler {
   public void removeFromIndex() throws Exception {
     List<UIFile> contents = getSelectedChangedFiles();
     for ( UIFile content : contents ) {
-      vcs.reset( Constants.HEAD, content.getName() );
+      vcs.resetPath( content.getName() );
     }
     fireSourceChanged();
   }

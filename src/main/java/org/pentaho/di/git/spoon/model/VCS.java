@@ -205,7 +205,7 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void reset( String name, String path ) {
+  public void resetPath( String path ) {
   }
 
   @Override

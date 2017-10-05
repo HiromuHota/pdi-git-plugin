@@ -458,12 +458,12 @@ public class UIGit extends VCS implements IVCS {
   }
 
   /**
-   * Reset a file to a commit (mixed)
+   * Reset a file to HEAD (mixed)
    */
   @Override
-  public void reset( String name, String path ) {
+  public void resetPath( String path ) {
     try {
-      git.reset().setRef( name ).addPath( path ).call();
+      git.reset().addPath( path ).call();
     } catch ( CheckoutConflictException e ) {
       e.printStackTrace();
     } catch ( GitAPIException e ) {

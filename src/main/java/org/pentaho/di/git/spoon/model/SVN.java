@@ -58,7 +58,7 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public void reset( String name, String path ) {
+  public void resetPath( String path ) {
     AbstractJhlClientAdapter client = (AbstractJhlClientAdapter) svnClient;
     try {
       client.getSVNClient().remove(
