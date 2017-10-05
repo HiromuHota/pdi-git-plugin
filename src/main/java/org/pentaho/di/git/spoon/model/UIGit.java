@@ -100,7 +100,6 @@ public class UIGit extends VCS implements IVCS {
   }
 
   private Git git;
-  private String directory;
   private CredentialsProvider credentialsProvider;
 
   /* (non-Javadoc)

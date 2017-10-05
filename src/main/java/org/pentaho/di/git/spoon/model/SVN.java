@@ -45,7 +45,6 @@ public class SVN extends VCS implements IVCS {
   }
 
   private ISVNClientAdapter svnClient;
-  private String directory;
   private File root;
 
   public SVN() {

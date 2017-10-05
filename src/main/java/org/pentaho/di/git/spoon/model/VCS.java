@@ -17,6 +17,7 @@ public class VCS implements IVCS {
 
   protected static final Class<?> PKG = GitController.class;
   protected Shell shell;
+  protected String directory;
 
   @VisibleForTesting
   void showMessageBox( String title, String message ) {
@@ -43,8 +44,7 @@ public class VCS implements IVCS {
 
   @Override
   public String getDirectory() {
-    // TODO Auto-generated method stub
-    return null;
+    return directory;
   }
 
   @Override
