@@ -26,7 +26,9 @@ import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -416,16 +418,28 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#add(java.lang.String)
    */
   @Override
-  public void add( String filepattern ) throws Exception {
-    git.add().addFilepattern( filepattern ).call();
+  public void add( String filepattern ) {
+    try {
+      git.add().addFilepattern( filepattern ).call();
+    } catch ( NoFilepatternException e ) {
+      e.printStackTrace();
+    } catch ( GitAPIException e ) {
+      e.printStackTrace();
+    }
   }
 
   /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.VCS#rm(java.lang.String)
    */
   @Override
-  public void rm( String filepattern ) throws Exception {
-    git.rm().addFilepattern( filepattern ).call();
+  public void rm( String filepattern ) {
+    try {
+      git.rm().addFilepattern( filepattern ).call();
+    } catch ( NoFilepatternException e ) {
+      e.printStackTrace();
+    } catch ( GitAPIException e ) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -433,16 +447,28 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.IVCS#reset(java.lang.String)
    */
   @Override
-  public void reset( String name ) throws Exception {
-    git.reset().setRef( name ).call();
+  public void reset( String name ) {
+    try {
+      git.reset().setRef( name ).call();
+    } catch ( CheckoutConflictException e ) {
+      e.printStackTrace();
+    } catch ( GitAPIException e ) {
+      e.printStackTrace();
+    }
   }
 
   /**
    * Reset a file to a commit (mixed)
    */
   @Override
-  public void reset( String name, String path ) throws Exception {
-    git.reset().setRef( name ).addPath( path ).call();
+  public void reset( String name, String path ) {
+    try {
+      git.reset().setRef( name ).addPath( path ).call();
+    } catch ( CheckoutConflictException e ) {
+      e.printStackTrace();
+    } catch ( GitAPIException e ) {
+      e.printStackTrace();
+    }
   }
 
   /* (non-Javadoc)

@@ -131,11 +131,11 @@ public interface IVCS {
 
   void closeRepo();
 
-  void add( String filepattern ) throws Exception;
+  void add( String filepattern );
 
-  void rm( String filepattern ) throws Exception;
+  void rm( String filepattern );
 
-  void reset( String name ) throws Exception;
+  void reset( String name );
 
   /**
    * Reset a file to a commit
@@ -143,7 +143,7 @@ public interface IVCS {
    * @param path of the file
    * @throws Exception
    */
-  void reset( String name, String path ) throws Exception;
+  void reset( String name, String path );
 
   void resetHard() throws Exception;
 

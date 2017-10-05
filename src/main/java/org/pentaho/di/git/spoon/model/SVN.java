@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.subversion.javahl.ClientException;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectRevision;
@@ -25,6 +27,7 @@ import org.tigris.subversion.svnclientadapter.SVNNodeKind;
 import org.tigris.subversion.svnclientadapter.SVNRevision;
 import org.tigris.subversion.svnclientadapter.SVNStatusKind;
 import org.tigris.subversion.svnclientadapter.SVNUrl;
+import org.tigris.subversion.svnclientadapter.javahl.AbstractJhlClientAdapter;
 import org.tigris.subversion.svnclientadapter.javahl.JhlClientAdapterFactory;
 
 public class SVN extends VCS implements IVCS {
@@ -43,6 +46,27 @@ public class SVN extends VCS implements IVCS {
 
   public SVN() {
     svnClient = SVNClientAdapterFactory.createSVNClient( JhlClientAdapterFactory.JAVAHL_CLIENT );
+  }
+
+  @Override
+  public void add( String name ) {
+    try {
+      svnClient.addFile( new File( directory, name ) );
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void reset( String name, String path ) {
+    AbstractJhlClientAdapter client = (AbstractJhlClientAdapter) svnClient;
+    try {
+      client.getSVNClient().remove(
+          new HashSet<String>( Arrays.asList( directory + File.separator + path ) ),
+          false, true, null, null, null );
+    } catch ( ClientException e ) {
+      e.printStackTrace();
+    }
   }
 
   @Override
@@ -130,6 +154,9 @@ public class SVN extends VCS implements IVCS {
       } else {
         return false;
       }
+    } catch ( Exception e ) {
+      e.printStackTrace();
+      return false;
     }
   }
 
@@ -156,14 +183,7 @@ public class SVN extends VCS implements IVCS {
           logMessage.getMessage() );
       revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
     } );
-    List<UIFile> stagedFiles = null;
-    try {
-      stagedFiles = getStagedFiles();
-    } catch ( Exception e ) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    if ( stagedFiles.size() != 0 ) {
+    if ( !isClean() ) {
       PurObjectRevision rev = new PurObjectRevision(
           WORKINGTREE,
           "*",
@@ -214,6 +234,16 @@ public class SVN extends VCS implements IVCS {
   @Override
   public boolean hasStagedFiles() throws Exception {
     return !getStagedFiles().isEmpty();
+  }
+
+  @Override
+  public boolean isClean() {
+    try {
+      return getStagedFiles().isEmpty() & getUnstagedFiles().isEmpty();
+    } catch ( Exception e ) {
+      e.printStackTrace();
+      return false;
+    }
   }
 
   @Override

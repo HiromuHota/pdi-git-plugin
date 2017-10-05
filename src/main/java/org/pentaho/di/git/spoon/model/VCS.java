@@ -49,7 +49,6 @@ public class VCS implements IVCS {
 
   @Override
   public boolean isClean() {
-    // TODO Auto-generated method stub
     return false;
   }
 
@@ -194,27 +193,19 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void add(String filepattern) throws Exception {
-    // TODO Auto-generated method stub
-    
+  public void add( String filepattern ) {
   }
 
   @Override
-  public void rm(String filepattern) throws Exception {
-    // TODO Auto-generated method stub
-    
+  public void rm( String filepattern ) {
   }
 
   @Override
-  public void reset(String name) throws Exception {
-    // TODO Auto-generated method stub
-    
+  public void reset( String name ) {
   }
 
   @Override
-  public void reset(String name, String path) throws Exception {
-    // TODO Auto-generated method stub
-    
+  public void reset( String name, String path ) {
   }
 
   @Override
