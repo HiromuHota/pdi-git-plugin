@@ -2,6 +2,7 @@ package org.pentaho.di.git.spoon.model;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -111,13 +112,18 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public String getCommitId( String revstr ) throws Exception {
+  public String getCommitId( String revstr ) {
     return revstr;
   }
 
   @Override
-  public String getParentCommitId( String revstr ) throws Exception {
-    return getCommitId( Long.toString( ( Long.parseLong( revstr ) - 1 ) ) );
+  public String getParentCommitId( String revstr ) {
+    try {
+      return getCommitId( Long.toString( ( Long.parseLong( revstr ) - 1 ) ) );
+    } catch ( NumberFormatException e ) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   @Override
@@ -267,6 +273,19 @@ public class SVN extends VCS implements IVCS {
       e.printStackTrace();
       return false;
     }
+  }
+
+  @Override
+  public InputStream open( String file, String commitId ) {
+    try {
+      return svnClient.getContent( svnClient.getInfo( root ).getRepository().appendPath( file ),
+          new SVNRevision.Number( Long.parseLong( commitId ) ) );
+    } catch ( NumberFormatException e ) {
+      e.printStackTrace();
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   @Override

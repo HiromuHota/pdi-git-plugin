@@ -47,7 +47,7 @@ public interface IVCS {
    * @return
    * @throws Exception
    */
-  String getCommitId( String revstr ) throws Exception;
+  String getCommitId( String revstr );
 
   /**
    * Get SHA-1 commit Id
@@ -55,7 +55,7 @@ public interface IVCS {
    * @return
    * @throws Exception
    */
-  String getParentCommitId( String revstr ) throws Exception;
+  String getParentCommitId( String revstr );
 
   /**
    * Get an expanded name from shortened name (e.g., master -> refs/heads/master)
@@ -171,7 +171,7 @@ public interface IVCS {
 
   String diff( String oldCommitId, String newCommitId, String file );
 
-  InputStream open( String file, String commitId ) throws Exception;
+  InputStream open( String file, String commitId );
 
   /**
    * Checkout a branch or commit

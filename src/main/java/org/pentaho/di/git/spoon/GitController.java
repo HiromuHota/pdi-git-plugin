@@ -1,5 +1,6 @@
 package org.pentaho.di.git.spoon;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
@@ -25,6 +26,8 @@ import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
+import org.pentaho.di.core.exception.KettleMissingPluginsException;
+import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.SVN;
@@ -335,6 +338,9 @@ public class GitController extends AbstractXulEventHandler {
               : getLastSelectedRevision().getName();
           }
           xmlStreamOld = vcs.open( content.getName(), commitIdOld );
+          if ( xmlStreamOld == null ) {
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "New file" );
+          }
           xmlStreamNew = vcs.open( content.getName(), commitIdNew );
           if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
             // Use temporary metaOld_ because metaOld will be modified before the 2nd comparison
@@ -368,9 +374,11 @@ public class GitController extends AbstractXulEventHandler {
           metaNew.setFilename( filePath );
           c.accept( metaNew );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
-        } catch ( MissingObjectException | NullPointerException e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "New file" );
-        } catch ( Exception e ) {
+        } catch ( IOException e ) {
+          e.printStackTrace();
+        } catch ( KettleXMLException e ) {
+          e.printStackTrace();
+        } catch ( KettleMissingPluginsException e ) {
           e.printStackTrace();
         }
       } );

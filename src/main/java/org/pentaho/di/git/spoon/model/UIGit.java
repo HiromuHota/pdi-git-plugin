@@ -3,6 +3,7 @@ package org.pentaho.di.git.spoon.model;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RenameDetector;
 import org.eclipse.jgit.dircache.DirCacheIterator;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
@@ -158,8 +160,19 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#getCommitId(java.lang.String)
    */
   @Override
-  public String getCommitId( String revstr ) throws Exception {
-    final ObjectId id = git.getRepository().resolve( revstr );
+  public String getCommitId( String revstr ) {
+    ObjectId id = null;
+    try {
+      id = git.getRepository().resolve( revstr );
+    } catch ( RevisionSyntaxException e ) {
+      e.printStackTrace();
+    } catch ( AmbiguousObjectException e ) {
+      e.printStackTrace();
+    } catch ( IncorrectObjectTypeException e ) {
+      e.printStackTrace();
+    } catch ( IOException e ) {
+      e.printStackTrace();
+    }
     if ( id == null ) {
       return null;
     } else {
@@ -168,7 +181,7 @@ public class UIGit extends VCS implements IVCS {
   }
 
   @Override
-  public String getParentCommitId( String revstr ) throws Exception {
+  public String getParentCommitId( String revstr ) {
     return getCommitId( revstr + "~" );
   }
 
@@ -684,26 +697,36 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#open(java.lang.String, java.lang.String)
    */
   @Override
-  public InputStream open( String file, String commitId ) throws Exception {
+  public InputStream open( String file, String commitId ) {
     if ( commitId.equals( WORKINGTREE ) ) {
       String baseDirectory = getDirectory();
       String filePath = baseDirectory + Const.FILE_SEPARATOR + file;
-      return new FileInputStream( new File( filePath ) );
-    }
-    ObjectId id = git.getRepository().resolve( commitId );
-    try ( RevWalk rw = new RevWalk( git.getRepository() ) ) {
-      RevObject obj = rw.parseAny( id );
-      RevCommit commit = (RevCommit) obj;
-      RevTree tree = commit.getTree();
-      try ( TreeWalk tw = new TreeWalk( git.getRepository() ) ) {
-        tw.addTree( tree );
-        tw.setFilter( PathFilter.create( file ) );
-        tw.setRecursive( true );
-        tw.next();
-        ObjectLoader loader = git.getRepository().open( tw.getObjectId( 0 ) );
-        return loader.openStream();
+      try {
+        return new FileInputStream( new File( filePath ) );
+      } catch ( FileNotFoundException e ) {
+        e.printStackTrace();
       }
+      return null;
     }
+    RevCommit commit = resolve( commitId );
+    RevTree tree = commit.getTree();
+    try ( TreeWalk tw = new TreeWalk( git.getRepository() ) ) {
+      tw.addTree( tree );
+      tw.setFilter( PathFilter.create( file ) );
+      tw.setRecursive( true );
+      tw.next();
+      ObjectLoader loader = git.getRepository().open( tw.getObjectId( 0 ) );
+      return loader.openStream();
+    } catch ( MissingObjectException e ) {
+      e.printStackTrace();
+    } catch ( IncorrectObjectTypeException e ) {
+      e.printStackTrace();
+    } catch ( CorruptObjectException e ) {
+      e.printStackTrace();
+    } catch ( IOException e ) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   public static void cloneRepo( String directory, String uri ) throws Exception {

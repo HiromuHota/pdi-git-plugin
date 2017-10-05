@@ -69,14 +69,12 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public String getCommitId(String revstr) throws Exception {
-    // TODO Auto-generated method stub
+  public String getCommitId( String revstr ) {
     return null;
   }
 
   @Override
-  public String getParentCommitId(String revstr) throws Exception {
-    // TODO Auto-generated method stub
+  public String getParentCommitId( String revstr ) {
     return null;
   }
 
@@ -86,9 +84,8 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public String getShortenedName(String name, String type) {
-    // TODO Auto-generated method stub
-    return null;
+  public String getShortenedName( String name, String type ) {
+    return name;
   }
 
   @Override
@@ -248,8 +245,7 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public InputStream open(String file, String commitId) throws Exception {
-    // TODO Auto-generated method stub
+  public InputStream open(String file, String commitId) {
     return null;
   }
 
