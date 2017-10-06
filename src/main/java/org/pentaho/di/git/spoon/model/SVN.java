@@ -17,6 +17,7 @@ import org.apache.subversion.javahl.ClientException;
 import org.apache.subversion.javahl.types.Depth;
 import org.apache.subversion.javahl.types.Revision;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.lib.Constants;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
@@ -78,9 +79,15 @@ public class SVN extends VCS implements IVCS {
     AbstractJhlClientAdapter client = (AbstractJhlClientAdapter) svnClient;
     OutputStream outStream = new ByteArrayOutputStream();
     try {
+      String target = null;
+      if ( newCommitId.equals( IVCS.INDEX ) ) {
+        target = directory + file;
+      } else {
+        target = svnClient.getInfo( root ).getRepository().toString() + File.separator + file;
+      }
       client.getSVNClient().diff(
-          svnClient.getInfo( root ).getRepository().toString() + File.separator + file,
-          null, Revision.getInstance( Long.parseLong( oldCommitId ) ), Revision.getInstance( Long.parseLong( newCommitId ) ),
+          target,
+          null, resolveRevision( oldCommitId ), resolveRevision( newCommitId ),
           null, outStream, Depth.infinityOrImmediates( true ), null, true, false, false, false, false, false );
       return outStream.toString();
     } catch ( ClientException e ) {
@@ -322,5 +329,15 @@ public class SVN extends VCS implements IVCS {
   public void setCredential( String username, String password ) {
     svnClient.setUsername( username );
     svnClient.setPassword( password );
+  }
+
+  private Revision resolveRevision( String commitId ) {
+    if ( commitId.equals( Constants.HEAD ) ) {
+      return Revision.HEAD;
+    } else if ( commitId.equals( IVCS.INDEX ) ) {
+      return Revision.WORKING;
+    } else {
+      return Revision.getInstance( Long.parseLong( commitId ) );
+    }
   }
 }
