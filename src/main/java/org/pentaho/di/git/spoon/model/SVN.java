@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.subversion.javahl.ClientException;
 import org.apache.subversion.javahl.types.Depth;
 import org.apache.subversion.javahl.types.Revision;
@@ -81,9 +82,9 @@ public class SVN extends VCS implements IVCS {
     try {
       String target = null;
       if ( newCommitId.equals( IVCS.INDEX ) ) {
-        target = directory + file;
+        target = directory + FilenameUtils.separatorsToSystem( file );
       } else {
-        target = svnClient.getInfo( root ).getRepository().toString() + File.separator + file;
+        target = svnClient.getInfo( root ).getRepository().toString() + "/" + file;
       }
       client.getSVNClient().diff(
           target,
@@ -237,7 +238,7 @@ public class SVN extends VCS implements IVCS {
     svnClient.getStatus( root, true, false, false,
       false, false, ( String path, ISVNStatus status ) -> {
         if ( status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
-          files.add( new UIFile( path.replaceFirst( directory, "" ), convertTypeToGit( status.getTextStatus().toString() ), false ) );
+          files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ), "" ), convertTypeToGit( status.getTextStatus().toString() ), false ) );
         }
       } );
     return files;
@@ -249,7 +250,7 @@ public class SVN extends VCS implements IVCS {
     svnClient.getStatus( root, true, false, false,
       false, false, ( String path, ISVNStatus status ) -> {
         if ( !status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
-          files.add( new UIFile( path.replaceFirst( directory, "" ), convertTypeToGit( status.getTextStatus().toString() ), true ) );
+          files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ), "" ), convertTypeToGit( status.getTextStatus().toString() ), true ) );
         }
       } );
     return files;
@@ -261,7 +262,8 @@ public class SVN extends VCS implements IVCS {
     Arrays.stream( svnClient.diffSummarize( svnClient.getInfo( root ).getRepository(), null, new SVNRevision.Number( Long.parseLong( oldCommitId ) ),
          new SVNRevision.Number( Long.parseLong( newCommitId ) ),
         100, true ) ).forEach( diffStatus -> {
-          files.add( new UIFile( diffStatus.getPath().replaceFirst( directory, "" ), convertTypeToGit( diffStatus.getDiffKind().toString() ), false ) );
+          files.add( new UIFile( diffStatus.getPath().replaceFirst( directory.replace( "\\", "\\\\" ), "" ),
+              convertTypeToGit( diffStatus.getDiffKind().toString() ), false ) );
         }
     );
     return files;
