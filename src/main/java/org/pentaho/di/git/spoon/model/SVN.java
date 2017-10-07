@@ -318,7 +318,7 @@ public class SVN extends VCS implements IVCS {
       return ChangeType.ADD;
     } else if ( type.equals( "deleted" ) ) {
       return ChangeType.DELETE;
-    } else if ( type.equals( "modified" ) ) {
+    } else if ( type.equals( "modified" ) | type.equals( "normal" ) ) {
       return ChangeType.MODIFY;
     } else if ( type.equals( "replaced" ) ) {
       return ChangeType.MODIFY;
