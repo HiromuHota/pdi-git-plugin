@@ -90,7 +90,7 @@ public class SVN extends VCS implements IVCS {
           target,
           null, resolveRevision( oldCommitId ), resolveRevision( newCommitId ),
           null, outStream, Depth.infinityOrImmediates( true ), null, true, false, false, false, false, false );
-      return outStream.toString();
+      return outStream.toString().replaceAll( "\n", System.getProperty( "line.separator" ) );
     } catch ( Exception e ) {
       return e.getMessage();
     }
