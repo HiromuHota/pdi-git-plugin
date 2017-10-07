@@ -91,14 +91,9 @@ public class SVN extends VCS implements IVCS {
           null, resolveRevision( oldCommitId ), resolveRevision( newCommitId ),
           null, outStream, Depth.infinityOrImmediates( true ), null, true, false, false, false, false, false );
       return outStream.toString();
-    } catch ( ClientException e ) {
-      e.printStackTrace();
-    } catch ( NumberFormatException e ) {
-      e.printStackTrace();
-    } catch ( SVNClientException e ) {
-      e.printStackTrace();
+    } catch ( Exception e ) {
+      return e.getMessage();
     }
-    return "";
   }
 
   @Override
