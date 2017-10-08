@@ -4,12 +4,46 @@ The Git plugin allows you to manage versions of local Kettle files without leavi
 
 # How to install
 
+## PDI Plugin
+
 ```
 $ cd data-integration/plugins
 $ unzip pdi-git-plugin-X.X.X-jar-with-dependencies.zip
 ```
 
 To uninstall, just remove the `pdi-git-plugin` folder.
+
+## Native SVN libraries (skip if Subversion is not used)
+
+### Windows
+
+1. Download SlikSVN from [here](https://sliksvn.com/download/) and install it
+2. Copy `C:\Program Files\SlikSvn\bin\libsvnjavahl-1.dll` to `libswt\win64` (64-bit) or to `libswt\win32` (32-bit)
+
+### Mac OS X
+
+```
+brew install subversion --with-java
+sudo ln -s /usr/local/lib/libsvnjavahl-1.dylib $JAVA_HOME/jre/lib/
+```
+
+or follow instructions in [here](http://subclipse.stage.tigris.org/wiki/JavaHL).
+
+### Linux (Debian/Ubuntu)
+
+```
+$ sudo apt-get install libsvn-java
+```
+
+Append `/usr/lib/x86_64-linux-gnu/jni/` to `LIBPATH` in `spoon.sh` as follows:
+
+```
+LIBPATH=$LIBPATH:/usr/lib/x86_64-linux-gnu/jni/
+export LIBPATH
+```
+
+Important: For example in Ubuntu 14.04, the version of libsvn-java will be 1.8.8 by default, but it should be 1.9.X.
+Ubuntu 16.04 (Xenial) gives you 1.9.3 by default.
 
 # How to use
 
