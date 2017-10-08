@@ -2,6 +2,8 @@ package org.pentaho.di.git.spoon.model;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
@@ -282,11 +284,20 @@ public class SVN extends VCS implements IVCS {
   @Override
   public InputStream open( String file, String commitId ) {
     try {
-      return svnClient.getContent( svnClient.getInfo( root ).getRepository().appendPath( file ),
+      if ( commitId.equals( IVCS.WORKINGTREE ) ) {
+        return new FileInputStream( new File( directory + FilenameUtils.separatorsToSystem( file ) ) );
+      } else if ( commitId.equals( Constants.HEAD ) ) {
+        return svnClient.getContent( new File( directory + FilenameUtils.separatorsToSystem( file ) ),
+          SVNRevision.HEAD );
+      } else {
+        return svnClient.getContent( svnClient.getInfo( root ).getRepository().appendPath( file ),
           new SVNRevision.Number( Long.parseLong( commitId ) ) );
+      }
     } catch ( NumberFormatException e ) {
       e.printStackTrace();
     } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    } catch ( FileNotFoundException e ) {
       e.printStackTrace();
     }
     return null;
