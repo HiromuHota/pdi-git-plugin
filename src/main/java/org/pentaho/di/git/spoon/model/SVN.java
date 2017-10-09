@@ -335,6 +335,10 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public void checkout( String name ) throws Exception {
+    if ( !isClean() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      return;
+    }
     svnClient.switchToUrl( root, new SVNUrl( getRemote() + "/" + name ), SVNRevision.HEAD, true );
   }
 
