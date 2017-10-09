@@ -256,7 +256,7 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void checkout(String name, String path) throws Exception {
+  public void revertPath(String path) {
     // TODO Auto-generated method stub
     
   }

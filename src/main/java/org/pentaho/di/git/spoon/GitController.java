@@ -624,15 +624,11 @@ public class GitController extends AbstractXulEventHandler {
     confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
     confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
       if ( returnCode.equals( Status.ACCEPT ) ) {
-        try {
-          List<UIFile> contents = getSelectedChangedFiles();
-          for ( UIFile content : contents ) {
-            vcs.checkout( Constants.HEAD, content.getName() );
-          }
-          fireSourceChanged();
-        } catch ( Exception e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+        List<UIFile> contents = getSelectedChangedFiles();
+        for ( UIFile content : contents ) {
+          vcs.revertPath( content.getName() );
         }
+        fireSourceChanged();
       }
     } );
     confirmBox.open();

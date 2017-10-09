@@ -375,7 +375,7 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testCheckoutPath() throws Exception {
+  public void testRevertPath() throws Exception {
     // commit something
     File file = writeTrashFile( "Test.txt", "Hello world" );
     git.add().addFilepattern( "Test.txt" ).call();
@@ -385,13 +385,7 @@ public class UIGitTest extends RepositoryTestCase {
     FileUtils.writeStringToFile( file, "Change" );
     assertEquals( "Change", FileUtils.readFileToString( file ) );
 
-    uiGit.checkout( null, file.getName() );
-    assertEquals( "Hello world", FileUtils.readFileToString( file ) );
-
-    uiGit.checkout( Constants.HEAD, file.getName() );
-    assertEquals( "Hello world", FileUtils.readFileToString( file ) );
-
-    uiGit.checkout( commit.getName(), file.getName() );
+    uiGit.revertPath( file.getName() );
     assertEquals( "Hello world", FileUtils.readFileToString( file ) );
   }
 

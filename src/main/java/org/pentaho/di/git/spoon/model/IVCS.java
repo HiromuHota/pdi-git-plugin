@@ -181,12 +181,10 @@ public interface IVCS {
   void checkout( String name ) throws Exception;
 
   /**
-   * Checkout a file of a particular branch or commit
-   * @param name branch or commit; null for INDEX
+   * Revert a file to the last commited state
    * @param path
-   * @throws Exception
    */
-  void checkout( String name, String path ) throws Exception;
+  void revertPath( String path );
 
   void createBranch( String value ) throws Exception;
 

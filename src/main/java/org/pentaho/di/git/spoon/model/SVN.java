@@ -66,11 +66,30 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
+  public void revertPath( String path ) {
+    try {
+      svnClient.revert( new File( directory + File.separator + FilenameUtils.separatorsToSystem( path ) ), false );
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
   public void resetPath( String path ) {
+    String fullpath = directory + File.separator + FilenameUtils.separatorsToSystem( path );
+    try {
+      ISVNStatus status = svnClient.getSingleStatus( new File( fullpath ) );
+      if ( !status.getTextStatus().toString().equals( "added" ) ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Versioned files are always staged for the next commit" );
+        return;
+      }
+    } catch ( SVNClientException e1 ) {
+      e1.printStackTrace();
+    }
     AbstractJhlClientAdapter client = (AbstractJhlClientAdapter) svnClient;
     try {
       client.getSVNClient().remove(
-          new HashSet<String>( Arrays.asList( directory + File.separator + path ) ),
+          new HashSet<String>( Arrays.asList( fullpath ) ),
           false, true, null, null, null );
     } catch ( ClientException e ) {
       e.printStackTrace();

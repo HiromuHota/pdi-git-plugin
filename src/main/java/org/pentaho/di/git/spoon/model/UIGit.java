@@ -765,11 +765,15 @@ public class UIGit extends VCS implements IVCS {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#checkout(java.lang.String, java.lang.String)
+   * @see org.pentaho.di.git.spoon.model.IVCS#revertFile(java.lang.String)
    */
   @Override
-  public void checkout( String name, String path ) throws Exception {
-    git.checkout().setStartPoint( name ).addPath( path ).call();
+  public void revertPath( String path ) {
+    try {
+      git.checkout().setStartPoint( Constants.HEAD ).addPath( path ).call();
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
   }
 
   /* (non-Javadoc)
