@@ -1,6 +1,7 @@
 package org.pentaho.di.git.spoon.model;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,7 +12,8 @@ public class SVNTest {
 
   @Before
   public void setUp() throws Exception {
-    vcs = new SVN();
+    vcs = spy( new SVN() );
+    doNothing().when( vcs ).showMessageBox( anyString(), anyString() );
     vcs.openRepo( "/Users/hiromu/workspace/new-repo" );
   }
 

@@ -214,16 +214,19 @@ public class VCS implements IVCS {
 
   @Override
   public boolean pull() {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
     return false;
   }
 
   @Override
   public boolean push() {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
     return false;
   }
 
   @Override
   public boolean push( String type ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
     return false;
   }
 
@@ -298,6 +301,7 @@ public class VCS implements IVCS {
 
   @Override
   public boolean merge() {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
     return false;
   }
 
