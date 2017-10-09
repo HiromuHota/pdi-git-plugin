@@ -795,14 +795,20 @@ public class UIGit extends VCS implements IVCS {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#deleteBranch(java.lang.String, boolean)
+   * @see org.pentaho.di.git.spoon.model.IVCS#deleteBranch(java.lang.String, boolean)
    */
   @Override
-  public void deleteBranch( String name, boolean force ) throws Exception {
-    git.branchDelete()
-        .setBranchNames( name )
-        .setForce( force )
-        .call();
+  public boolean deleteBranch( String name, boolean force ) {
+    try {
+      git.branchDelete()
+          .setBranchNames( name )
+          .setForce( force )
+          .call();
+      return true;
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      return false;
+    }
   }
 
   private MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception {
@@ -907,13 +913,25 @@ public class UIGit extends VCS implements IVCS {
   }
 
   @Override
-  public void createTag( String name ) throws Exception {
-    git.tag().setName( name ).call();
+  public boolean createTag( String name ) {
+    try {
+      git.tag().setName( name ).call();
+      return true;
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      return false;
+    }
   }
 
   @Override
-  public void deleteTag( String name ) throws Exception {
-    git.tagDelete().setTags( name ).call();
+  public boolean deleteTag( String name ) {
+    try {
+      git.tagDelete().setTags( name ).call();
+      return true;
+    } catch (GitAPIException e) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      return false;
+    }
   }
 
   @Override

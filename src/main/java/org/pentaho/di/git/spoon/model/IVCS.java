@@ -187,13 +187,13 @@ public interface IVCS {
 
   boolean createBranch( String value );
 
-  void deleteBranch( String name, boolean force ) throws Exception;
+  boolean deleteBranch( String name, boolean force );
 
   List<String> getTags();
 
-  void createTag( String name ) throws Exception;
+  boolean createTag( String name );
 
-  void deleteTag( String name ) throws Exception;
+  boolean deleteTag( String name );
 
   void setShell( Shell shell );
 

@@ -181,6 +181,11 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
+  public List<String> getLocalBranches() {
+    return getBranches();
+  }
+
+  @Override
   public String getRemote() {
     try {
       return svnClient.getInfo( root ).getRepository().toString();

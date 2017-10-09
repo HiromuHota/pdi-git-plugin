@@ -269,9 +269,9 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void deleteBranch(String name, boolean force) throws Exception {
-    // TODO Auto-generated method stub
-    
+  public boolean deleteBranch( String name, boolean force ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
   }
 
   @Override
@@ -281,15 +281,15 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void createTag(String name) throws Exception {
-    // TODO Auto-generated method stub
-    
+  public boolean createTag( String name ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
   }
 
   @Override
-  public void deleteTag(String name) throws Exception {
-    // TODO Auto-generated method stub
-    
+  public boolean deleteTag( String name ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
   }
 
   @Override

@@ -679,11 +679,8 @@ public class GitController extends AbstractXulEventHandler {
       if ( branch == null ) {
         return;
       }
-      try {
-        vcs.deleteBranch( branch, isForce );
+      if ( vcs.deleteBranch( branch, isForce ) ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
   }
@@ -695,11 +692,8 @@ public class GitController extends AbstractXulEventHandler {
     promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.Tag.Create.Message" ) );
     promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
       if ( status.equals( Status.ACCEPT ) ) {
-        try {
-          vcs.createTag( value );
+        if ( vcs.createTag( value ) ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-        } catch ( Exception e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
         }
       }
     } );
@@ -711,11 +705,8 @@ public class GitController extends AbstractXulEventHandler {
     EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to delete..." );
     String name = esd.open();
     if ( name != null ) {
-      try {
-        vcs.deleteTag( name );
+      if ( vcs.deleteTag( name ) ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
   }
