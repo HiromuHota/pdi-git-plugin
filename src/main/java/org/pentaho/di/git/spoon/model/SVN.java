@@ -254,39 +254,53 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public List<UIFile> getUnstagedFiles() throws Exception {
+  public List<UIFile> getUnstagedFiles() {
     List<UIFile> files = new ArrayList<UIFile>();
-    svnClient.getStatus( root, true, false, false,
-      false, false, ( String path, ISVNStatus status ) -> {
-        if ( status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
-          files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ) + "/", "" ), convertTypeToGit( status.getTextStatus().toString() ), false ) );
-        }
-      } );
+    try {
+      svnClient.getStatus( root, true, false, false,
+        false, false, ( String path, ISVNStatus status ) -> {
+          if ( status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
+            files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ) + "/", "" ), convertTypeToGit( status.getTextStatus().toString() ), false ) );
+          }
+        } );
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    }
     return files;
   }
 
   @Override
-  public List<UIFile> getStagedFiles() throws Exception {
+  public List<UIFile> getStagedFiles() {
     List<UIFile> files = new ArrayList<UIFile>();
-    svnClient.getStatus( root, true, false, false,
-      false, false, ( String path, ISVNStatus status ) -> {
-        if ( !status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
-          files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ) + "/", "" ), convertTypeToGit( status.getTextStatus().toString() ), true ) );
-        }
-      } );
+    try {
+      svnClient.getStatus( root, true, false, false,
+        false, false, ( String path, ISVNStatus status ) -> {
+          if ( !status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
+            files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ) + "/", "" ), convertTypeToGit( status.getTextStatus().toString() ), true ) );
+          }
+        } );
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    }
     return files;
   }
 
   @Override
-  public List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) throws Exception {
+  public List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) {
     List<UIFile> files = new ArrayList<UIFile>();
-    Arrays.stream( svnClient.diffSummarize( svnClient.getInfo( root ).getUrl(), null, new SVNRevision.Number( Long.parseLong( oldCommitId ) ),
-         new SVNRevision.Number( Long.parseLong( newCommitId ) ),
-        100, true ) ).forEach( diffStatus -> {
-          files.add( new UIFile( diffStatus.getPath().replaceFirst( directory.replace( "\\", "\\\\" ), "" ),
-              convertTypeToGit( diffStatus.getDiffKind().toString() ), false ) );
-        }
-    );
+    try {
+      Arrays.stream( svnClient.diffSummarize( svnClient.getInfo( root ).getUrl(), null, new SVNRevision.Number( Long.parseLong( oldCommitId ) ),
+           new SVNRevision.Number( Long.parseLong( newCommitId ) ),
+          100, true ) ).forEach( diffStatus -> {
+            files.add( new UIFile( diffStatus.getPath().replaceFirst( directory.replace( "\\", "\\\\" ), "" ),
+                convertTypeToGit( diffStatus.getDiffKind().toString() ), false ) );
+          }
+      );
+    } catch ( NumberFormatException e ) {
+      e.printStackTrace();
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    }
     return files;
   }
 

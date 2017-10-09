@@ -103,25 +103,22 @@ public interface IVCS {
   /**
    * Get the list of unstaged files
    * @return
-   * @throws Exception
    */
-  List<UIFile> getUnstagedFiles() throws Exception;
+  List<UIFile> getUnstagedFiles();
 
   /**
    * Get the list of staged files
    * @return
-   * @throws Exception
    */
-  List<UIFile> getStagedFiles() throws Exception;
+  List<UIFile> getStagedFiles();
 
   /**
    * Get the list of changed files between two commits
    * @param oldCommitId
    * @param newCommitId
    * @return
-   * @throws Exception
    */
-  List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) throws Exception;
+  List<UIFile> getStagedFiles( String oldCommitId, String newCommitId );
 
   boolean hasStagedFiles() throws Exception;
 

@@ -486,7 +486,7 @@ public class GitController extends AbstractXulEventHandler {
     return vcs.getRevisions();
   }
 
-  public List<UIFile> getChangedFiles() throws Exception {
+  public List<UIFile> getChangedFiles() {
     List<UIFile> changedFiles = new ArrayList<UIFile>();
     if ( isOnlyWIP() ) {
       addToIndexMenuItem.setDisabled( false );

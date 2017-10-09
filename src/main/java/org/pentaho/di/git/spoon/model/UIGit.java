@@ -338,9 +338,15 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#getUnstagedFiles()
    */
   @Override
-  public List<UIFile> getUnstagedFiles() throws Exception {
+  public List<UIFile> getUnstagedFiles() {
     List<UIFile> files = new ArrayList<UIFile>();
-    Status status = git.status().call();
+    Status status = null;
+    try {
+      status = git.status().call();
+    } catch ( Exception e ) {
+      e.printStackTrace();
+      return files;
+    }
     status.getUntracked().forEach( name -> {
       files.add( new UIFile( name, ChangeType.ADD, false ) );
     } );
@@ -357,9 +363,15 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#getStagedFiles()
    */
   @Override
-  public List<UIFile> getStagedFiles() throws Exception {
+  public List<UIFile> getStagedFiles() {
     List<UIFile> files = new ArrayList<UIFile>();
-    Status status = git.status().call();
+    Status status = null;
+    try {
+      status = git.status().call();
+    } catch ( Exception e ) {
+      e.printStackTrace();
+      return files;
+    }
     status.getAdded().forEach( name -> {
       files.add( new UIFile( name, ChangeType.ADD, true ) );
     } );
@@ -376,18 +388,22 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#getStagedFiles(java.lang.String, java.lang.String)
    */
   @Override
-  public List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) throws Exception {
+  public List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) {
     List<UIFile> files = new ArrayList<UIFile>();
-    List<DiffEntry> diffs = getDiffCommand( oldCommitId, newCommitId )
-      .setShowNameAndStatusOnly( true )
-      .call();
-    RenameDetector rd = new RenameDetector( git.getRepository() );
-    rd.addAll( diffs );
-    diffs = rd.compute();
-    diffs.forEach( diff -> {
-      files.add( new UIFile( diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath() : diff.getNewPath(),
-        diff.getChangeType(), false ) );
-    } );
+    try {
+      List<DiffEntry> diffs = getDiffCommand( oldCommitId, newCommitId )
+        .setShowNameAndStatusOnly( true )
+        .call();
+      RenameDetector rd = new RenameDetector( git.getRepository() );
+      rd.addAll( diffs );
+      diffs = rd.compute();
+      diffs.forEach( diff -> {
+        files.add( new UIFile( diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath() : diff.getNewPath(),
+          diff.getChangeType(), false ) );
+      } );
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
     return files;
   }
 

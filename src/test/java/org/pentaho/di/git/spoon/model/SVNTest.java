@@ -2,8 +2,6 @@ package org.pentaho.di.git.spoon.model;
 
 import static org.junit.Assert.*;
 
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
@@ -18,7 +16,7 @@ public class SVNTest {
   }
 
   @Test
-  public void testCommit() throws Exception {
+  public void testCommit() {
     UIRepositoryObjectRevisions revisions = vcs.getRevisions();
     if ( vcs.getStagedFiles().size() != 0 ) {
       assertEquals( VCS.WORKINGTREE, revisions.get( 0 ).getName() );
