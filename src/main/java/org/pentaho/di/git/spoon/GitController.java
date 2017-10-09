@@ -627,11 +627,7 @@ public class GitController extends AbstractXulEventHandler {
         try {
           List<UIFile> contents = getSelectedChangedFiles();
           for ( UIFile content : contents ) {
-            if ( content.getIsStaged() ) {
-              showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please unstage first" );
-            } else {
-              vcs.checkout( null, content.getName() );
-            }
+            vcs.checkout( Constants.HEAD, content.getName() );
           }
           fireSourceChanged();
         } catch ( Exception e ) {

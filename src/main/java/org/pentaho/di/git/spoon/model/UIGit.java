@@ -769,7 +769,7 @@ public class UIGit extends VCS implements IVCS {
    */
   @Override
   public void checkout( String name, String path ) throws Exception {
-    git.checkout().setName( name ).addPath( path ).call();
+    git.checkout().setStartPoint( name ).addPath( path ).call();
   }
 
   /* (non-Javadoc)
