@@ -85,6 +85,7 @@ public class EditRepositoryDialog extends Dialog {
     } else {
       typeCombo.select( 1 );
     }
+    typeCombo.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
     return comp;
   }
 
