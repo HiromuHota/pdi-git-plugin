@@ -276,7 +276,6 @@ public class VCS implements IVCS {
 
   @Override
   public List<String> getTags() {
-    // TODO Auto-generated method stub
     return null;
   }
 
