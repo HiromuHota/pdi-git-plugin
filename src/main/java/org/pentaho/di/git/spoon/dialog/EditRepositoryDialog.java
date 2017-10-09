@@ -81,6 +81,7 @@ public class EditRepositoryDialog extends Dialog {
     typeCombo = new Combo( comp, SWT.READ_ONLY );
     typeCombo.setItems( VCS.GIT );
     typeCombo.select( 0 );
+    typeCombo.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
     return comp;
   }
 
