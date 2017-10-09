@@ -659,12 +659,9 @@ public class GitController extends AbstractXulEventHandler {
     promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.Branch.Create.Message" ) );
     promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
       if ( status.equals( Status.ACCEPT ) ) {
-        try {
-          vcs.createBranch( value );
+        if ( vcs.createBranch( value ) ) {
           vcs.checkout( value );
           fireSourceChanged();
-        } catch ( Exception e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
         }
       }
     } );

@@ -757,11 +757,15 @@ public class UIGit extends VCS implements IVCS {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#checkout(java.lang.String)
+   * @see org.pentaho.di.git.spoon.model.IVCS#checkout(java.lang.String)
    */
   @Override
-  public void checkout( String name ) throws Exception {
-    git.checkout().setName( name ).call();
+  public void checkout( String name ) {
+    try {
+      git.checkout().setName( name ).call();
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
   }
 
   /* (non-Javadoc)
@@ -777,11 +781,17 @@ public class UIGit extends VCS implements IVCS {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#createBranch(java.lang.String)
+   * @see org.pentaho.di.git.spoon.model.IVCS#createBranch(java.lang.String)
    */
   @Override
-  public void createBranch( String value ) throws Exception {
-    git.branchCreate().setName( value ).call();
+  public boolean createBranch( String value ) {
+    try {
+      git.branchCreate().setName( value ).call();
+      return true;
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      return false;
+    }
   }
 
   /* (non-Javadoc)

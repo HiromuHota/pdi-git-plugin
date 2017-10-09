@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.git.spoon.GitController;
 import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -250,7 +251,7 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void checkout(String name) throws Exception {
+  public void checkout(String name) {
     // TODO Auto-generated method stub
     
   }
@@ -262,9 +263,9 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void createBranch(String value) throws Exception {
-    // TODO Auto-generated method stub
-    
+  public boolean createBranch( String value ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
   }
 
   @Override

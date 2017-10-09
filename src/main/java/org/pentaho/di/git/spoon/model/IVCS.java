@@ -176,9 +176,8 @@ public interface IVCS {
   /**
    * Checkout a branch or commit
    * @param name
-   * @throws Exception
    */
-  void checkout( String name ) throws Exception;
+  void checkout( String name );
 
   /**
    * Revert a file to the last commited state
@@ -186,7 +185,7 @@ public interface IVCS {
    */
   void revertPath( String path );
 
-  void createBranch( String value ) throws Exception;
+  boolean createBranch( String value );
 
   void deleteBranch( String name, boolean force ) throws Exception;
 
