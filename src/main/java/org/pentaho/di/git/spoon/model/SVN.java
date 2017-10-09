@@ -61,7 +61,7 @@ public class SVN extends VCS implements IVCS {
     try {
       svnClient.addFile( new File( directory, name ) );
     } catch ( SVNClientException e ) {
-      e.printStackTrace();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
