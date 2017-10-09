@@ -167,7 +167,7 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public boolean hasStagedFiles() throws Exception {
+  public boolean hasStagedFiles() {
     // TODO Auto-generated method stub
     return false;
   }

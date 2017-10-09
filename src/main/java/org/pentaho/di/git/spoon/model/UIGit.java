@@ -411,7 +411,7 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#hasStagedFiles()
    */
   @Override
-  public boolean hasStagedFiles() throws Exception {
+  public boolean hasStagedFiles() {
     return !getStagedFiles().isEmpty();
   }
 

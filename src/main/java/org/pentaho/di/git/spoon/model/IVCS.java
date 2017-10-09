@@ -120,7 +120,7 @@ public interface IVCS {
    */
   List<UIFile> getStagedFiles( String oldCommitId, String newCommitId );
 
-  boolean hasStagedFiles() throws Exception;
+  boolean hasStagedFiles();
 
   void initRepo( String baseDirectory ) throws Exception;
 

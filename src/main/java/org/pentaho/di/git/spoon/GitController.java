@@ -529,7 +529,7 @@ public class GitController extends AbstractXulEventHandler {
     return changedFiles;
   }
 
-  public void commit() throws Exception {
+  public void commit() {
     if ( !vcs.hasStagedFiles() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           "There are no staged files" );
