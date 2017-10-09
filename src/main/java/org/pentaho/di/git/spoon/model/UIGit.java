@@ -745,21 +745,22 @@ public class UIGit extends VCS implements IVCS {
     return null;
   }
 
-  public static void cloneRepo( String directory, String uri ) throws Exception {
+  public boolean cloneRepo( String directory, String uri ) {
     CloneCommand cmd = Git.cloneRepository();
     cmd.setDirectory( new File( directory ) );
     cmd.setURI( uri );
     try {
       Git git = cmd.call();
       git.close();
+      return true;
     } catch ( Exception e ) {
       try {
         FileUtils.delete( new File( directory ), FileUtils.RECURSIVE );
-        throw e;
       } catch ( IOException e1 ) {
         e1.printStackTrace();
       }
     }
+    return false;
   }
 
   public static void cloneRepo( String directory, String uri, String username, String password ) throws Exception {

@@ -50,7 +50,7 @@ public class CloneRepositoryDialog extends EditRepositoryDialog {
       try {
         uri = new URIish( url );
         cloneAsText.setText( uri.getHumanishName() );
-      } catch ( URISyntaxException e ) {
+      } catch ( Exception e ) {
 //        e.printStackTrace();
       }
     } );

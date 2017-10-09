@@ -66,6 +66,25 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
+  public boolean cloneRepo( String directory, String url ) {
+    try {
+      svnClient.checkout( new SVNUrl( url ), new File( directory ), SVNRevision.HEAD, true );
+      return true;
+    } catch ( SVNClientException e ) {
+      if ( e.getMessage().contains( "Authorization" ) ) {
+        if ( promptUsernamePassword() ) {
+          return cloneRepo( directory, url );
+        }
+      }
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      return false;
+    } catch ( MalformedURLException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      return false;
+    }
+  }
+
+  @Override
   public void revertPath( String path ) {
     try {
       svnClient.revert( new File( directory + File.separator + FilenameUtils.separatorsToSystem( path ) ), false );

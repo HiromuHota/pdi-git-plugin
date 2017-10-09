@@ -11,7 +11,10 @@ import org.pentaho.di.git.spoon.dialog.CloneRepositoryDialog;
 import org.pentaho.di.git.spoon.dialog.EditRepositoryDialog;
 import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
+import org.pentaho.di.git.spoon.model.IVCS;
+import org.pentaho.di.git.spoon.model.SVN;
 import org.pentaho.di.git.spoon.model.UIGit;
+import org.pentaho.di.git.spoon.model.VCS;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.spoon.ISpoonMenuController;
@@ -137,8 +140,16 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
       String directory = null;
       try {
         directory = dialog.getDirectory() + File.separator + dialog.getCloneAs();
-        UIGit.cloneRepo( directory, url );
-        showMessageBox( "Success", "Success" );
+        IVCS vcs;
+        if ( repo.getType() == null || repo.getType().equals( IVCS.GIT ) ) {
+          vcs = new UIGit();
+        } else {
+          vcs = new SVN();
+        }
+        vcs.setShell( getShell() );
+        if ( vcs.cloneRepo( directory, url ) ) {
+          showMessageBox( "Success", "Success" );
+        }
         saveRepository( repo );
         gitController.openGit( repo );
       } catch ( Exception e ) {

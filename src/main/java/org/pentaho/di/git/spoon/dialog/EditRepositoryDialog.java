@@ -80,10 +80,12 @@ public class EditRepositoryDialog extends Dialog {
     typeLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
     typeCombo = new Combo( comp, SWT.READ_ONLY );
     typeCombo.setItems( IVCS.GIT, IVCS.SVN );
-    if ( repo.getType().equals( IVCS.GIT ) ) {
-      typeCombo.select( 0 );
-    } else {
-      typeCombo.select( 1 );
+    if ( repo.getType() != null ) {
+      if ( repo.getType().equals( IVCS.GIT ) ) {
+        typeCombo.select( 0 );
+      } else {
+        typeCombo.select( 1 );
+      }
     }
     typeCombo.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
     return comp;

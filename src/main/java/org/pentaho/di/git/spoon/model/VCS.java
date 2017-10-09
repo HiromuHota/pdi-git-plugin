@@ -305,4 +305,9 @@ public class VCS implements IVCS {
     return false;
   }
 
+  @Override
+  public boolean cloneRepo( String directory, String url ) {
+    return false;
+  }
+
 }

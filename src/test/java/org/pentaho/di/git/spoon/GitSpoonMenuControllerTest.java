@@ -37,6 +37,7 @@ public class GitSpoonMenuControllerTest extends RepositoryTestCase {
     super.setUp();
     doReturn( cloneRepositoryDialog ).when( controller ).getCloneRepositoryDialog( any( GitRepository.class ) );
     doReturn( usernamePasswordDialog ).when( controller ).getUsernamePasswordDialog();
+    doReturn( null ).when( controller ).getShell();
     doNothing().when( controller ).saveRepository( any( GitRepository.class ) );
     doNothing().when( controller ).showMessageBox( anyString(), anyString() );
   }

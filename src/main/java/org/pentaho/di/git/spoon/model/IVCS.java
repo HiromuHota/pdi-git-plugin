@@ -195,4 +195,6 @@ public interface IVCS {
   void setShell( Shell shell );
 
   boolean merge();
+
+  boolean cloneRepo( String directory, String url );
 }
