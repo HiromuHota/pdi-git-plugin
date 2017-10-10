@@ -1,6 +1,5 @@
 package org.pentaho.di.git.spoon;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import org.eclipse.jface.window.Window;
