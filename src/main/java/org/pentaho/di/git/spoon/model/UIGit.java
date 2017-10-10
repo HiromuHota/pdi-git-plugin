@@ -449,10 +449,8 @@ public class UIGit extends VCS implements IVCS {
   public void add( String filepattern ) {
     try {
       git.add().addFilepattern( filepattern ).call();
-    } catch ( NoFilepatternException e ) {
-      e.printStackTrace();
-    } catch ( GitAPIException e ) {
-      e.printStackTrace();
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
@@ -463,10 +461,8 @@ public class UIGit extends VCS implements IVCS {
   public void rm( String filepattern ) {
     try {
       git.rm().addFilepattern( filepattern ).call();
-    } catch ( NoFilepatternException e ) {
-      e.printStackTrace();
-    } catch ( GitAPIException e ) {
-      e.printStackTrace();
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
@@ -478,10 +474,8 @@ public class UIGit extends VCS implements IVCS {
   public void reset( String name ) {
     try {
       git.reset().setRef( name ).call();
-    } catch ( CheckoutConflictException e ) {
-      e.printStackTrace();
-    } catch ( GitAPIException e ) {
-      e.printStackTrace();
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
@@ -492,10 +486,8 @@ public class UIGit extends VCS implements IVCS {
   public void resetPath( String path ) {
     try {
       git.reset().addPath( path ).call();
-    } catch ( CheckoutConflictException e ) {
-      e.printStackTrace();
-    } catch ( GitAPIException e ) {
-      e.printStackTrace();
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
@@ -793,7 +785,7 @@ public class UIGit extends VCS implements IVCS {
     try {
       git.checkout().setStartPoint( Constants.HEAD ).addPath( path ).call();
     } catch ( Exception e ) {
-      e.printStackTrace();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
