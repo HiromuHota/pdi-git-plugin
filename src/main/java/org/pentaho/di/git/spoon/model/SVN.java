@@ -257,14 +257,16 @@ public class SVN extends VCS implements IVCS {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
-    Arrays.stream( messages ).forEach( logMessage -> {
-      PurObjectRevision rev = new PurObjectRevision(
+    if ( messages != null ) {
+      Arrays.stream( messages ).forEach( logMessage -> {
+        PurObjectRevision rev = new PurObjectRevision(
           logMessage.getRevision().toString(),
           logMessage.getAuthor(),
           logMessage.getDate(),
           logMessage.getMessage() );
-      revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
-    } );
+        revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
+      } );
+    }
     if ( !isClean() ) {
       PurObjectRevision rev = new PurObjectRevision(
           WORKINGTREE,
