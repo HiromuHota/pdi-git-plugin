@@ -519,13 +519,10 @@ public class UIGit extends VCS implements IVCS {
       PullResult pullResult = cmd.call();
       return processPullResult( pullResult );
     } catch ( TransportException e ) {
-      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
+      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" )
+        || e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
         if ( promptUsernamePassword() ) {
-          pull();
-        }
-      } else if ( e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
-        if ( promptUsernamePassword() ) {
-          pull();
+          return pull();
         }
       } else {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -608,13 +605,10 @@ public class UIGit extends VCS implements IVCS {
       processPushResult( resultIterable );
       return true;
     } catch ( TransportException e ) {
-      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
+      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" )
+        || e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
         if ( promptUsernamePassword() ) {
-          push( type );
-        }
-      } else if ( e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
-        if ( promptUsernamePassword() ) {
-          push( type );
+          return push( type );
         }
       } else {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
