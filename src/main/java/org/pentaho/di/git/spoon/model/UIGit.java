@@ -573,7 +573,7 @@ public class UIGit extends VCS implements IVCS {
     switch ( type ) {
       case IVCS.TYPE_BRANCH:
         names = getLocalBranches();
-        esd = new EnterSelectionDialog( shell, names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to push..." );
+        esd = getEnterSelectionDialog( names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to push..." );
         name = esd.open();
         if ( name == null ) {
           return false;
@@ -581,7 +581,7 @@ public class UIGit extends VCS implements IVCS {
         break;
       case IVCS.TYPE_TAG:
         names = getTags();
-        esd = new EnterSelectionDialog( shell, names.toArray( new String[names.size()] ), "Select Tag", "Select the tag to push..." );
+        esd = getEnterSelectionDialog( names.toArray( new String[names.size()] ), "Select Tag", "Select the tag to push..." );
         name = esd.open();
         if ( name == null ) {
           return false;
@@ -967,5 +967,10 @@ public class UIGit extends VCS implements IVCS {
       e.printStackTrace();
     }
     return null;
+  }
+
+  @VisibleForTesting
+  EnterSelectionDialog getEnterSelectionDialog( String[] choices, String shellText, String message ) {
+    return new EnterSelectionDialog( shell, choices, shellText, message );
   }
 }

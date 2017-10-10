@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
 public class UIGitTest extends RepositoryTestCase {
@@ -224,6 +225,9 @@ public class UIGitTest extends RepositoryTestCase {
   @Test
   public void testPush() throws Exception {
     // Set remote
+    Git git2 = new Git( db2 );
+    UIGit uiGit2 = new UIGit();
+    uiGit2.setGit( git2 );
     URIish uri = new URIish(
       db2.getDirectory().toURI().toURL() );
     RemoteAddCommand cmd = git.remoteAdd();
@@ -244,14 +248,30 @@ public class UIGitTest extends RepositoryTestCase {
       // we should get here
     }
 
-    uiGit.push();
-    uiGit.checkout( uiGit.getExpandedName( Constants.DEFAULT_REMOTE_NAME + "/" + Constants.MASTER, IVCS.TYPE_REMOTE ) );
-    assertTrue( uiGit.getBranch().contains( Constants.HEAD ) );
-
+    boolean success = uiGit.push();
+    assertTrue( success );
     assertEquals( commit.getId(),
         db2.resolve( commit.getId().getName() + "^{commit}" ) );
     assertEquals( tagRef.getObjectId(),
         db2.resolve( tagRef.getObjectId().getName() ) );
+
+    // Push a tag
+    EnterSelectionDialog esd = mock( EnterSelectionDialog.class );
+    doReturn( "tag" ).when( esd ).open();
+    doReturn( esd ).when( uiGit ).getEnterSelectionDialog( any(), anyString(), anyString() );
+    uiGit.push( IVCS.TYPE_TAG );
+    assertTrue( success );
+    assertTrue( uiGit2.getTags().contains( "tag" ) );
+
+    // Another commit and push a branch again
+    writeTrashFile( "Test2.txt", "Hello world" );
+    git.add().addFilepattern( "Test2.txt" ).call();
+    commit = git.commit().setMessage( "second commit" ).call();
+    doReturn( Constants.MASTER ).when( esd ).open();
+    uiGit.push( IVCS.TYPE_BRANCH );
+    assertTrue( success );
+    assertEquals( commit.getId(),
+        db2.resolve( commit.getId().getName() + "^{commit}" ) );
   }
 
   @Rule
