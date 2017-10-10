@@ -766,8 +766,8 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   @VisibleForTesting
-  void setUIGit( IVCS uiGit ) {
-    this.vcs = uiGit;
+  void setVCS( IVCS vcs ) {
+    this.vcs = vcs;
   }
 
   public boolean isOpen() {

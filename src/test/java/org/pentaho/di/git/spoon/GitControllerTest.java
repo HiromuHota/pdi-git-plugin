@@ -48,7 +48,7 @@ public class GitControllerTest {
     controller.setAuthorName( "test <test@example.com>" );
     controller.setCommitMessage( "test" );
     uiGit = mock( UIGit.class );
-    controller.setUIGit( uiGit );
+    controller.setVCS( uiGit );
     doNothing().when( controller ).fireSourceChanged();
     doReturn( false ).when( controller ).anyChangedTabs();
 
