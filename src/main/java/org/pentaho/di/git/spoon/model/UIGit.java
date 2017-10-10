@@ -491,11 +491,8 @@ public class UIGit extends VCS implements IVCS {
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#resetHard()
-   */
-  @Override
-  public void resetHard() throws Exception {
+  @VisibleForTesting
+  void resetHard() throws Exception {
     git.reset().setMode( ResetType.HARD ).call();
   }
 

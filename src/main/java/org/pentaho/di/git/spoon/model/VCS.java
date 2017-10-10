@@ -207,12 +207,6 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void resetHard() throws Exception {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
   public boolean pull() {
     showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
     return false;

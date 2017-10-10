@@ -141,8 +141,6 @@ public interface IVCS {
    */
   void resetPath( String path );
 
-  void resetHard() throws Exception;
-
   /**
    * Equivalent of <tt>git fetch; git merge --ff</tt>
    *
