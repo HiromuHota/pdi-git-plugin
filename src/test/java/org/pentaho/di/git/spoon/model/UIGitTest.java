@@ -331,24 +331,6 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testShow() throws Exception {
-    RevCommit commit = initialCommit();
-
-    String diff = uiGit.show( commit.getId().name() );
-    assertTrue( diff.contains( "Hello world" ) );
-
-    // Make the second commit
-    writeTrashFile( "Test2.txt", "Second commit" );
-    diff = uiGit.show( IVCS.WORKINGTREE );
-    assertTrue( diff.contains( "+Second commit" ) );
-    git.add().addFilepattern( "Test2.txt" ).call();
-    commit = git.commit().setMessage( "initial commit" ).call();
-
-    diff = uiGit.show( commit.getId().name() );
-    assertTrue( diff.contains( "Second commit" ) );
-  }
-
-  @Test
   public void testOpen() throws Exception {
     RevCommit commit = initialCommit();
 

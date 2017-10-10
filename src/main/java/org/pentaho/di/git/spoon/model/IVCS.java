@@ -154,14 +154,6 @@ public interface IVCS {
 
   boolean push( String type );
 
-  /**
-   * Show diff for a commit
-   * @param commitId
-   * @return
-   * @throws Exception
-   */
-  String show( String commitId ) throws Exception;
-
   String diff( String oldCommitId, String newCommitId ) throws Exception;
 
   String diff( String oldCommitId, String newCommitId, String file );

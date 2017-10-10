@@ -640,18 +640,6 @@ public class UIGit extends VCS implements IVCS {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#show(java.lang.String)
-   */
-  @Override
-  public String show( String commitId ) throws Exception {
-    if ( commitId.equals( WORKINGTREE ) ) {
-      return diff( Constants.HEAD, WORKINGTREE );
-    } else {
-      return diff( commitId + "^", commitId );
-    }
-  }
-
-  /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.VCS#diff(java.lang.String, java.lang.String)
    */
   @Override
