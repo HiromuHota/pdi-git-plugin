@@ -749,6 +749,7 @@ public class UIGit extends VCS implements IVCS {
     CloneCommand cmd = Git.cloneRepository();
     cmd.setDirectory( new File( directory ) );
     cmd.setURI( uri );
+    cmd.setCredentialsProvider( credentialsProvider );
     try {
       Git git = cmd.call();
       git.close();
@@ -757,20 +758,19 @@ public class UIGit extends VCS implements IVCS {
       try {
         FileUtils.delete( new File( directory ), FileUtils.RECURSIVE );
       } catch ( IOException e1 ) {
-        e1.printStackTrace();
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e1.getMessage() );
+      }
+      if ( ( e instanceof TransportException )
+          && ( ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" )
+            || e.getMessage().contains( "not authorized" ) ) ) ) {
+        if ( promptUsernamePassword() ) {
+          return cloneRepo( directory, uri );
+        }
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
     return false;
-  }
-
-  public static void cloneRepo( String directory, String uri, String username, String password ) throws Exception {
-    CloneCommand cmd = Git.cloneRepository();
-    cmd.setDirectory( new File( directory ) );
-    cmd.setURI( uri );
-    CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider( username, password );
-    cmd.setCredentialsProvider( credentialsProvider );
-    Git git = cmd.call();
-    git.close();
   }
 
   /* (non-Javadoc)

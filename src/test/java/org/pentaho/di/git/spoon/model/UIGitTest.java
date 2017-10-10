@@ -424,6 +424,18 @@ public class UIGitTest extends RepositoryTestCase {
     assertFalse( tags.contains( "test" ) );
   }
 
+
+  @Test
+  public void testCloneShouldFail() throws Exception {
+    // WhenDirAlreadyExists
+    boolean success = uiGit.cloneRepo( db.getDirectory().getPath(), db.getDirectory().getPath() );
+    assertFalse( success );
+
+    // WhenURLNotFound
+    success = uiGit.cloneRepo( createTempFile().getPath(), "fakeURL" );
+    assertFalse( success );
+  }
+
   private RevCommit initialCommit() throws Exception {
     writeTrashFile( "Test.txt", "Hello world" );
     git.add().addFilepattern( "Test.txt" ).call();
