@@ -246,27 +246,28 @@ public class SVN extends VCS implements IVCS {
   @Override
   public UIRepositoryObjectRevisions getRevisions() {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
-    long startRevision = 1;
     ISVNLogMessage[] messages = null;
     try {
-      messages = svnClient.getLogMessages( root, new SVNRevision.Number( startRevision ), SVNRevision.HEAD, false, false, 100 );
+      messages = svnClient.getLogMessages( root, new SVNRevision.Number( 0 ), SVNRevision.HEAD, false, false, 100 );
     } catch ( SVNClientException e ) {
       if ( e.getMessage().contains( "Authorization" ) ) {
         promptUsernamePassword();
         return getRevisions();
       } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+        e.printStackTrace();
       }
     }
     if ( messages != null ) {
-      Arrays.stream( messages ).forEach( logMessage -> {
-        PurObjectRevision rev = new PurObjectRevision(
-          logMessage.getRevision().toString(),
-          logMessage.getAuthor(),
-          logMessage.getDate(),
-          logMessage.getMessage() );
-        revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
-      } );
+      Arrays.stream( messages )
+        .filter( logMessage -> logMessage.getRevision().getNumber() != 0 )
+        .forEach( logMessage -> {
+          PurObjectRevision rev = new PurObjectRevision(
+            logMessage.getRevision().toString(),
+            logMessage.getAuthor(),
+            logMessage.getDate(),
+            logMessage.getMessage() );
+          revisions.add( new UIRepositoryObjectRevision( (ObjectRevision) rev ) );
+        } );
     }
     if ( !isClean() ) {
       PurObjectRevision rev = new PurObjectRevision(
