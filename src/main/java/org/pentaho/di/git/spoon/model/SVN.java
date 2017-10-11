@@ -380,6 +380,23 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
+  public boolean pull() {
+    try {
+      SVNRevision.Number lastRevision = svnClient.getInfo( root ).getRevision();
+      long newLastRevision = svnClient.update( root, SVNRevision.HEAD, true );
+      if ( lastRevision.getNumber() == newLastRevision ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), "Up-to-date" );
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+      }
+      return true;
+    } catch ( SVNClientException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
+    return false;
+  }
+
+  @Override
   public void closeRepo() {
     root = null;
   }
