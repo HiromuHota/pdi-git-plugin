@@ -298,4 +298,9 @@ public class VCS implements IVCS {
     return false;
   }
 
+  @Override
+  public String getType() {
+    return null;
+  }
+
 }

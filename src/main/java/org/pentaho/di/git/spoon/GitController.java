@@ -181,27 +181,27 @@ public class GitController extends AbstractXulEventHandler {
     document.getElementById( "config" ).setDisabled( false );
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
-    if ( vcs.getClass() == UIGit.class ) {
-      pushButton.setDisabled( false );
-      pullButton.setLabel( BaseMessages.getString( PKG, "Git.Pull" ) );
-      ((XulMenuitem) document.getElementById( "branch-checkout" )).setLabel( BaseMessages.getString( PKG, "Git.Checkout" ) );
-      ((XulMenuitem) document.getElementById( "tag-checkout" )).setLabel( BaseMessages.getString( PKG, "Git.Checkout" ) );
-      document.getElementById( "branch-push" ).setDisabled( false );
-      document.getElementById( "tag-push" ).setDisabled( false );
-    } else {
-      pushButton.setDisabled( true );
-      pullButton.setLabel( BaseMessages.getString( PKG, "SVN.Pull" ) );
-      ((XulMenuitem) document.getElementById( "branch-checkout" )).setLabel( BaseMessages.getString( PKG, "SVN.Checkout" ) );
-      ((XulMenuitem) document.getElementById( "tag-checkout" )).setLabel( BaseMessages.getString( PKG, "SVN.Checkout" ) );
-      document.getElementById( "branch-push" ).setDisabled( true );
-      document.getElementById( "tag-push" ).setDisabled( true );
-    }
     branchButton.setDisabled( false );
     tagButton.setDisabled( false );
     ( (XulButton) document.getElementById( "refresh" ) ).setDisabled( false );
 
     commitMessageTextbox.setReadonly( false );
     authorNameTextbox.setReadonly( false );
+
+    // Depends on VCS type
+    pullButton.setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Pull" ) );
+    ((XulMenuitem) document.getElementById( "branch-checkout" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Checkout" ) );
+    ((XulMenuitem) document.getElementById( "branch-merge" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Merge" ) );
+    ((XulMenuitem) document.getElementById( "tag-checkout" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Checkout" ) );
+    if ( vcs.getType().equals( IVCS.GIT ) ) {
+      pushButton.setDisabled( false );
+      document.getElementById( "branch-push" ).setDisabled( false );
+      document.getElementById( "tag-push" ).setDisabled( false );
+    } else {
+      pushButton.setDisabled( true );
+      document.getElementById( "branch-push" ).setDisabled( true );
+      document.getElementById( "tag-push" ).setDisabled( true );
+    }
   }
 
   public void openGit( GitRepository repo ) {

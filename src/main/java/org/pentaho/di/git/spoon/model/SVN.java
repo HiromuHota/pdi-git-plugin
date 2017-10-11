@@ -24,6 +24,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
+import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.tigris.subversion.svnclientadapter.ISVNClientAdapter;
@@ -56,6 +57,11 @@ public class SVN extends VCS implements IVCS {
 
   public SVN() {
     svnClient = SVNClientAdapterFactory.createSVNClient( JhlClientAdapterFactory.JAVAHL_CLIENT );
+  }
+
+  @Override
+  public String getType() {
+    return IVCS.SVN;
   }
 
   @Override
@@ -501,6 +507,28 @@ public class SVN extends VCS implements IVCS {
       return true;
     } catch ( SVNClientException e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
+    return false;
+  }
+
+  @Override
+  public boolean merge() {
+    String name = null;
+    List<String> names = getBranches();
+    EnterSelectionDialog esd = new EnterSelectionDialog( shell, names.toArray( new String[names.size()] ),
+      "Select Branch", "Select the branch to be merged (reintegrated) into the current working copy" );
+    name = esd.open();
+    if ( name == null ) {
+      return false;
+    }
+    try {
+      svnClient.mergeReintegrate( new SVNUrl( getRemoteRoot() + File.separator + name ),
+          SVNRevision.HEAD, root, false, false );
+      return true;
+    } catch ( MalformedURLException e ) {
+      e.printStackTrace();
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
     }
     return false;
   }

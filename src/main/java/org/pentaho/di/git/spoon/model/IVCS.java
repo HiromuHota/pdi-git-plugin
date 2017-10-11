@@ -17,6 +17,12 @@ public interface IVCS {
   String TYPE_REMOTE = "remote";
   String TYPE_COMMIT = "commit";
 
+  /**
+   * Get the name of implementation (e.g., Git, SVN)
+   * @return
+   */
+  String getType();
+
   String getDirectory();
 
   /**

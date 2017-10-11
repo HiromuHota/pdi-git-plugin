@@ -103,6 +103,11 @@ public class UIGit extends VCS implements IVCS {
   private Git git;
   private CredentialsProvider credentialsProvider;
 
+  @Override
+  public String getType() {
+    return IVCS.GIT;
+  }
+
   /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.VCS#getDirectory()
    */

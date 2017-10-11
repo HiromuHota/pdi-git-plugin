@@ -63,7 +63,7 @@
   <menupopup id="branchContextMenu">
     <menuitem id="branch-checkout" label="${Git.Checkout}" command="gitController.checkout('branch')"/>
     <menuitem label="${Git.Create}" command="gitController.createBranch()"/>
-    <menuitem label="${Git.Merge}" command="gitController.merge()"/>
+    <menuitem id="branch-merge" label="${Git.Merge}" command="gitController.merge()"/>
     <menuitem label="${Git.Delete}" command="gitController.deleteBranch()"/>
     <menuitem id="branch-push" label="${Git.Push}" command="gitController.push('branch')"/>
   </menupopup>
