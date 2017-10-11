@@ -88,6 +88,10 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public boolean createBranch( String name ) {
+    if ( !isClean() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      return false;
+    }
     try {
       svnClient.copy( new SVNUrl( getRemote() + File.separator + getBranch() ),
           new SVNUrl( getRemote() + File.separator + name ),
@@ -129,6 +133,10 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public boolean createTag( String name ) {
+    if ( !isClean() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      return false;
+    }
     try {
       svnClient.copy( new SVNUrl( getRemote() + File.separator + getBranch() ),
           new SVNUrl( getRemote() + File.separator + name ),
