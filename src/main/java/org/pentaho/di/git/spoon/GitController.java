@@ -185,9 +185,17 @@ public class GitController extends AbstractXulEventHandler {
     if ( vcs.getClass() == UIGit.class ) {
       pushButton.setDisabled( false );
       pullButton.setLabel( BaseMessages.getString( PKG, "Git.Pull" ) );
+      ((XulMenuitem) document.getElementById( "branch-checkout" )).setLabel( BaseMessages.getString( PKG, "Git.Checkout" ) );
+      ((XulMenuitem) document.getElementById( "tag-checkout" )).setLabel( BaseMessages.getString( PKG, "Git.Checkout" ) );
+      document.getElementById( "branch-push" ).setDisabled( false );
+      document.getElementById( "tag-push" ).setDisabled( false );
     } else {
       pushButton.setDisabled( true );
-      pullButton.setLabel( BaseMessages.getString( PKG, "SVN.Update" ) );
+      pullButton.setLabel( BaseMessages.getString( PKG, "SVN.Pull" ) );
+      ((XulMenuitem) document.getElementById( "branch-checkout" )).setLabel( BaseMessages.getString( PKG, "SVN.Checkout" ) );
+      ((XulMenuitem) document.getElementById( "tag-checkout" )).setLabel( BaseMessages.getString( PKG, "SVN.Checkout" ) );
+      document.getElementById( "branch-push" ).setDisabled( true );
+      document.getElementById( "tag-push" ).setDisabled( true );
     }
     branchButton.setDisabled( false );
     tagButton.setDisabled( false );

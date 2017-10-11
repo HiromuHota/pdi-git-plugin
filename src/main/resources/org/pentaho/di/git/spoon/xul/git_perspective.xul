@@ -61,17 +61,17 @@
             <menuitem id="menu-git-remote-setting" label="Setting" command="gitController.editRemote()" disabled="true"/>
           </menupopup>
   <menupopup id="branchContextMenu">
-    <menuitem label="${Git.Checkout}" command="gitController.checkout('branch')"/>
+    <menuitem id="branch-checkout" label="${Git.Checkout}" command="gitController.checkout('branch')"/>
     <menuitem label="${Git.Create}" command="gitController.createBranch()"/>
     <menuitem label="${Git.Merge}" command="gitController.merge()"/>
     <menuitem label="${Git.Delete}" command="gitController.deleteBranch()"/>
-    <menuitem label="${Git.Push}" command="gitController.push('branch')"/>
+    <menuitem id="branch-push" label="${Git.Push}" command="gitController.push('branch')"/>
   </menupopup>
   <menupopup id="tagContextMenu">
-    <menuitem label="${Git.Checkout}" command="gitController.checkout('tag')"/>
+    <menuitem id="tag-checkout" label="${Git.Checkout}" command="gitController.checkout('tag')"/>
     <menuitem label="${Git.Create}" command="gitController.createTag()"/>
     <menuitem label="${Git.Delete}" command="gitController.deleteTag()"/>
-    <menuitem label="${Git.Push}" command="gitController.push('tag')"/>
+    <menuitem id="tag-push" label="${Git.Push}" command="gitController.push('tag')"/>
   </menupopup>
   <menupopup id="changedContextMenu">
     <menuitem id="menuitem-addtoindex" label="${Git.ContextMenu.AddToIndex}" command="gitController.addToIndex()"/>
