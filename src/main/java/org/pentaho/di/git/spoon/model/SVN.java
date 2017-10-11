@@ -258,7 +258,7 @@ public class SVN extends VCS implements IVCS {
   @Override
   public String getBranch() {
     try {
-      String branch = svnClient.getInfo( root ).getUrlString().replaceFirst( getRemote(), "" );
+      String branch = svnClient.getInfoFromWorkingCopy( root ).getUrlString().replaceFirst( getRemote(), "" );
       return branch.replaceAll( "^/", "" );
     } catch ( SVNClientException e ) {
       // TODO Auto-generated catch block
@@ -299,7 +299,7 @@ public class SVN extends VCS implements IVCS {
   @Override
   public String getRemote() {
     try {
-      return svnClient.getInfo( root ).getRepository().toString();
+      return svnClient.getInfoFromWorkingCopy( root ).getRepository().toString();
     } catch ( SVNClientException e ) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -403,7 +403,7 @@ public class SVN extends VCS implements IVCS {
   public List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) {
     List<UIFile> files = new ArrayList<UIFile>();
     try {
-      Arrays.stream( svnClient.diffSummarize( svnClient.getInfo( root ).getUrl(), null, new SVNRevision.Number( Long.parseLong( oldCommitId ) ),
+      Arrays.stream( svnClient.diffSummarize( svnClient.getInfoFromWorkingCopy( root ).getUrl(), null, new SVNRevision.Number( Long.parseLong( oldCommitId ) ),
            new SVNRevision.Number( Long.parseLong( newCommitId ) ),
           100, true ) )
         .filter( diffStatus -> diffStatus.getNodeKind() == SVNNodeKind.FILE.toInt() )
@@ -444,7 +444,7 @@ public class SVN extends VCS implements IVCS {
         return svnClient.getContent( new File( directory + File.separator + FilenameUtils.separatorsToSystem( file ) ),
           SVNRevision.HEAD );
       } else {
-        return svnClient.getContent( svnClient.getInfo( root ).getUrl().appendPath( file ),
+        return svnClient.getContent( svnClient.getInfoFromWorkingCopy( root ).getUrl().appendPath( file ),
           new SVNRevision.Number( Long.parseLong( commitId ) ) );
       }
     } catch ( NumberFormatException e ) {
@@ -466,7 +466,7 @@ public class SVN extends VCS implements IVCS {
   @Override
   public boolean pull() {
     try {
-      SVNRevision.Number lastRevision = svnClient.getInfo( root ).getRevision();
+      SVNRevision.Number lastRevision = svnClient.getInfoFromWorkingCopy( root ).getRevision();
       long newLastRevision = svnClient.update( root, SVNRevision.HEAD, true );
       if ( lastRevision.getNumber() == newLastRevision ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), "Up-to-date" );
