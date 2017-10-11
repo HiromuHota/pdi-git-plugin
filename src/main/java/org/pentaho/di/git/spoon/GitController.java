@@ -444,11 +444,7 @@ public class GitController extends AbstractXulEventHandler {
       List<UIFile> selectedFiles = getSelectedChangedFiles();
       if ( selectedFiles.size() != 0 ) {
         if ( isOnlyWIP() ) {
-          if ( selectedFiles.get( 0 ).getIsStaged() ) {
-            return vcs.diff( Constants.HEAD, IVCS.INDEX, selectedFiles.get( 0 ).getName() );
-          } else {
-            return vcs.diff( IVCS.INDEX, IVCS.WORKINGTREE, selectedFiles.get( 0 ).getName() );
-          }
+          return vcs.diff( Constants.HEAD, IVCS.WORKINGTREE, selectedFiles.get( 0 ).getName() );
         } else {
           String newCommitId = getFirstSelectedRevision().getName();
           String oldCommitId = getSelectedRevisions().size() == 1 ? vcs.getParentCommitId( newCommitId )

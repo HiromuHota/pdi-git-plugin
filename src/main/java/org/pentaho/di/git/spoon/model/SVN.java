@@ -121,7 +121,7 @@ public class SVN extends VCS implements IVCS {
     OutputStream outStream = new ByteArrayOutputStream();
     try {
       String target = null;
-      if ( newCommitId.equals( IVCS.INDEX ) ) {
+      if ( oldCommitId.equals( Constants.HEAD ) ) {
         target = directory + File.separator + FilenameUtils.separatorsToSystem( file );
       } else {
         target = svnClient.getInfo( root ).getUrl().toString() + "/" + file;
@@ -414,7 +414,7 @@ public class SVN extends VCS implements IVCS {
   private Revision resolveRevision( String commitId ) {
     if ( commitId.equals( Constants.HEAD ) ) {
       return Revision.HEAD;
-    } else if ( commitId.equals( IVCS.INDEX ) ) {
+    } else if ( commitId.equals( IVCS.WORKINGTREE ) ) {
       return Revision.WORKING;
     } else {
       return Revision.getInstance( Long.parseLong( commitId ) );
