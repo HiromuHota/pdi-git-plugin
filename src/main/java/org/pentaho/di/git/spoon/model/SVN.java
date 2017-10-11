@@ -405,11 +405,13 @@ public class SVN extends VCS implements IVCS {
     try {
       Arrays.stream( svnClient.diffSummarize( svnClient.getInfo( root ).getUrl(), null, new SVNRevision.Number( Long.parseLong( oldCommitId ) ),
            new SVNRevision.Number( Long.parseLong( newCommitId ) ),
-          100, true ) ).forEach( diffStatus -> {
+          100, true ) )
+        .filter( diffStatus -> diffStatus.getNodeKind() == SVNNodeKind.FILE.toInt() )
+        .forEach( diffStatus -> {
             files.add( new UIFile( diffStatus.getPath().replaceFirst( directory.replace( "\\", "\\\\" ), "" ),
                 convertTypeToGit( diffStatus.getDiffKind().toString() ), false ) );
-          }
-      );
+        }
+        );
     } catch ( NumberFormatException e ) {
       e.printStackTrace();
     } catch ( SVNClientException e ) {
