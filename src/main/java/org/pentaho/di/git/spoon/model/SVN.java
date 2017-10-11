@@ -172,7 +172,8 @@ public class SVN extends VCS implements IVCS {
   @Override
   public String getBranch() {
     try {
-      return svnClient.getInfo( root ).getUrlString().replaceFirst( getRemote() + "/", "" );
+      String branch = svnClient.getInfo( root ).getUrlString().replaceFirst( getRemote(), "" );
+      return branch.replaceAll( "^/", "" );
     } catch ( SVNClientException e ) {
       // TODO Auto-generated catch block
       e.printStackTrace();
