@@ -395,10 +395,13 @@ public class UIGitTest extends RepositoryTestCase {
   public void testCreateDeleteBranch() throws Exception {
     initialCommit();
 
-    // create a branch
+    // create a branch (and checkout that branch)
     uiGit.createBranch( "test" );
     List<String> branches = uiGit.getLocalBranches();
     assertTrue( branches.contains( "test" ) );
+
+    // Checkout master
+    uiGit.checkout( Constants.MASTER );
 
     // delete the branch
     uiGit.deleteBranch( "test", true );

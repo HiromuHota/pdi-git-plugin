@@ -773,6 +773,7 @@ public class UIGit extends VCS implements IVCS {
   public boolean createBranch( String value ) {
     try {
       git.branchCreate().setName( value ).call();
+      checkout( value );
       return true;
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );

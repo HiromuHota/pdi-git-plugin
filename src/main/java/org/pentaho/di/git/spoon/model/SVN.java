@@ -87,6 +87,88 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
+  public boolean createBranch( String name ) {
+    try {
+      svnClient.copy( new SVNUrl( getRemote() + File.separator + getBranch() ),
+          new SVNUrl( getRemote() + File.separator + name ),
+          "Created a branch by Spoon", SVNRevision.HEAD, true );
+      return true;
+    } catch ( MalformedURLException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    } catch ( SVNClientException e ) {
+      if ( e.getMessage().contains( "Authorization" ) ) {
+        if ( promptUsernamePassword() ) {
+          return createBranch( name );
+        }
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean deleteBranch( String name, boolean force ) {
+    try {
+      svnClient.remove( new SVNUrl[]{ new SVNUrl( getRemote() + File.separator + name ) },
+          "Deleted a branch by Spoon" );
+      return true;
+    } catch ( MalformedURLException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    } catch ( SVNClientException e ) {
+      if ( e.getMessage().contains( "Authorization" ) ) {
+        if ( promptUsernamePassword() ) {
+          return deleteBranch( name, force );
+        }
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean createTag( String name ) {
+    try {
+      svnClient.copy( new SVNUrl( getRemote() + File.separator + getBranch() ),
+          new SVNUrl( getRemote() + File.separator + name ),
+          "Created a tag by Spoon", SVNRevision.HEAD, true );
+      return true;
+    } catch ( MalformedURLException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    } catch ( SVNClientException e ) {
+      if ( e.getMessage().contains( "Authorization" ) ) {
+        if ( promptUsernamePassword() ) {
+          return createTag( name );
+        }
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean deleteTag( String name ) {
+    try {
+      svnClient.remove( new SVNUrl[]{ new SVNUrl( getRemote() + File.separator + name ) },
+          "Deleted a tag by Spoon" );
+      return true;
+    } catch ( MalformedURLException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    } catch ( SVNClientException e ) {
+      if ( e.getMessage().contains( "Authorization" ) ) {
+        if ( promptUsernamePassword() ) {
+          return deleteTag( name );
+        }
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    }
+    return false;
+  }
+
+  @Override
   public void revertPath( String path ) {
     try {
       svnClient.revert( new File( directory + File.separator + FilenameUtils.separatorsToSystem( path ) ), false );
