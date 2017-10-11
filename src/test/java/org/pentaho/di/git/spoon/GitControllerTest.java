@@ -3,7 +3,6 @@ package org.pentaho.di.git.spoon;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -156,19 +155,6 @@ public class GitControllerTest {
     controller.editRemote();
 
     verify( uiGit, never() ).addRemote( anyString() );
-  }
-
-  @Test
-  public void shouldDeleteRemoteWhenEmptyString() throws Exception {
-    XulPromptBox prompt = new XulPromptBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.createElement( PROMPTBOX ) ).thenReturn( prompt );
-    doThrow( URISyntaxException.class ).when( uiGit ).addRemote( anyString() );
-    doReturn( "" ).when( uiGit ).getRemote();
-
-    controller.editRemote();
-
-    verify( uiGit ).addRemote( anyString() );
-    verify( uiGit ).removeRemote();
   }
 
   @Test

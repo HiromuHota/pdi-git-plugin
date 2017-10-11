@@ -3,7 +3,6 @@ package org.pentaho.di.git.spoon;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -737,21 +736,7 @@ public class GitController extends AbstractXulEventHandler {
       promptBox.setValue( vcs.getRemote() );
       promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
         if ( status.equals( Status.ACCEPT ) ) {
-          try {
-            vcs.addRemote( value );
-          } catch ( URISyntaxException e ) {
-            if ( value.equals( "" ) ) {
-              try {
-                vcs.removeRemote();
-              } catch ( Exception e1 ) {
-                e1.printStackTrace();
-              }
-            } else {
-              editRemote();
-            }
-          } catch ( Exception e ) {
-            e.printStackTrace();
-          }
+          vcs.addRemote( value );
         }
       } );
       promptBox.open();

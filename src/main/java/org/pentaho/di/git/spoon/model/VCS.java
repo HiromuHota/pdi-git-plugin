@@ -114,13 +114,13 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void addRemote(String s) throws Exception {
+  public void addRemote(String s) {
     // TODO Auto-generated method stub
     
   }
 
   @Override
-  public void removeRemote() throws Exception {
+  public void removeRemote() {
     // TODO Auto-generated method stub
     
   }

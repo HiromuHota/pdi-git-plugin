@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -252,25 +253,39 @@ public class UIGit extends VCS implements IVCS {
    * @see org.pentaho.di.git.spoon.model.VCS#addRemote(java.lang.String)
    */
   @Override
-  public void addRemote( String s ) throws Exception {
+  public void addRemote( String value ) {
     // Make sure you have only one URI for push
     removeRemote();
 
-    URIish uri = new URIish( s );
-    RemoteAddCommand cmd = git.remoteAdd();
-    cmd.setName( Constants.DEFAULT_REMOTE_NAME );
-    cmd.setUri( uri );
-    cmd.call();
+    try {
+      URIish uri = new URIish( value );
+      RemoteAddCommand cmd = git.remoteAdd();
+      cmd.setName( Constants.DEFAULT_REMOTE_NAME );
+      cmd.setUri( uri );
+      cmd.call();
+    } catch ( URISyntaxException e ) {
+      if ( value.equals( "" ) ) {
+        removeRemote();
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+      }
+    } catch ( GitAPIException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
   }
 
   /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.VCS#removeRemote()
    */
   @Override
-  public void removeRemote() throws Exception {
+  public void removeRemote() {
     RemoteRemoveCommand cmd = git.remoteRemove();
     cmd.setName( Constants.DEFAULT_REMOTE_NAME );
-    cmd.call();
+    try {
+      cmd.call();
+    } catch ( GitAPIException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
   }
 
   /* (non-Javadoc)

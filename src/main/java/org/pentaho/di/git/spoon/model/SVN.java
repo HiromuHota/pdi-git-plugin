@@ -68,6 +68,15 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
+  public void addRemote( String value ) {
+    try {
+      svnClient.relocate( getRemote(), value, directory, true );
+    } catch ( SVNClientException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
+  }
+
+  @Override
   public boolean cloneRepo( String directory, String url ) {
     try {
       svnClient.checkout( new SVNUrl( url ), new File( directory ), SVNRevision.HEAD, true );
@@ -93,8 +102,8 @@ public class SVN extends VCS implements IVCS {
       return false;
     }
     try {
-      svnClient.copy( new SVNUrl( getRemote() + File.separator + getBranch() ),
-          new SVNUrl( getRemote() + File.separator + name ),
+      svnClient.copy( new SVNUrl( getRemoteRoot() + File.separator + getBranch() ),
+          new SVNUrl( getRemoteRoot() + File.separator + name ),
           "Created a branch by Spoon", SVNRevision.HEAD, true );
       return true;
     } catch ( MalformedURLException e ) {
@@ -114,7 +123,7 @@ public class SVN extends VCS implements IVCS {
   @Override
   public boolean deleteBranch( String name, boolean force ) {
     try {
-      svnClient.remove( new SVNUrl[]{ new SVNUrl( getRemote() + File.separator + name ) },
+      svnClient.remove( new SVNUrl[]{ new SVNUrl( getRemoteRoot() + File.separator + name ) },
           "Deleted a branch by Spoon" );
       return true;
     } catch ( MalformedURLException e ) {
@@ -138,8 +147,8 @@ public class SVN extends VCS implements IVCS {
       return false;
     }
     try {
-      svnClient.copy( new SVNUrl( getRemote() + File.separator + getBranch() ),
-          new SVNUrl( getRemote() + File.separator + name ),
+      svnClient.copy( new SVNUrl( getRemoteRoot() + File.separator + getBranch() ),
+          new SVNUrl( getRemoteRoot() + File.separator + name ),
           "Created a tag by Spoon", SVNRevision.HEAD, true );
       return true;
     } catch ( MalformedURLException e ) {
@@ -159,7 +168,7 @@ public class SVN extends VCS implements IVCS {
   @Override
   public boolean deleteTag( String name ) {
     try {
-      svnClient.remove( new SVNUrl[]{ new SVNUrl( getRemote() + File.separator + name ) },
+      svnClient.remove( new SVNUrl[]{ new SVNUrl( getRemoteRoot() + File.separator + name ) },
           "Deleted a tag by Spoon" );
       return true;
     } catch ( MalformedURLException e ) {
@@ -266,7 +275,7 @@ public class SVN extends VCS implements IVCS {
   @Override
   public String getBranch() {
     try {
-      String branch = svnClient.getInfoFromWorkingCopy( root ).getUrlString().replaceFirst( getRemote(), "" );
+      String branch = svnClient.getInfoFromWorkingCopy( root ).getUrlString().replaceFirst( getRemoteRoot(), "" );
       return branch.replaceAll( "^/", "" );
     } catch ( SVNClientException e ) {
       // TODO Auto-generated catch block
@@ -280,7 +289,7 @@ public class SVN extends VCS implements IVCS {
     ISVNDirEntry[] dirEntries = null;
     SVNUrl url = null;
     try {
-      url = new SVNUrl( getRemote() );
+      url = new SVNUrl( getRemoteRoot() );
       dirEntries = svnClient.getList( url, SVNRevision.HEAD, true );
     } catch ( SVNClientException e ) {
       e.printStackTrace();
@@ -307,9 +316,17 @@ public class SVN extends VCS implements IVCS {
   @Override
   public String getRemote() {
     try {
+      return svnClient.getInfoFromWorkingCopy( root ).getUrlString();
+    } catch ( SVNClientException e ) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  private String getRemoteRoot() {
+    try {
       return svnClient.getInfoFromWorkingCopy( root ).getRepository().toString();
     } catch ( SVNClientException e ) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     return null;
@@ -500,7 +517,7 @@ public class SVN extends VCS implements IVCS {
       return;
     }
     try {
-      svnClient.switchToUrl( root, new SVNUrl( getRemote() + "/" + name ), SVNRevision.HEAD, true );
+      svnClient.switchToUrl( root, new SVNUrl( getRemoteRoot() + "/" + name ), SVNRevision.HEAD, true );
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }

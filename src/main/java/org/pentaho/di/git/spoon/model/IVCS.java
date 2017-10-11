@@ -88,9 +88,9 @@ public interface IVCS {
 
   String getRemote();
 
-  void addRemote( String s ) throws Exception;
+  void addRemote( String s );
 
-  void removeRemote() throws Exception;
+  void removeRemote();
 
   boolean hasRemote();
 
