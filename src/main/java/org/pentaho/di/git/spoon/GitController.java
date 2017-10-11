@@ -323,6 +323,10 @@ public class GitController extends AbstractXulEventHandler {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
           return;
         }
+        if ( content.getChangeType() == ChangeType.ADD ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "New file" );
+          return;
+        }
         EngineMetaInterface metaOld = null, metaNew = null;
         Consumer<EngineMetaInterface> c = null;
         try {
@@ -337,9 +341,6 @@ public class GitController extends AbstractXulEventHandler {
               : getLastSelectedRevision().getName();
           }
           xmlStreamOld = vcs.open( content.getName(), commitIdOld );
-          if ( xmlStreamOld == null ) {
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "New file" );
-          }
           xmlStreamNew = vcs.open( content.getName(), commitIdNew );
           if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
             // Use temporary metaOld_ because metaOld will be modified before the 2nd comparison
