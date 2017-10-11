@@ -28,10 +28,12 @@ import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObj
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 import org.tigris.subversion.svnclientadapter.ISVNClientAdapter;
 import org.tigris.subversion.svnclientadapter.ISVNDirEntry;
+import org.tigris.subversion.svnclientadapter.ISVNInfo;
 import org.tigris.subversion.svnclientadapter.ISVNLogMessage;
 import org.tigris.subversion.svnclientadapter.ISVNStatus;
 import org.tigris.subversion.svnclientadapter.SVNClientAdapterFactory;
 import org.tigris.subversion.svnclientadapter.SVNClientException;
+import org.tigris.subversion.svnclientadapter.SVNInfoUnversioned;
 import org.tigris.subversion.svnclientadapter.SVNNodeKind;
 import org.tigris.subversion.svnclientadapter.SVNRevision;
 import org.tigris.subversion.svnclientadapter.SVNStatusKind;
@@ -120,19 +122,18 @@ public class SVN extends VCS implements IVCS {
     AbstractJhlClientAdapter client = (AbstractJhlClientAdapter) svnClient;
     OutputStream outStream = new ByteArrayOutputStream();
     try {
-      String target = null;
-      if ( oldCommitId.equals( Constants.HEAD ) ) {
-        target = directory + File.separator + FilenameUtils.separatorsToSystem( file );
-        if ( getRevisions().size() == 1 ) {
-          oldCommitId = null;
-        }
-      } else {
-        target = svnClient.getInfo( root ).getUrl().toString() + "/" + file;
+      String target = directory + File.separator + FilenameUtils.separatorsToSystem( file );
+      ISVNInfo info = svnClient.getInfoFromWorkingCopy( new File( target ) );
+      if ( info instanceof SVNInfoUnversioned ) {
+        return "Unversioned";
+      }
+      if ( info.getRevision() == null ) { // not commited yet
+        oldCommitId = null;
       }
       client.getSVNClient().diff(
           target,
           null, resolveRevision( oldCommitId ), resolveRevision( newCommitId ),
-          null, outStream, Depth.infinityOrImmediates( true ), null, true, false, false, false, false, false );
+          directory, outStream, Depth.infinityOrImmediates( true ), null, true, false, false, false, false, false );
       return outStream.toString().replaceAll( "\n", System.getProperty( "line.separator" ) );
     } catch ( Exception e ) {
       return e.getMessage();

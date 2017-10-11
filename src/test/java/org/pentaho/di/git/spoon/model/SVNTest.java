@@ -23,6 +23,7 @@ public class SVNTest {
   private ISVNRepos admin;
   private File rootServer;
   private File rootClient;
+  private String diff;
 
   @Before
   public void setUp() throws Exception {
@@ -54,6 +55,9 @@ public class SVNTest {
     File file = new File( rootClient.getPath(), "test.txt" );
     FileUtils.write( file, "Hello World" );
     vcs.add( "test.txt" );
+
+    diff = vcs.diff( Constants.HEAD, IVCS.WORKINGTREE, "test.txt" );
+    assertTrue( diff.contains( "nonexistent" ) );
     assertEquals( vcs.getRevisions().size(), revisions.size() + 1 );
     revisions = vcs.getRevisions();
     assertEquals( VCS.WORKINGTREE, revisions.get( 0 ).getName() );
@@ -84,7 +88,7 @@ public class SVNTest {
     IOUtils.copy( inputStream, writer, "UTF-8" );
     assertEquals( "Hello World", writer.toString() );
 
-    String diff = vcs.diff( "0", "1", "test.txt" );
+    diff = vcs.diff( "0", "1", "test.txt" );
     assertTrue( diff.contains( "+Hello World" ) );
   }
 
