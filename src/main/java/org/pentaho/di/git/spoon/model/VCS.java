@@ -200,6 +200,7 @@ public class VCS implements IVCS {
 
   @Override
   public void reset( String name ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
   }
 
   @Override
