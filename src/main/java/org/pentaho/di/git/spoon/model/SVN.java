@@ -404,7 +404,8 @@ public class SVN extends VCS implements IVCS {
     try {
       svnClient.getStatus( root, true, false, false,
         false, false, ( String path, ISVNStatus status ) -> {
-          if ( status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
+          File file = new File( path );
+          if ( file.isFile() && status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
             files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ) + "/", "" ), convertTypeToGit( status.getTextStatus().toString() ), false ) );
           }
         } );
@@ -420,7 +421,8 @@ public class SVN extends VCS implements IVCS {
     try {
       svnClient.getStatus( root, true, false, false,
         false, false, ( String path, ISVNStatus status ) -> {
-          if ( !status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
+          File file = new File( path );
+          if ( file.isFile() && !status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
             files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ) + "/", "" ), convertTypeToGit( status.getTextStatus().toString() ), true ) );
           }
         } );
