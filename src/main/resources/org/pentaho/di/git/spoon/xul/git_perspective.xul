@@ -81,8 +81,8 @@
     <menuitem label="${Git.ContextMenu.VisualDiff}" command="gitController.visualdiff()"/>
   </menupopup>
   <menupopup id="revisionContextMenu">
-    <menuitem label="${Git.ContextMenu.Checkout}" command="gitController.checkout()"/>
-    <menuitem label="${Git.ContextMenu.Reset}" command="gitController.reset()"/>
+    <menuitem id="menuitem-checkout" label="${Git.ContextMenu.Checkout}" command="gitController.checkout()"/>
+    <menuitem id="menuitem-reset" label="${Git.ContextMenu.Reset}" command="gitController.reset()"/>
   </menupopup>
 
 </window>

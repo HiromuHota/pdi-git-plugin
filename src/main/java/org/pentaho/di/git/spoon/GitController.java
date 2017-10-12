@@ -193,14 +193,17 @@ public class GitController extends AbstractXulEventHandler {
     ((XulMenuitem) document.getElementById( "branch-checkout" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Checkout" ) );
     ((XulMenuitem) document.getElementById( "branch-merge" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Merge" ) );
     ((XulMenuitem) document.getElementById( "tag-checkout" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Checkout" ) );
+    ((XulMenuitem) document.getElementById( "menuitem-reset" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".ContextMenu.Reset" ) );
     if ( vcs.getType().equals( IVCS.GIT ) ) {
       pushButton.setDisabled( false );
       document.getElementById( "branch-push" ).setDisabled( false );
       document.getElementById( "tag-push" ).setDisabled( false );
+      document.getElementById( "menuitem-checkout" ).setDisabled( false );
     } else {
       pushButton.setDisabled( true );
       document.getElementById( "branch-push" ).setDisabled( true );
       document.getElementById( "tag-push" ).setDisabled( true );
+      document.getElementById( "menuitem-checkout" ).setDisabled( true );
     }
   }
 

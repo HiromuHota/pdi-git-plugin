@@ -37,6 +37,7 @@ import org.tigris.subversion.svnclientadapter.SVNClientException;
 import org.tigris.subversion.svnclientadapter.SVNInfoUnversioned;
 import org.tigris.subversion.svnclientadapter.SVNNodeKind;
 import org.tigris.subversion.svnclientadapter.SVNRevision;
+import org.tigris.subversion.svnclientadapter.SVNRevisionRange;
 import org.tigris.subversion.svnclientadapter.SVNStatusKind;
 import org.tigris.subversion.svnclientadapter.SVNUrl;
 import org.tigris.subversion.svnclientadapter.javahl.AbstractJhlClientAdapter;
@@ -533,6 +534,23 @@ public class SVN extends VCS implements IVCS {
       e.printStackTrace();
     }
     return false;
+  }
+
+  @Override
+  public void reset( String name ) {
+    try {
+      svnClient.merge( new SVNUrl( getRemote() ),
+          null,
+          new SVNRevisionRange[] { new SVNRevisionRange( SVNRevision.HEAD, new SVNRevision.Number( Long.parseLong( name ) ) ) },
+          root,
+          false, 100, true, false, false );
+    } catch ( NumberFormatException e ) {
+      e.printStackTrace();
+    } catch ( SVNClientException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    } catch ( MalformedURLException e ) {
+      e.printStackTrace();
+    }
   }
 
   @Override
