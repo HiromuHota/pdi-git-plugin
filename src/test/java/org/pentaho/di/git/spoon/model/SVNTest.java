@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.subversion.javahl.ISVNRepos;
 import org.apache.subversion.javahl.SVNRepos;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.Constants;
 import org.junit.After;
 import org.junit.Before;
@@ -103,5 +104,26 @@ public class SVNTest {
   public void testGetRemote() {
     String remote = vcs.getRemote();
     assertNotNull( remote );
+  }
+
+  @Test
+  public void testGetUnStagedFiles() throws Exception {
+    List<UIFile> files;
+    // Create a new file
+    File file = new File( rootClient.getPath(), "test.txt" );
+    FileUtils.write( file, "Hello World" );
+
+    // New file should be listed in the list of unstaged files
+    files = vcs.getUnstagedFiles();
+    assertTrue( files.stream().anyMatch( f -> f.getName().equals( "test.txt" ) && f.getChangeType() == ChangeType.ADD ) );
+
+    // First commit
+    vcs.add( "test.txt" );
+    vcs.commit( "user", "message" );
+
+    // Test if delete files are listed in the list of staged files
+    file.delete();
+    files = vcs.getStagedFiles();
+    assertTrue( files.stream().anyMatch( f -> f.getName().equals( "test.txt" ) && f.getChangeType() == ChangeType.DELETE ) );
   }
 }
