@@ -594,7 +594,7 @@ public class SVN extends VCS implements IVCS {
       return Revision.BASE;
     } else if ( commitId.equals( Constants.HEAD ) ) {
       return Revision.HEAD;
-    } else if ( commitId.equals( IVCS.WORKINGTREE ) ) {
+    } else if ( commitId.equals( IVCS.INDEX ) ) {
       return Revision.WORKING;
     } else {
       return Revision.getInstance( Long.parseLong( commitId ) );

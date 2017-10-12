@@ -54,11 +54,11 @@ public class SVNTest {
     UIRepositoryObjectRevisions revisions = vcs.getRevisions();
     File file = new File( rootClient.getPath(), "test.txt" );
     FileUtils.write( file, "Hello World" );
-    diff = vcs.diff( Constants.HEAD, IVCS.WORKINGTREE, "test.txt" );
+    diff = vcs.diff( IVCS.INDEX, IVCS.WORKINGTREE, "test.txt" );
     assertEquals( "Unversioned", diff );
 
     vcs.add( "test.txt" );
-    diff = vcs.diff( Constants.HEAD, IVCS.WORKINGTREE, "test.txt" );
+    diff = vcs.diff( Constants.HEAD, IVCS.INDEX, "test.txt" );
     assertTrue( diff.contains( "nonexistent" ) );
     assertEquals( vcs.getRevisions().size(), revisions.size() + 1 );
     revisions = vcs.getRevisions();
