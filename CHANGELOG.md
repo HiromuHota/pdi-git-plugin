@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.8.0 - 2017-XX-XX
+### Added
+- Subversion support
+
+### Changed
+- No need to unstage to discard changes
+
+### Removed
+- The "Open" command from a context menu that opens the changed file in a particular commit
+
 ## 0.7.2 - 2017-09-28
 ### Fixed
 - Fix a typo bug that tries to push instead of pull when the cached credential does not get authenticated
