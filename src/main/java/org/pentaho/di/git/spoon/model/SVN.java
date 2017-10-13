@@ -536,13 +536,18 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
-  public void reset( String name ) {
+  public boolean rollback( String name ) {
+    if ( !isClean() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      return false;
+    }
     try {
       svnClient.merge( new SVNUrl( getRemote() ),
           null,
           new SVNRevisionRange[] { new SVNRevisionRange( SVNRevision.HEAD, new SVNRevision.Number( Long.parseLong( name ) ) ) },
           root,
           false, 100, true, false, false );
+      return true;
     } catch ( NumberFormatException e ) {
       e.printStackTrace();
     } catch ( SVNClientException e ) {
@@ -550,6 +555,7 @@ public class SVN extends VCS implements IVCS {
     } catch ( MalformedURLException e ) {
       e.printStackTrace();
     }
+    return false;
   }
 
   @Override

@@ -243,9 +243,8 @@ public class VCS implements IVCS {
   }
 
   @Override
-  public void checkout(String name) {
-    // TODO Auto-generated method stub
-    
+  public void checkout( String name ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
   }
 
   @Override
@@ -310,6 +309,12 @@ public class VCS implements IVCS {
 
   @Override
   public void checkoutTag( String name ) {
+  }
+
+  @Override
+  public boolean rollback( String name ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
   }
 
 }

@@ -193,15 +193,17 @@ public class GitController extends AbstractXulEventHandler {
     ((XulMenuitem) document.getElementById( "branch-checkout" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Checkout" ) );
     ((XulMenuitem) document.getElementById( "branch-merge" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Merge" ) );
     ((XulMenuitem) document.getElementById( "tag-checkout" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Checkout" ) );
-    ((XulMenuitem) document.getElementById( "menuitem-reset" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".ContextMenu.Reset" ) );
+    ((XulMenuitem) document.getElementById( "menuitem-checkout" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".ContextMenu.Checkout" ) );
     if ( vcs.getType().equals( IVCS.GIT ) ) {
       pushButton.setDisabled( false );
       document.getElementById( "branch-push" ).setDisabled( false );
       document.getElementById( "tag-push" ).setDisabled( false );
+      document.getElementById( "menuitem-reset" ).setDisabled( false );
     } else {
       pushButton.setDisabled( true );
       document.getElementById( "branch-push" ).setDisabled( true );
       document.getElementById( "tag-push" ).setDisabled( true );
+      document.getElementById( "menuitem-reset" ).setDisabled( true );
     }
   }
 
@@ -588,6 +590,18 @@ public class GitController extends AbstractXulEventHandler {
       }
     } );
     confirmBox.open();
+  }
+
+  /**
+   * Rollback to the selected commit, but does not make a commit
+   */
+  public void rollback() {
+    if ( anyChangedTabs() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "One or more tabs have unsaved changes" );
+      return;
+    }
+    vcs.rollback( getFirstSelectedRevision().getName() );
+    fireSourceChanged();
   }
 
   /**

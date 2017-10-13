@@ -3,6 +3,7 @@
 ## 0.8.0 - 2017-XX-XX
 ### Added
 - Subversion support
+- "Rollback to here" command to a context menu that rollbacks the working tree (copy) to a previous commit (revision), but does not make a commit.
 
 ### Changed
 - No need to unstage to discard changes

@@ -197,4 +197,6 @@ public interface IVCS {
   boolean merge();
 
   boolean cloneRepo( String directory, String url );
+
+  boolean rollback( String name );
 }

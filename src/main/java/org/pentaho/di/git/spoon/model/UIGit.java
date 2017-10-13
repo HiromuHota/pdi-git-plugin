@@ -27,6 +27,7 @@ import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
+import org.eclipse.jgit.api.RevertCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -512,6 +513,34 @@ public class UIGit extends VCS implements IVCS {
   @VisibleForTesting
   void resetHard() throws Exception {
     git.reset().setMode( ResetType.HARD ).call();
+  }
+
+  @Override
+  public boolean rollback( String name ) {
+    if ( !isClean() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      return false;
+    }
+    String commit = resolve( Constants.HEAD ).getName();
+    RevertCommand cmd = git.revert();
+    for ( int i = 0; i < getRevisions().size(); i++ ) {
+      String commitId = getRevisions().get( i ).getName();
+      /*
+       * Revert commits from HEAD to the specified commit in reverse order.
+       */
+      cmd.include( resolve( commitId ) );
+      if ( commitId.equals( name ) ) {
+        break;
+      }
+    }
+    try {
+      cmd.call();
+      git.reset().setRef( commit ).call();
+      return true;
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
+    return false;
   }
 
   /* (non-Javadoc)
