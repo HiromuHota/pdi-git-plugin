@@ -233,13 +233,13 @@ public class SVN extends VCS implements IVCS {
       if ( info instanceof SVNInfoUnversioned ) {
         return "Unversioned";
       }
-      if ( info.getRevision() == null ) { // not commited yet
+      if ( info.getRevision() == null || info.isCopied() ) { // not commited yet or copied
         oldCommitId = null;
       }
       client.getSVNClient().diff(
           target,
           null, resolveRevision( oldCommitId ), resolveRevision( newCommitId ),
-          directory, outStream, Depth.infinityOrImmediates( true ), null, true, false, false, false, false, false );
+          directory, outStream, Depth.infinityOrImmediates( true ), null, true, false, false, true, false, false );
       return outStream.toString().replaceAll( "\n", System.getProperty( "line.separator" ) );
     } catch ( Exception e ) {
       return e.getMessage();
