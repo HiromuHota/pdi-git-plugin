@@ -198,12 +198,12 @@ public class GitController extends AbstractXulEventHandler {
       pushButton.setDisabled( false );
       document.getElementById( "branch-push" ).setDisabled( false );
       document.getElementById( "tag-push" ).setDisabled( false );
-      document.getElementById( "menuitem-reset" ).setDisabled( false );
+//      document.getElementById( "menuitem-reset" ).setDisabled( false );
     } else {
       pushButton.setDisabled( true );
       document.getElementById( "branch-push" ).setDisabled( true );
       document.getElementById( "tag-push" ).setDisabled( true );
-      document.getElementById( "menuitem-reset" ).setDisabled( true );
+//      document.getElementById( "menuitem-reset" ).setDisabled( true );
     }
   }
 
