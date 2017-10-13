@@ -14,6 +14,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.git.spoon.model.IVCS;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
@@ -143,8 +144,10 @@ public class GitControllerTest {
     when( result.getRemoteUpdates() ).thenReturn( Arrays.asList( update ) );
 
     controller.push();
+    controller.push( IVCS.TYPE_BRANCH );
 
-    verify( uiGit ).push( anyString() );
+    verify( uiGit ).push( "default" );
+    verify( uiGit ).push( IVCS.TYPE_BRANCH );
   }
 
   @Test

@@ -626,7 +626,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void push( String type ) {
-    vcs.push( name );
+    vcs.push( type );
   }
 
   public void createBranch() throws XulException {
