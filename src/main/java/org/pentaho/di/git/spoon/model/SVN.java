@@ -564,10 +564,28 @@ public class SVN extends VCS implements IVCS {
       return;
     }
     try {
+      svnClient.update( root, new SVNRevision.Number( Long.parseLong( name ) ), true );
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
+  }
+
+  @Override
+  public void checkoutBranch( String name ) {
+    if ( !isClean() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      return;
+    }
+    try {
       svnClient.switchToUrl( root, new SVNUrl( getRemoteRoot() + "/" + name ), SVNRevision.HEAD, true );
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
+  }
+
+  @Override
+  public void checkoutTag( String name ) {
+    checkoutBranch( name );
   }
 
   private static ChangeType convertTypeToGit( String type ) {

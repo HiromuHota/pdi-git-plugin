@@ -304,4 +304,12 @@ public class VCS implements IVCS {
     return null;
   }
 
+  @Override
+  public void checkoutBranch( String name ) {
+  }
+
+  @Override
+  public void checkoutTag( String name ) {
+  }
+
 }

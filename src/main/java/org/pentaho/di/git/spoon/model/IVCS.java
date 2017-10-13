@@ -167,10 +167,14 @@ public interface IVCS {
   InputStream open( String file, String commitId );
 
   /**
-   * Checkout a branch or commit
+   * Checkout a commit
    * @param name
    */
   void checkout( String name );
+
+  void checkoutBranch( String name );
+
+  void checkoutTag( String name );
 
   /**
    * Revert a file to the last commited state

@@ -774,6 +774,16 @@ public class UIGit extends VCS implements IVCS {
     }
   }
 
+  @Override
+  public void checkoutBranch( String name ) {
+    checkout( name );
+  }
+
+  @Override
+  public void checkoutTag( String name ) {
+    checkout( name );
+  }
+
   /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.IVCS#revertFile(java.lang.String)
    */

@@ -198,12 +198,10 @@ public class GitController extends AbstractXulEventHandler {
       pushButton.setDisabled( false );
       document.getElementById( "branch-push" ).setDisabled( false );
       document.getElementById( "tag-push" ).setDisabled( false );
-      document.getElementById( "menuitem-checkout" ).setDisabled( false );
     } else {
       pushButton.setDisabled( true );
       document.getElementById( "branch-push" ).setDisabled( true );
       document.getElementById( "tag-push" ).setDisabled( true );
-      document.getElementById( "menuitem-checkout" ).setDisabled( true );
     }
   }
 
@@ -534,6 +532,7 @@ public class GitController extends AbstractXulEventHandler {
     String name = null;
     List<String> names;
     EnterSelectionDialog esd;
+    Consumer<String> consumer = null;
     switch ( type ) {
       case IVCS.TYPE_BRANCH:
         names = vcs.getBranches();
@@ -543,6 +542,7 @@ public class GitController extends AbstractXulEventHandler {
         if ( name == null ) {
           return;
         }
+        consumer = s -> vcs.checkoutBranch( s );
         break;
       case IVCS.TYPE_TAG:
         names = vcs.getTags();
@@ -551,13 +551,15 @@ public class GitController extends AbstractXulEventHandler {
         if ( name == null ) {
           return;
         }
+        consumer = s -> vcs.checkoutTag( s );
         break;
       default:
         name = getFirstSelectedRevision().getName();
+        consumer = s -> vcs.checkout( s );
     }
     try {
       name = vcs.getExpandedName( name, type );
-      vcs.checkout( name );
+      consumer.accept( name );
       fireSourceChanged();
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
