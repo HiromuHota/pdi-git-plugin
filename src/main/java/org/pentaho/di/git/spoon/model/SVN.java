@@ -366,7 +366,8 @@ public class SVN extends VCS implements IVCS {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     ISVNLogMessage[] messages = null;
     try {
-      messages = svnClient.getLogMessages( root, new SVNRevision.Number( 0 ), SVNRevision.HEAD, false, false, 0 );
+      messages = svnClient.getLogMessages( root, new SVNRevision.Number( 0 ),
+          svnClient.getInfoFromWorkingCopy( root ).getRevision(), false, false, 0 );
     } catch ( SVNClientException e ) {
       if ( e.getMessage().contains( "Authorization" ) ) {
         promptUsernamePassword();

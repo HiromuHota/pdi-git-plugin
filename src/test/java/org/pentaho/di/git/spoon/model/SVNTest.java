@@ -69,6 +69,7 @@ public class SVNTest {
     vcs.add( "test.txt" );
 
     vcs.commit( "user", "message" );
+    vcs.pull();
     assertEquals( revisions.size(), vcs.getRevisions().size() );
     revisions = vcs.getRevisions();
     assertEquals( "1", revisions.get( revisions.size() - 1 ).getName() );
