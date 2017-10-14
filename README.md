@@ -1,6 +1,7 @@
 # Overview
 
-The Git plugin allows you to manage versions of local Kettle files without leaving Spoon.
+This plugin allows you to manage versions of local Kettle files without leaving Spoon.
+In addition to Git, Subversion is also supported.
 
 # How to install
 
@@ -69,8 +70,20 @@ Currently, a remote repository named "origin" can be set.
 The commit history is listed in reverse chronological order.
 Selecting one of the commits shows a list of changed files in that particular commit.
 If there are any changes in the working tree, WORKINGTREE is added to the top of the list, where you can see those changes.
-Right-click on a commit pops up a context menu, where you can choose **checkout** to checkout that particular commit.
-Or you can choose **reset to this commit**, equivalent of `git reset --mixed <commit>`, to reset the current branch head to this commit.
+Right-click menu on a commit differs between Git and Subversion.
+
+### Git
+
+- **Checkout**: checkout a previous commit (`git checkout <commit>`). <img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16"> **Branch > Checkout** to undo this operation.
+- **Rollback**: rollback to a previous commit (`git revert --no-commit HEAD..<commit>`). **Discard changes in working tree** to undo this operation.
+
+### Subversion
+
+- **Update**: update to a previous revision (`svn update -r <revision>)`. <img src="src/main/resources/org/pentaho/di/git/spoon/images/pull.png" width="16"> **Update** to undo this operation.
+- **Rollback**: rollback to a previous commit (`svn merge -r BASE:<revision>`). **Discard changes in working tree** to undo this operation.
+
+Use **Checkout/Update** to see how the contents looked like at that commit with the commit history intact.
+Use **Rollback** to rollback all the changes. A new commit can be made to persist the rollback.
 
 ## Working with files
 
@@ -138,6 +151,11 @@ Here is an example `.git/config` (see [here](https://git-scm.com/docs/git-config
 
 With this example config, **Pull** uses the non fast-forward mode instead of the default fast-forward mode when merging into `master`, **Push** pushes the current branch to two remotes.
 
+### Subversion
+
+**Push** is disabled because making a commit always pushes changes to the remote repository.
+Instead of **Pull**, **Update** is used because of the Subversion terminology.
+
 ## Branches
 
 <img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16"> **Branch** has branch operations: **Checkout** switches between branches, **Create / Delete** can create / delete a branch, **Merge** can merge a branch into the current one, **Push** can push a specific branch.
@@ -145,6 +163,12 @@ With this example config, **Pull** uses the non fast-forward mode instead of the
 Switching to a remote branch, say `origin/feature`, gets you in a detached HEAD state.
 Use **Branch > Create** to create a local branch, say `feature`, then you will get out of the state.
 Collectively, they are equivalent of `git checkout origin/feature` then `git checkout -b feature`.
+
+### Subversion
+
+The typical repository layout is trunk/branches/tags, but currently this plugin has no assumption on the layout.
+Thus, the list of branches includes any directories in the repository.
+For example, the list may include `/trunk` and `/tags/tag1`.
 
 ## Tags
 
