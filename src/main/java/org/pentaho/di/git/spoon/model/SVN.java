@@ -545,7 +545,10 @@ public class SVN extends VCS implements IVCS {
     try {
       svnClient.merge( new SVNUrl( getRemote() ),
           null,
-          new SVNRevisionRange[] { new SVNRevisionRange( SVNRevision.HEAD, new SVNRevision.Number( Long.parseLong( name ) ) ) },
+          new SVNRevisionRange[] { new SVNRevisionRange(
+              svnClient.getInfoFromWorkingCopy( root ).getRevision(),
+              new SVNRevision.Number( Long.parseLong( name ) )
+              ) },
           root,
           false, 100, true, false, false );
       return true;
