@@ -9,7 +9,8 @@
 - No need to unstage to discard changes
 
 ### Removed
-- The "Open" command from a context menu that opens the changed file in a particular commit
+- "Open" command from the context menu of a changed file
+- "Reset to this commit" command from the context menu of a commit
 
 ## 0.7.2 - 2017-09-28
 ### Fixed
