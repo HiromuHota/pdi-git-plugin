@@ -699,9 +699,11 @@ public class UIGit implements VCS {
     case TYPE_TAG:
       return Constants.R_TAGS + name;
     case TYPE_BRANCH:
-      return Constants.R_HEADS + name;
-    case TYPE_REMOTE:
-      return Constants.R_REMOTES + name;
+      try {
+        return git.getRepository().findRef( Constants.R_HEADS + name ).getName();
+      } catch ( Exception e ) {
+        return git.getRepository().findRef( Constants.R_REMOTES + name ).getName();
+      }
     default:
       return getCommitId( name );
     }
