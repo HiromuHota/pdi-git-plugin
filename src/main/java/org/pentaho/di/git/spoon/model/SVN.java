@@ -350,9 +350,10 @@ public class SVN extends VCS implements IVCS {
       svnClient.commit( new File[]{ root }, message, true );
       return true;
     } catch ( SVNClientException e ) {
-      if ( promptUsernamePassword() ) {
+      if ( e.getMessage().contains( "Authorization" ) && promptUsernamePassword() ) {
         return commit( authorName, message );
       } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
         return false;
       }
     } catch ( Exception e ) {
@@ -369,8 +370,7 @@ public class SVN extends VCS implements IVCS {
       messages = svnClient.getLogMessages( root, new SVNRevision.Number( 0 ),
           svnClient.getInfoFromWorkingCopy( root ).getRevision(), false, false, 0 );
     } catch ( SVNClientException e ) {
-      if ( e.getMessage().contains( "Authorization" ) ) {
-        promptUsernamePassword();
+      if ( e.getMessage().contains( "Authorization" ) && promptUsernamePassword() ) {
         return getRevisions();
       } else {
         e.printStackTrace();
