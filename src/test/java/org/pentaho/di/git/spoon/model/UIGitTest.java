@@ -272,6 +272,8 @@ public class UIGitTest extends RepositoryTestCase {
     assertTrue( success );
     assertEquals( commit.getId(),
         db2.resolve( commit.getId().getName() + "^{commit}" ) );
+
+    assertEquals( "refs/remotes/origin/master", uiGit.getExpandedName( "origin/master", "branch" ) );
   }
 
   @Rule

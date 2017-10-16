@@ -986,16 +986,17 @@ public class UIGit extends VCS implements IVCS {
       case TYPE_TAG:
         return Constants.R_TAGS + name;
       case TYPE_BRANCH:
-        return Constants.R_HEADS + name;
-      case TYPE_REMOTE:
-        return Constants.R_REMOTES + name;
-      default:
         try {
-          return getCommitId( name );
+          return git.getRepository().findRef( Constants.R_HEADS + name ).getName();
         } catch ( Exception e ) {
-          e.printStackTrace();
-          return name;
+          try {
+            return git.getRepository().findRef( Constants.R_REMOTES + name ).getName();
+          } catch ( IOException e1 ) {
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+          }
         }
+      default:
+        return getCommitId( name );
     }
   }
 
