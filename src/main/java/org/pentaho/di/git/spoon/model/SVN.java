@@ -239,7 +239,7 @@ public class SVN extends VCS implements IVCS {
       client.getSVNClient().diff(
           target,
           null, resolveRevision( oldCommitId ), resolveRevision( newCommitId ),
-          directory, outStream, Depth.infinityOrImmediates( true ), null, true, false, false, true, false, false );
+          directory.replace( "\\", "/" ), outStream, Depth.infinityOrImmediates( true ), null, true, false, false, true, false, false );
       return outStream.toString().replaceAll( "\n", System.getProperty( "line.separator" ) );
     } catch ( Exception e ) {
       return e.getMessage();
