@@ -114,9 +114,13 @@ public class SVNTest {
     File file = new File( rootClient.getPath(), "test.txt" );
     FileUtils.write( file, "Hello World" );
 
+    File dir = new File( rootClient.getPath(), "folder" );
+    dir.mkdir();
+
     // New file should be listed in the list of unstaged files
     files = vcs.getUnstagedFiles();
     assertTrue( files.stream().anyMatch( f -> f.getName().equals( "test.txt" ) && f.getChangeType() == ChangeType.ADD ) );
+    assertTrue( files.stream().anyMatch( f -> f.getName().equals( "folder" ) && f.getChangeType() == ChangeType.ADD ) );
 
     // First commit
     vcs.add( "test.txt" );

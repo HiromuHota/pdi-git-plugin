@@ -406,8 +406,7 @@ public class SVN extends VCS implements IVCS {
     try {
       svnClient.getStatus( root, true, false, false,
         false, false, ( String path, ISVNStatus status ) -> {
-          File file = new File( path );
-          if ( file.isFile() && status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
+          if ( status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
             files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ) + "/", "" ), convertTypeToGit( status.getTextStatus().toString() ), false ) );
           }
         } );
@@ -423,7 +422,7 @@ public class SVN extends VCS implements IVCS {
     try {
       svnClient.getStatus( root, true, false, false,
         false, false, ( String path, ISVNStatus status ) -> {
-          if ( status.getNodeKind() == SVNNodeKind.FILE && !status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
+          if ( !status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
             files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ) + "/", "" ), convertTypeToGit( status.getTextStatus().toString() ), true ) );
           }
         } );
@@ -440,7 +439,6 @@ public class SVN extends VCS implements IVCS {
       Arrays.stream( svnClient.diffSummarize( svnClient.getInfoFromWorkingCopy( root ).getUrl(), null, new SVNRevision.Number( Long.parseLong( oldCommitId ) ),
            new SVNRevision.Number( Long.parseLong( newCommitId ) ),
           100, true ) )
-        .filter( diffStatus -> diffStatus.getNodeKind() == SVNNodeKind.FILE.toInt() )
         .forEach( diffStatus -> {
             files.add( new UIFile( diffStatus.getPath().replaceFirst( directory.replace( "\\", "\\\\" ), "" ),
                 convertTypeToGit( diffStatus.getDiffKind().toString() ), false ) );
