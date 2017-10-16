@@ -3,7 +3,6 @@ package org.pentaho.di.git.spoon.model;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
@@ -197,7 +196,7 @@ public class SVN extends VCS implements IVCS {
     try {
       svnClient.revert( new File( directory + File.separator + FilenameUtils.separatorsToSystem( path ) ), false );
     } catch ( SVNClientException e ) {
-      e.printStackTrace();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
@@ -210,8 +209,8 @@ public class SVN extends VCS implements IVCS {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Versioned files are always staged for the next commit" );
         return;
       }
-    } catch ( SVNClientException e1 ) {
-      e1.printStackTrace();
+    } catch ( SVNClientException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     AbstractJhlClientAdapter client = (AbstractJhlClientAdapter) svnClient;
     try {
@@ -219,7 +218,7 @@ public class SVN extends VCS implements IVCS {
           new HashSet<String>( Arrays.asList( fullpath ) ),
           false, true, null, null, null );
     } catch ( ClientException e ) {
-      e.printStackTrace();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
@@ -271,12 +270,7 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public String getParentCommitId( String revstr ) {
-    try {
-      return getCommitId( Long.toString( ( Long.parseLong( revstr ) - 1 ) ) );
-    } catch ( NumberFormatException e ) {
-      e.printStackTrace();
-    }
-    return null;
+    return getCommitId( Long.toString( ( Long.parseLong( revstr ) - 1 ) ) );
   }
 
   @Override
@@ -285,8 +279,7 @@ public class SVN extends VCS implements IVCS {
       String branch = svnClient.getInfoFromWorkingCopy( root ).getUrlString().replaceFirst( getRemoteRoot(), "" );
       return branch.replaceAll( "^/", "" );
     } catch ( SVNClientException e ) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     return null;
   }
@@ -298,11 +291,8 @@ public class SVN extends VCS implements IVCS {
     try {
       url = new SVNUrl( getRemoteRoot() );
       dirEntries = svnClient.getList( url, SVNRevision.HEAD, true );
-    } catch ( SVNClientException e ) {
-      e.printStackTrace();
-      return null;
-    } catch ( MalformedURLException e ) {
-      e.printStackTrace();
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     return Arrays.stream( dirEntries )
       .filter( dirEntry -> dirEntry.getNodeKind() == SVNNodeKind.DIR )
@@ -325,7 +315,7 @@ public class SVN extends VCS implements IVCS {
     try {
       return svnClient.getInfoFromWorkingCopy( root ).getUrlString();
     } catch ( SVNClientException e ) {
-      e.printStackTrace();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     return null;
   }
@@ -334,7 +324,7 @@ public class SVN extends VCS implements IVCS {
     try {
       return svnClient.getInfoFromWorkingCopy( root ).getRepository().toString();
     } catch ( SVNClientException e ) {
-      e.printStackTrace();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     return null;
   }
@@ -357,7 +347,7 @@ public class SVN extends VCS implements IVCS {
         return false;
       }
     } catch ( Exception e ) {
-      e.printStackTrace();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       return false;
     }
   }
@@ -373,7 +363,7 @@ public class SVN extends VCS implements IVCS {
       if ( e.getMessage().contains( "Authorization" ) && promptUsernamePassword() ) {
         return getRevisions();
       } else {
-        e.printStackTrace();
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
     if ( messages != null ) {
@@ -411,7 +401,7 @@ public class SVN extends VCS implements IVCS {
           }
         } );
     } catch ( SVNClientException e ) {
-      e.printStackTrace();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     return files;
   }
@@ -427,7 +417,7 @@ public class SVN extends VCS implements IVCS {
           }
         } );
     } catch ( SVNClientException e ) {
-      e.printStackTrace();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     return files;
   }
@@ -444,10 +434,8 @@ public class SVN extends VCS implements IVCS {
                 convertTypeToGit( diffStatus.getDiffKind().toString() ), false ) );
         }
         );
-    } catch ( NumberFormatException e ) {
-      e.printStackTrace();
-    } catch ( SVNClientException e ) {
-      e.printStackTrace();
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     return files;
   }
@@ -459,12 +447,7 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public boolean isClean() {
-    try {
-      return getStagedFiles().isEmpty() & getUnstagedFiles().isEmpty();
-    } catch ( Exception e ) {
-      e.printStackTrace();
-      return false;
-    }
+    return getStagedFiles().isEmpty() & getUnstagedFiles().isEmpty();
   }
 
   @Override
@@ -479,12 +462,8 @@ public class SVN extends VCS implements IVCS {
         return svnClient.getContent( svnClient.getInfoFromWorkingCopy( root ).getUrl().appendPath( file ),
           new SVNRevision.Number( Long.parseLong( commitId ) ) );
       }
-    } catch ( NumberFormatException e ) {
-      e.printStackTrace();
-    } catch ( SVNClientException e ) {
-      e.printStackTrace();
-    } catch ( FileNotFoundException e ) {
-      e.printStackTrace();
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     return null;
   }
@@ -526,10 +505,8 @@ public class SVN extends VCS implements IVCS {
       svnClient.mergeReintegrate( new SVNUrl( getRemoteRoot() + File.separator + name ),
           SVNRevision.HEAD, root, false, false );
       return true;
-    } catch ( MalformedURLException e ) {
-      e.printStackTrace();
-    } catch ( SVNClientException e ) {
-      e.printStackTrace();
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     return false;
   }
@@ -550,12 +527,8 @@ public class SVN extends VCS implements IVCS {
           root,
           false, 100, true, false, false );
       return true;
-    } catch ( NumberFormatException e ) {
-      e.printStackTrace();
-    } catch ( SVNClientException e ) {
+    } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-    } catch ( MalformedURLException e ) {
-      e.printStackTrace();
     }
     return false;
   }
