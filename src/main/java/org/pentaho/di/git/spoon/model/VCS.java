@@ -24,7 +24,7 @@ public class VCS implements IVCS {
   void showMessageBox( String title, String message ) {
     MessageBox messageBox = new MessageBox( shell, SWT.OK );
     messageBox.setText( title );
-    messageBox.setMessage( message );
+    messageBox.setMessage( message == null ? "" : message );
     messageBox.open();
   }
 

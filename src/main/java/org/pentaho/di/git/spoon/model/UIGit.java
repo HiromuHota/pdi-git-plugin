@@ -858,9 +858,9 @@ public class UIGit extends VCS implements IVCS {
   }
 
   private MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception {
-    Ref ref = git.getRepository().exactRef( Constants.R_HEADS + value );
+    ObjectId obj = git.getRepository().resolve( value );
     return git.merge()
-        .include( ref )
+        .include( obj )
         .setStrategy( MergeStrategy.get( mergeStrategy ) )
         .call();
   }
@@ -872,7 +872,7 @@ public class UIGit extends VCS implements IVCS {
       return false;
     }
     MergeBranchDialog dialog = new MergeBranchDialog( shell );
-    List<String> branches = getLocalBranches();
+    List<String> branches = getBranches();
     branches.remove( getBranch() );
     dialog.setBranches( branches );
     if ( dialog.open() == Window.OK ) {
