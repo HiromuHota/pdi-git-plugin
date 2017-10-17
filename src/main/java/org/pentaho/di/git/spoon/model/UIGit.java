@@ -847,7 +847,7 @@ public class UIGit extends VCS implements IVCS {
   public boolean deleteBranch( String name, boolean force ) {
     try {
       git.branchDelete()
-          .setBranchNames( name )
+          .setBranchNames( getExpandedName( name, IVCS.TYPE_BRANCH ) )
           .setForce( force )
           .call();
       return true;
