@@ -372,6 +372,9 @@ public class UIGit extends VCS implements IVCS {
     status.getModified().forEach( name -> {
       files.add( new UIFile( name, ChangeType.MODIFY, false ) );
     } );
+    status.getConflicting().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.MODIFY, false ) );
+    } );
     status.getMissing().forEach( name -> {
       files.add( new UIFile( name, ChangeType.DELETE, false ) );
     } );
@@ -591,7 +594,7 @@ public class UIGit extends VCS implements IVCS {
     } else {
       String msg = mergeResult.getMergeStatus().toString();
       if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
-        resetHard();
+//        resetHard();
       } else if ( mergeResult.getFailingPaths().size() != 0 ) {
         for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
           msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
@@ -819,7 +822,16 @@ public class UIGit extends VCS implements IVCS {
   @Override
   public void revertPath( String path ) {
     try {
+      /*
+       * This is a work-around to discard changes of conflicting files
+       * Git CLI `git checkout -- conflicted.txt` discards the changes, but jgit does not
+       */
+      git.add().addFilepattern( path ).call();
+
       git.checkout().setStartPoint( Constants.HEAD ).addPath( path ).call();
+      if ( isClean() ) { // if no changed files, then reset --hard to get out of merging status
+        git.reset().setMode( ResetType.HARD ).call();
+      }
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
@@ -879,13 +891,14 @@ public class UIGit extends VCS implements IVCS {
       String branch = dialog.getSelectedBranch();
       String mergeStrategy = dialog.getSelectedMergeStrategy();
       try {
-        MergeResult result = mergeBranch( branch, mergeStrategy );
+        MergeResult result = mergeBranch( getExpandedName( branch, IVCS.TYPE_BRANCH ), mergeStrategy );
         if ( result.getMergeStatus().isSuccessful() ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           return true;
         } else {
           if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
-            resetHard();
+//            resetHard();
+            return true;
           }
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
         }

@@ -217,8 +217,10 @@ public class UIGitTest extends RepositoryTestCase {
     git2.commit().setMessage( "Change B at remote" ).call();
 
     assertFalse( uiGit.pull() );
-    verify( uiGit ).resetHard();
+//    verify( uiGit ).resetHard();
 
+    uiGit.revertPath( "SomeFile.txt" );
+    assertTrue( uiGit.isClean() );
     git2.close();
   }
 
