@@ -596,7 +596,7 @@ public class UIGit implements VCS {
   @Override
   public void deleteBranch( String name, boolean force ) throws Exception {
     git.branchDelete()
-        .setBranchNames( name )
+        .setBranchNames( getExpandedName( name, VCS.TYPE_BRANCH ) )
         .setForce( force )
         .call();
   }
@@ -690,7 +690,7 @@ public class UIGit implements VCS {
 
   @Override
   public void deleteTag( String name ) throws Exception {
-    git.tagDelete().setTags( name ).call();
+    git.tagDelete().setTags( getExpandedName( name, VCS.TYPE_TAG ) ).call();
   }
 
   @Override

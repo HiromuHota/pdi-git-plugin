@@ -402,7 +402,7 @@ public class UIGitTest extends RepositoryTestCase {
   }
 
   @Test
-  public void testCreateDeleteBranch() throws Exception {
+  public void testCreateDeleteBranchTag() throws Exception {
     initialCommit();
 
     // create a branch
@@ -410,26 +410,21 @@ public class UIGitTest extends RepositoryTestCase {
     List<String> branches = uiGit.getLocalBranches();
     assertTrue( branches.contains( "test" ) );
 
-    // delete the branch
-    uiGit.deleteBranch( "test", true );
-    branches = uiGit.getLocalBranches();
-    assertEquals( 1, branches.size() );
-    assertFalse( branches.contains( "test" ) );
-  }
-
-  @Test
-  public void testCreateDeleteTag() throws Exception {
-    initialCommit();
-
     // create a tag
     uiGit.createTag( "test" );
     List<String> tags = uiGit.getTags();
     assertTrue( tags.contains( "test" ) );
 
+    // delete the branch
+    uiGit.deleteBranch( "test", true );
+    branches = uiGit.getLocalBranches();
+    assertEquals( 1, branches.size() );
+    assertFalse( branches.contains( "test" ) );
+
     uiGit.checkout( uiGit.getExpandedName( "test", VCS.TYPE_TAG ) );
     assertTrue( uiGit.getBranch().contains( Constants.HEAD ) );
 
-    // delete the branch
+    // delete the tag
     uiGit.deleteTag( "test" );
     tags = uiGit.getTags();
     assertEquals( 0, tags.size() );
