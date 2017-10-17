@@ -397,15 +397,16 @@ public class UIGitTest extends RepositoryTestCase {
   public void testCreateDeleteBranchTag() throws Exception {
     initialCommit();
 
-    // create a branch (and checkout that branch)
-    uiGit.createBranch( "test" );
-    List<String> branches = uiGit.getLocalBranches();
-    assertTrue( branches.contains( "test" ) );
-
     // create a tag
     uiGit.createTag( "test" );
     List<String> tags = uiGit.getTags();
     assertTrue( tags.contains( "test" ) );
+
+    // create a branch (and checkout that branch)
+    uiGit.createBranch( "test" );
+    List<String> branches = uiGit.getLocalBranches();
+    assertTrue( branches.contains( "test" ) );
+    assertEquals( "test", uiGit.getBranch() );
 
     // Checkout master
     uiGit.checkout( Constants.MASTER );
