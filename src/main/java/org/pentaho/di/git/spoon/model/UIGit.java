@@ -805,12 +805,12 @@ public class UIGit extends VCS implements IVCS {
 
   @Override
   public void checkoutBranch( String name ) {
-    checkout( getExpandedName( name, IVCS.TYPE_BRANCH ) );
+    checkout( name );
   }
 
   @Override
   public void checkoutTag( String name ) {
-    checkout( getExpandedName( name, IVCS.TYPE_TAG ) );
+    checkout( name );
   }
 
   /* (non-Javadoc)
@@ -832,7 +832,7 @@ public class UIGit extends VCS implements IVCS {
   public boolean createBranch( String value ) {
     try {
       git.branchCreate().setName( value ).call();
-      checkoutBranch( value );
+      checkoutBranch( getExpandedName( value, IVCS.TYPE_BRANCH ) );
       return true;
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
