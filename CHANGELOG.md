@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.7.3 - 2017-10-17
+### Fixed
+- The layout of CloneRepositoryDialog
+- Ignore parse error when typing an url
+- A bug that a remote branch cannot be checked-out
+- A bug that deleting a branch deletes a tag with the same name
+
 ## 0.7.2 - 2017-09-28
 ### Fixed
 - Fix a typo bug that tries to push instead of pull when the cached credential does not get authenticated
