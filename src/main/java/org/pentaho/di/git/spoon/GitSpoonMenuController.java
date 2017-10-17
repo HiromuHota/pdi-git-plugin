@@ -5,12 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.window.Window;
-import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.git.spoon.dialog.CloneRepositoryDialog;
 import org.pentaho.di.git.spoon.dialog.EditRepositoryDialog;
 import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
+import org.pentaho.di.git.spoon.model.IVCS;
+import org.pentaho.di.git.spoon.model.SVN;
 import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
@@ -135,39 +136,13 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
       }
       String url = dialog.getURL();
       String directory = null;
-      try {
-        directory = dialog.getDirectory() + File.separator + dialog.getCloneAs();
-        UIGit.cloneRepo( directory, url );
+      directory = dialog.getDirectory() + File.separator + dialog.getCloneAs();
+      IVCS vcs = getVCS( repo );
+      vcs.setShell( getShell() );
+      if ( vcs.cloneRepo( directory, url ) ) {
         showMessageBox( "Success", "Success" );
         saveRepository( repo );
         gitController.openGit( repo );
-      } catch ( Exception e ) {
-        if ( e instanceof TransportException
-            && e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
-          cloneRepoWithUsernamePassword( directory, url );
-          try {
-            saveRepository( repo );
-            gitController.openGit( repo );
-          } catch ( MetaStoreException e1 ) {
-            showMessageBox( "Error", e1.getLocalizedMessage() );
-          }
-        } else {
-          showMessageBox( "Error", e.getLocalizedMessage() );
-        }
-      }
-    }
-  }
-
-  public void cloneRepoWithUsernamePassword( String directory, String url ) {
-    UsernamePasswordDialog dialog = getUsernamePasswordDialog();
-    if ( dialog.open() == Window.OK ) {
-      String username = dialog.getUsername();
-      String password = dialog.getPassword();
-      try {
-        UIGit.cloneRepo( directory, url, username, password );
-        showMessageBox( "Success", "Success" );
-      } catch ( Exception e ) {
-        showMessageBox( "Error", e.getLocalizedMessage() );
       }
     }
   }
@@ -195,9 +170,13 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   @VisibleForTesting
-  void saveRepository( GitRepository repo ) throws MetaStoreException {
+  void saveRepository( GitRepository repo ) {
     MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
-    repoFactory.saveElement( repo );
+    try {
+      repoFactory.saveElement( repo );
+    } catch ( MetaStoreException e ) {
+      e.printStackTrace();
+    }
   }
 
   Shell getShell() {
@@ -207,5 +186,14 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   private MetaStoreFactory<GitRepository> getRepoFactory() {
     IMetaStore metaStore = Spoon.getInstance().getMetaStore();
     return new MetaStoreFactory<GitRepository>( GitRepository.class, metaStore, PentahoDefaults.NAMESPACE );
+  }
+
+  @VisibleForTesting
+  IVCS getVCS( GitRepository repo ) {
+    if ( repo.getType() == null || repo.getType().equals( IVCS.GIT ) ) {
+      return new UIGit();
+    } else {
+      return new SVN();
+    }
   }
 }

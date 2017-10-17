@@ -1,8 +1,11 @@
 # Overview
 
-The Git plugin allows you to manage versions of local Kettle files without leaving Spoon.
+This plugin allows you to manage versions of local Kettle files without leaving Spoon.
+In addition to Git, Subversion is also supported.
 
 # How to install
+
+## PDI Plugin
 
 ```
 $ cd data-integration/plugins
@@ -10,6 +13,38 @@ $ unzip pdi-git-plugin-X.X.X-jar-with-dependencies.zip
 ```
 
 To uninstall, just remove the `pdi-git-plugin` folder.
+
+## Native SVN libraries (skip if Subversion is not used)
+
+### Windows
+
+1. Download SlikSVN from [here](https://sliksvn.com/download/) and install it
+2. Copy `C:\Program Files\SlikSvn\bin\libsvnjavahl-1.dll` to `libswt\win64` (64-bit) or to `libswt\win32` (32-bit)
+
+### Mac OS X
+
+```
+brew install subversion --with-java
+sudo ln -s /usr/local/lib/libsvnjavahl-1.dylib $JAVA_HOME/jre/lib/
+```
+
+or follow instructions in [here](http://subclipse.stage.tigris.org/wiki/JavaHL).
+
+### Linux (Debian/Ubuntu)
+
+```
+$ sudo apt-get install libsvn-java
+```
+
+Append `/usr/lib/x86_64-linux-gnu/jni/` to `LIBPATH` in `spoon.sh` as follows:
+
+```
+LIBPATH=$LIBPATH:/usr/lib/x86_64-linux-gnu/jni/
+export LIBPATH
+```
+
+Important: For example in Ubuntu 14.04, the version of libsvn-java will be 1.8.8 by default, but it should be 1.9.X.
+Ubuntu 16.04 (Xenial) gives you 1.9.3 by default.
 
 # How to use
 
@@ -35,8 +70,20 @@ Currently, a remote repository named "origin" can be set.
 The commit history is listed in reverse chronological order.
 Selecting one of the commits shows a list of changed files in that particular commit.
 If there are any changes in the working tree, WORKINGTREE is added to the top of the list, where you can see those changes.
-Right-click on a commit pops up a context menu, where you can choose **checkout** to checkout that particular commit.
-Or you can choose **reset to this commit**, equivalent of `git reset --mixed <commit>`, to reset the current branch head to this commit.
+Right-click menu on a commit differs between Git and Subversion.
+
+### Git
+
+- **Checkout**: checkout a previous commit (`git checkout <commit>`). <img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16"> **Branch > Checkout** to undo this operation.
+- **Rollback**: rollback to a previous commit (`git revert --no-commit HEAD..<commit>`). **Discard changes in working tree** to undo this operation.
+
+### Subversion
+
+- **Update**: update to a previous revision (`svn update -r <revision>)`. <img src="src/main/resources/org/pentaho/di/git/spoon/images/pull.png" width="16"> **Update** to undo this operation.
+- **Rollback**: rollback to a previous commit (`svn merge -r BASE:<revision>`). **Discard changes in working tree** to undo this operation.
+
+Use **Checkout/Update** to see how the contents looked like at that commit with the commit history intact.
+Use **Rollback** to rollback all the changes. A new commit can be made to persist the rollback.
 
 ## Working with files
 
@@ -104,6 +151,11 @@ Here is an example `.git/config` (see [here](https://git-scm.com/docs/git-config
 
 With this example config, **Pull** uses the non fast-forward mode instead of the default fast-forward mode when merging into `master`, **Push** pushes the current branch to two remotes.
 
+### Subversion
+
+**Push** is disabled because making a commit always pushes changes to the remote repository.
+Instead of **Pull**, **Update** is used because of the Subversion terminology.
+
 ## Branches
 
 <img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16"> **Branch** has branch operations: **Checkout** switches between branches, **Create / Delete** can create / delete a branch, **Merge** can merge a branch into the current one, **Push** can push a specific branch.
@@ -111,6 +163,12 @@ With this example config, **Pull** uses the non fast-forward mode instead of the
 Switching to a remote branch, say `origin/feature`, gets you in a detached HEAD state.
 Use **Branch > Create** to create a local branch, say `feature`, then you will get out of the state.
 Collectively, they are equivalent of `git checkout origin/feature` then `git checkout -b feature`.
+
+### Subversion
+
+The typical repository layout is trunk/branches/tags, but currently this plugin has no assumption on the layout.
+Thus, the list of branches includes any directories in the repository.
+For example, the list may include `/trunk` and `/tags/tag1`.
 
 ## Tags
 
@@ -162,11 +220,6 @@ Proxy Authentication is currently not supported.
 ### When I checkedout a remote branch, say *origin/develop*, I ended up being in a HEAD detached state. How can I create a local branch?
 
 Please create a branch called *develop*, then you will be out of the HEAD detached state.
-
-### How can I revert to one of the commits?
-
-*Revert* (equivalent to `git revert`) has not been and will not be implemented in this plugin because reverting to a commit may conflict and it is not easy to resolve conflicts of Kettle files.
-However, you can still let a Kettle file revert to a past commit: open the interested Kettle file of the particular commit (Context menu > Open), change the Transformation/Job name if you want, save it, stage it, and make a new commit.
 
 # How to compile
 

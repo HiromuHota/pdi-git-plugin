@@ -3,205 +3,318 @@ package org.pentaho.di.git.spoon.model;
 import java.io.InputStream;
 import java.util.List;
 
-import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.pentaho.di.git.spoon.GitController;
+import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
-public interface VCS {
+import com.google.common.annotations.VisibleForTesting;
 
-  String WORKINGTREE = "WORKINGTREE";
-  String INDEX = "INDEX";
-  String GIT = "Git";
-  String TYPE_TAG = "tag";
-  String TYPE_BRANCH = "branch";
-  String TYPE_REMOTE = "remote";
-  String TYPE_COMMIT = "commit";
+public class VCS implements IVCS {
 
-  String getDirectory();
+  protected static final Class<?> PKG = GitController.class;
+  protected Shell shell;
+  protected String directory;
 
-  /**
-   * If the repository is clean and not dirty.
-   * @return
-   */
-  boolean isClean();
+  @VisibleForTesting
+  void showMessageBox( String title, String message ) {
+    MessageBox messageBox = new MessageBox( shell, SWT.OK );
+    messageBox.setText( title );
+    messageBox.setMessage( message == null ? "" : message );
+    messageBox.open();
+  }
 
   /**
-   * Get the author name as defined in the .git
-   * @return
+   * Prompt the user to set username and password
+   * @return true on success
    */
-  String getAuthorName();
+  protected boolean promptUsernamePassword() {
+    UsernamePasswordDialog dialog = new UsernamePasswordDialog( shell );
+    if ( dialog.open() == Window.OK ) {
+      String username = dialog.getUsername();
+      String password = dialog.getPassword();
+      setCredential( username, password );
+      return true;
+    }
+    return false;
+  }
 
-  /**
-   * Get the author name for a commit
-   * @param commitId
-   * @return
-   * @throws Exception
-   */
-  String getAuthorName( String commitId ) throws Exception;
+  @Override
+  public String getDirectory() {
+    return directory;
+  }
 
-  String getCommitMessage( String commitId ) throws Exception;
+  @Override
+  public boolean isClean() {
+    return false;
+  }
 
-  /**
-   * Get SHA-1 commit Id
-   * @param revstr: (e.g., HEAD, SHA-1)
-   * @return
-   * @throws Exception
-   */
-  String getCommitId( String revstr ) throws Exception;
+  @Override
+  public String getAuthorName() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  /**
-   * Get SHA-1 commit Id
-   * @param revstr: (e.g., HEAD, SHA-1)
-   * @return
-   * @throws Exception
-   */
-  String getParentCommitId( String revstr ) throws Exception;
+  @Override
+  public String getAuthorName( String commitId ) {
+    return null;
+  }
 
-  /**
-   * Get an expanded name from shortened name (e.g., master -> refs/heads/master)
-   * @param name (e.g., master)
-   * @param type
-   * @return
-   * @throws Exception
-   */
-  String getExpandedName( String name, String type ) throws Exception;
+  @Override
+  public String getCommitMessage( String commitId ) {
+    return null;
+  }
 
-  String getShortenedName( String name, String type );
+  @Override
+  public String getCommitId( String revstr ) {
+    return null;
+  }
 
-  /**
-   * Get the current branch
-   * @return Current branch
-   */
-  String getBranch();
+  @Override
+  public String getParentCommitId( String revstr ) {
+    return null;
+  }
 
-  /**
-   * Get a list of local branches
-   * @return
-   */
-  List<String> getLocalBranches();
+  @Override
+  public String getExpandedName( String name, String type ) {
+    return name;
+  }
 
-  /**
-   * Get a list of all (local + remote) branches
-   * @return
-   */
-  List<String> getBranches();
+  @Override
+  public String getShortenedName( String name, String type ) {
+    return name;
+  }
 
-  String getRemote();
+  @Override
+  public String getBranch() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  void addRemote( String s ) throws Exception;
+  @Override
+  public List<String> getLocalBranches() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  void removeRemote() throws Exception;
+  @Override
+  public List<String> getBranches() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  boolean hasRemote();
+  @Override
+  public String getRemote() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  void commit( String authorName, String message ) throws Exception;
+  @Override
+  public void addRemote(String s) {
+    // TODO Auto-generated method stub
+    
+  }
 
-  UIRepositoryObjectRevisions getRevisions() throws Exception;
+  @Override
+  public void removeRemote() {
+    // TODO Auto-generated method stub
+    
+  }
 
-  void setCredential( String username, String password );
+  @Override
+  public boolean hasRemote() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 
-  /**
-   * Get the list of unstaged files
-   * @return
-   * @throws Exception
-   */
-  List<UIFile> getUnstagedFiles() throws Exception;
+  @Override
+  public boolean commit( String authorName, String message ) {
+    return false;
+  }
 
-  /**
-   * Get the list of staged files
-   * @return
-   * @throws Exception
-   */
-  List<UIFile> getStagedFiles() throws Exception;
+  @Override
+  public UIRepositoryObjectRevisions getRevisions() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  /**
-   * Get the list of changed files between two commits
-   * @param oldCommitId
-   * @param newCommitId
-   * @return
-   * @throws Exception
-   */
-  List<UIFile> getStagedFiles( String oldCommitId, String newCommitId ) throws Exception;
+  @Override
+  public void setCredential(String username, String password) {
+    // TODO Auto-generated method stub
+    
+  }
 
-  boolean hasStagedFiles() throws Exception;
+  @Override
+  public List<UIFile> getUnstagedFiles() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  void initRepo( String baseDirectory ) throws Exception;
+  @Override
+  public List<UIFile> getStagedFiles() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  void openRepo( String baseDirectory ) throws Exception;
+  @Override
+  public List<UIFile> getStagedFiles(String oldCommitId, String newCommitId) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  void closeRepo();
+  @Override
+  public boolean hasStagedFiles() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 
-  void add( String filepattern ) throws Exception;
+  @Override
+  public void initRepo(String baseDirectory) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
 
-  void rm( String filepattern ) throws Exception;
+  @Override
+  public void openRepo(String baseDirectory) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
 
-  void reset( String name ) throws Exception;
+  @Override
+  public void closeRepo() {
+    // TODO Auto-generated method stub
+    
+  }
 
-  /**
-   * Reset a file to a commit
-   * @param name of the commit
-   * @param path of the file
-   * @throws Exception
-   */
-  void reset( String name, String path ) throws Exception;
+  @Override
+  public void add( String filepattern ) {
+  }
 
-  void resetHard() throws Exception;
+  @Override
+  public void rm( String filepattern ) {
+  }
 
-  /**
-   * Equivalent of <tt>git fetch; git merge --ff</tt>
-   *
-   * @return PullResult
-   * @throws Exception
-   * @see <a href="http://www.kernel.org/pub/software/scm/git/docs/git-pull.html">Git documentation about Pull</a>
-   */
-  PullResult pull() throws Exception;
+  @Override
+  public void reset( String name ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+  }
 
-  Iterable<PushResult> push() throws Exception;
+  @Override
+  public void resetPath( String path ) {
+  }
 
-  Iterable<PushResult> push( String name ) throws Exception;
+  @Override
+  public boolean pull() {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
+  }
 
-  /**
-   * Show diff for a commit
-   * @param commitId
-   * @return
-   * @throws Exception
-   */
-  String show( String commitId ) throws Exception;
+  @Override
+  public boolean push() {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
+  }
 
-  String diff( String oldCommitId, String newCommitId ) throws Exception;
+  @Override
+  public boolean push( String type ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
+  }
 
-  String diff( String oldCommitId, String newCommitId, String file ) throws Exception;
+  @Override
+  public String diff(String oldCommitId, String newCommitId) throws Exception {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  InputStream open( String file, String commitId ) throws Exception;
+  @Override
+  public String diff(String oldCommitId, String newCommitId, String file) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  /**
-   * Checkout a branch or commit
-   * @param name
-   * @throws Exception
-   */
-  void checkout( String name ) throws Exception;
+  @Override
+  public InputStream open(String file, String commitId) {
+    return null;
+  }
 
-  /**
-   * Checkout a file of a particular branch or commit
-   * @param name branch or commit; null for INDEX
-   * @param path
-   * @throws Exception
-   */
-  void checkout( String name, String path ) throws Exception;
+  @Override
+  public void checkout( String name ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+  }
 
-  void createBranch( String value ) throws Exception;
+  @Override
+  public void revertPath(String path) {
+    // TODO Auto-generated method stub
+    
+  }
 
-  void deleteBranch( String name, boolean force ) throws Exception;
+  @Override
+  public boolean createBranch( String value ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
+  }
 
-  MergeResult mergeBranch( String value ) throws Exception;
+  @Override
+  public boolean deleteBranch( String name, boolean force ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
+  }
 
-  MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception;
+  @Override
+  public List<String> getTags() {
+    return null;
+  }
 
-  List<String> getTags();
+  @Override
+  public boolean createTag( String name ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
+  }
 
-  void createTag( String name ) throws Exception;
+  @Override
+  public boolean deleteTag( String name ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
+  }
 
-  void deleteTag( String name ) throws Exception;
+  @Override
+  public void setShell( Shell shell ) {
+    this.shell = shell;
+  }
+
+  @Override
+  public boolean merge() {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
+  }
+
+  @Override
+  public boolean cloneRepo( String directory, String url ) {
+    return false;
+  }
+
+  @Override
+  public String getType() {
+    return null;
+  }
+
+  @Override
+  public void checkoutBranch( String name ) {
+  }
+
+  @Override
+  public void checkoutTag( String name ) {
+  }
+
+  @Override
+  public boolean rollback( String name ) {
+    showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Not supported (yet)" );
+    return false;
+  }
 
 }

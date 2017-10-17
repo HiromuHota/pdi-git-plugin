@@ -87,6 +87,21 @@
       <version>${dependency.jgit.revision}</version>
     </dependency>
     <dependency>
+      <groupId>org.tigris.svnclientadapter</groupId>
+      <artifactId>adapter-base</artifactId>
+      <version>1.9.4-2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tigris.svnclientadapter</groupId>
+      <artifactId>adapter-javahl</artifactId>
+      <version>1.9.4-2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.subversion</groupId>
+      <artifactId>javahl</artifactId>
+      <version>1.9.4</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.3.6</version>
@@ -95,6 +110,12 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
       <version>4.3.3</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.2</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -124,6 +145,10 @@
     <repository>
       <id>Pentaho Public Release Repo</id>
       <url>http://nexus.pentaho.org/content/groups/omni</url>
+    </repository>
+    <repository>
+      <id>bintray-maven</id>
+      <url>https://dl.bintray.com/subclipse/maven</url>
     </repository>
   </repositories>
 </project>

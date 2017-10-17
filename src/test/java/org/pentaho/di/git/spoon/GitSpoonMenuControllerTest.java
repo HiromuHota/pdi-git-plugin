@@ -1,6 +1,5 @@
 package org.pentaho.di.git.spoon;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import org.eclipse.jface.window.Window;
@@ -16,6 +15,7 @@ import org.mockito.Spy;
 import org.pentaho.di.git.spoon.dialog.CloneRepositoryDialog;
 import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
+import org.pentaho.di.git.spoon.model.UIGit;
 
 @RunWith( MockitoJUnitRunner.class )
 public class GitSpoonMenuControllerTest extends RepositoryTestCase {
@@ -28,6 +28,10 @@ public class GitSpoonMenuControllerTest extends RepositoryTestCase {
   private UsernamePasswordDialog usernamePasswordDialog;
   @Mock
   private GitRepository repo;
+  @Mock
+  private GitController gitController;
+  @Mock
+  private UIGit git;
 
   @Rule
   public TemporaryFolder dstFolder = new TemporaryFolder();
@@ -35,8 +39,11 @@ public class GitSpoonMenuControllerTest extends RepositoryTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+    controller.setGitController( gitController );
     doReturn( cloneRepositoryDialog ).when( controller ).getCloneRepositoryDialog( any( GitRepository.class ) );
     doReturn( usernamePasswordDialog ).when( controller ).getUsernamePasswordDialog();
+    doReturn( null ).when( controller ).getShell();
+    doReturn( git ).when( controller ).getVCS( any( GitRepository.class ) );
     doNothing().when( controller ).saveRepository( any( GitRepository.class ) );
     doNothing().when( controller ).showMessageBox( anyString(), anyString() );
   }
@@ -55,31 +62,10 @@ public class GitSpoonMenuControllerTest extends RepositoryTestCase {
     when( cloneRepositoryDialog.open() ).thenReturn( Window.OK );
     when( cloneRepositoryDialog.getURL() ).thenReturn( db.getDirectory().getPath() );
     when( cloneRepositoryDialog.getDirectory() ).thenReturn( dstFolder.getRoot().getPath() );
+    doReturn( true ).when( git ).cloneRepo( anyString(), anyString() );
 
     controller.cloneRepo();
 
     verify( controller ).showMessageBox( eq( "Success" ), anyString() );
-  }
-
-  @Test
-  public void testCloneShouldFailWhenDirNotFound() throws Exception {
-    when( cloneRepositoryDialog.open() ).thenReturn( Window.OK );
-    when( cloneRepositoryDialog.getURL() ).thenReturn( db.getDirectory().getPath() );
-    when( cloneRepositoryDialog.getDirectory() ).thenReturn( dstFolder.getRoot().getPath() + "notexists" );
-
-    controller.cloneRepo();
-
-    verify( controller ).showMessageBox( eq( "Error" ), anyString() );
-  }
-
-  @Test
-  public void testCloneShouldFailWhenURLNotFound() throws Exception {
-    when( cloneRepositoryDialog.open() ).thenReturn( Window.OK );
-    when( cloneRepositoryDialog.getURL() ).thenReturn( "fakeURL" );
-    when( cloneRepositoryDialog.getDirectory() ).thenReturn( dstFolder.getRoot().getPath() );
-
-    controller.cloneRepo();
-
-    verify( controller ).showMessageBox( eq( "Error" ), anyString() );
   }
 }

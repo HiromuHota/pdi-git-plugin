@@ -1,11 +1,10 @@
 package org.pentaho.di.git.spoon;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -16,31 +15,23 @@ import org.eclipse.jface.viewers.ColumnViewerEditorDeactivationEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.MergeResult.MergeStatus;
-import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
-import org.eclipse.jgit.transport.FetchResult;
-import org.eclipse.jgit.transport.PushResult;
-import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
+import org.pentaho.di.core.exception.KettleMissingPluginsException;
+import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
-import org.pentaho.di.git.spoon.dialog.MergeBranchDialog;
-import org.pentaho.di.git.spoon.dialog.UsernamePasswordDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
+import org.pentaho.di.git.spoon.model.SVN;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
-import org.pentaho.di.git.spoon.model.VCS;
+import org.pentaho.di.git.spoon.model.IVCS;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
@@ -77,7 +68,7 @@ public class GitController extends AbstractXulEventHandler {
 
   private static final Class<?> PKG = GitController.class;
 
-  private VCS vcs;
+  private IVCS vcs;
   private String path;
   private String authorName;
   private String commitMessage;
@@ -134,7 +125,7 @@ public class GitController extends AbstractXulEventHandler {
         UIFile file = (UIFile) selectedItem.getBoundObject();
         try {
           if ( file.getIsStaged() ) {
-            vcs.reset( Constants.HEAD, file.getName() );
+            vcs.resetPath( file.getName() );
           } else {
             vcs.add( file.getName() );
           }
@@ -190,21 +181,41 @@ public class GitController extends AbstractXulEventHandler {
     document.getElementById( "config" ).setDisabled( false );
     commitButton.setDisabled( false );
     pullButton.setDisabled( false );
-    pushButton.setDisabled( false );
     branchButton.setDisabled( false );
     tagButton.setDisabled( false );
     ( (XulButton) document.getElementById( "refresh" ) ).setDisabled( false );
 
     commitMessageTextbox.setReadonly( false );
     authorNameTextbox.setReadonly( false );
+
+    // Depends on VCS type
+    pullButton.setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Pull" ) );
+    ((XulMenuitem) document.getElementById( "branch-checkout" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Checkout" ) );
+    ((XulMenuitem) document.getElementById( "branch-merge" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Merge" ) );
+    ((XulMenuitem) document.getElementById( "tag-checkout" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".Checkout" ) );
+    ((XulMenuitem) document.getElementById( "menuitem-checkout" )).setLabel( BaseMessages.getString( PKG, vcs.getType() + ".ContextMenu.Checkout" ) );
+    if ( vcs.getType().equals( IVCS.GIT ) ) {
+      pushButton.setDisabled( false );
+      document.getElementById( "branch-push" ).setDisabled( false );
+      document.getElementById( "tag-push" ).setDisabled( false );
+//      document.getElementById( "menuitem-reset" ).setDisabled( false );
+    } else {
+      pushButton.setDisabled( true );
+      document.getElementById( "branch-push" ).setDisabled( true );
+      document.getElementById( "tag-push" ).setDisabled( true );
+//      document.getElementById( "menuitem-reset" ).setDisabled( true );
+    }
   }
 
   public void openGit( GitRepository repo ) {
     String baseDirectory = repo.getDirectory();
     try {
-      if ( repo.getType() == null || repo.getType().equals( VCS.GIT ) ) {
+      if ( repo.getType() == null || repo.getType().equals( IVCS.GIT ) ) {
         vcs = new UIGit();
+      } else {
+        vcs = new SVN();
       }
+      vcs.setShell( getShell() );
       vcs.openRepo( baseDirectory );
     } catch ( RepositoryNotFoundException e ) {
       initGit( baseDirectory );
@@ -265,48 +276,15 @@ public class GitController extends AbstractXulEventHandler {
         vcs.add( content.getName() );
       }
     }
-    fireSourceChanged();
+    changedBinding.fireSourceChanged();
   }
 
   public void removeFromIndex() throws Exception {
     List<UIFile> contents = getSelectedChangedFiles();
     for ( UIFile content : contents ) {
-      vcs.reset( Constants.HEAD, content.getName() );
+      vcs.resetPath( content.getName() );
     }
-    fireSourceChanged();
-  }
-
-  public void openFile() {
-    String baseDirectory = vcs.getDirectory();
-    getSelectedChangedFiles().stream()
-      .forEach( content -> {
-        String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
-        String commitId;
-        commitId = isOnlyWIP() ? VCS.WORKINGTREE : getFirstSelectedRevision().getName();
-        try ( InputStream xmlStream = vcs.open( content.getName(), commitId ) ) {
-          EngineMetaInterface meta = null;
-          Consumer<EngineMetaInterface> c = null;
-          if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
-            meta = new TransMeta( xmlStream, null, true, null, null );
-            c = meta0 -> Spoon.getInstance().addTransGraph( (TransMeta) meta0 );
-          } else if ( filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
-            meta = new JobMeta( xmlStream, null, null );
-            c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
-          } else {
-            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
-            return;
-          }
-          meta.clearChanged();
-          meta.setFilename( filePath );
-          if ( !isOnlyWIP() ) {
-            meta.setName( String.format( "%s (%s)", meta.getName(), vcs.getShortenedName( commitId, VCS.TYPE_COMMIT ) ) );
-          }
-          c.accept( meta );
-          Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
-        } catch ( Exception e ) {
-          e.printStackTrace();
-        }
-      } );
+    changedBinding.fireSourceChanged();
   }
 
   /**
@@ -322,13 +300,17 @@ public class GitController extends AbstractXulEventHandler {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
           return;
         }
+        if ( content.getChangeType() == ChangeType.ADD ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "New file" );
+          return;
+        }
         EngineMetaInterface metaOld = null, metaNew = null;
         Consumer<EngineMetaInterface> c = null;
         try {
           InputStream xmlStreamOld, xmlStreamNew;
           String commitIdOld, commitIdNew;
           if ( isOnlyWIP() ) {
-            commitIdNew = VCS.WORKINGTREE;
+            commitIdNew = IVCS.WORKINGTREE;
             commitIdOld = Constants.HEAD;
           } else {
             commitIdNew = getFirstSelectedRevision().getName();
@@ -360,18 +342,20 @@ public class GitController extends AbstractXulEventHandler {
 
           metaOld.clearChanged();
           metaOld.setName( String.format( "%s (%s -> %s)", metaOld.getName(),
-              vcs.getShortenedName( commitIdOld, VCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdNew, VCS.TYPE_COMMIT ) ) );
+              vcs.getShortenedName( commitIdOld, IVCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdNew, IVCS.TYPE_COMMIT ) ) );
           metaOld.setFilename( filePath );
           c.accept( metaOld );
           metaNew.clearChanged();
           metaNew.setName( String.format( "%s (%s -> %s)", metaNew.getName(),
-              vcs.getShortenedName( commitIdNew, VCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdOld, VCS.TYPE_COMMIT ) ) );
+              vcs.getShortenedName( commitIdNew, IVCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdOld, IVCS.TYPE_COMMIT ) ) );
           metaNew.setFilename( filePath );
           c.accept( metaNew );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
-        } catch ( MissingObjectException | NullPointerException e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "New file" );
-        } catch ( Exception e ) {
+        } catch ( IOException e ) {
+          e.printStackTrace();
+        } catch ( KettleXMLException e ) {
+          e.printStackTrace();
+        } catch ( KettleMissingPluginsException e ) {
           e.printStackTrace();
         }
       } );
@@ -411,7 +395,7 @@ public class GitController extends AbstractXulEventHandler {
    */
   private Boolean isOnlyWIP() {
     return CollectionUtils.isEmpty( getSelectedRevisions() )
-        || ( getFirstSelectedRevision().getName().equals( VCS.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
+        || ( getFirstSelectedRevision().getName().equals( IVCS.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
   }
 
   private Shell getShell() {
@@ -439,9 +423,9 @@ public class GitController extends AbstractXulEventHandler {
       if ( selectedFiles.size() != 0 ) {
         if ( isOnlyWIP() ) {
           if ( selectedFiles.get( 0 ).getIsStaged() ) {
-            return vcs.diff( Constants.HEAD, VCS.INDEX, selectedFiles.get( 0 ).getName() );
+            return vcs.diff( Constants.HEAD, IVCS.INDEX, selectedFiles.get( 0 ).getName() );
           } else {
-            return vcs.diff( VCS.INDEX, VCS.WORKINGTREE, selectedFiles.get( 0 ).getName() );
+            return vcs.diff( IVCS.INDEX, IVCS.WORKINGTREE, selectedFiles.get( 0 ).getName() );
           }
         } else {
           String newCommitId = getFirstSelectedRevision().getName();
@@ -475,11 +459,11 @@ public class GitController extends AbstractXulEventHandler {
     firePropertyChange( "commitMessage", null, commitMessage );
   }
 
-  public UIRepositoryObjectRevisions getRevisions() throws Exception {
+  public UIRepositoryObjectRevisions getRevisions() {
     return vcs.getRevisions();
   }
 
-  public List<UIFile> getChangedFiles() throws Exception {
+  public List<UIFile> getChangedFiles() {
     List<UIFile> changedFiles = new ArrayList<UIFile>();
     if ( isOnlyWIP() ) {
       addToIndexMenuItem.setDisabled( false );
@@ -522,7 +506,7 @@ public class GitController extends AbstractXulEventHandler {
     return changedFiles;
   }
 
-  public void commit() throws Exception {
+  public void commit() {
     if ( !vcs.hasStagedFiles() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           "There are no staged files" );
@@ -530,25 +514,29 @@ public class GitController extends AbstractXulEventHandler {
     }
 
     try {
-      vcs.commit( getAuthorName(), getCommitMessage() );
-      setCommitMessage( "" );
-      fireSourceChanged();
+      if ( vcs.commit( getAuthorName(), getCommitMessage() ) ) {
+        setCommitMessage( "" );
+        fireSourceChanged();
+      }
     } catch ( NullPointerException e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
           "Malformed author name" );
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
 
   public void checkout() {
-    checkout( VCS.TYPE_COMMIT );
+    checkout( IVCS.TYPE_COMMIT );
   }
 
   public void checkout( String type ) {
     String name = null;
     List<String> names;
     EnterSelectionDialog esd;
+    Consumer<String> consumer = null;
     switch ( type ) {
-      case VCS.TYPE_BRANCH:
+      case IVCS.TYPE_BRANCH:
         names = vcs.getBranches();
         names.remove( vcs.getBranch() );
         esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to checkout..." );
@@ -556,21 +544,24 @@ public class GitController extends AbstractXulEventHandler {
         if ( name == null ) {
           return;
         }
+        consumer = s -> vcs.checkoutBranch( s );
         break;
-      case VCS.TYPE_TAG:
+      case IVCS.TYPE_TAG:
         names = vcs.getTags();
         esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to checkout..." );
         name = esd.open();
         if ( name == null ) {
           return;
         }
+        consumer = s -> vcs.checkoutTag( s );
         break;
       default:
         name = getFirstSelectedRevision().getName();
+        consumer = s -> vcs.checkout( s );
     }
     try {
       name = vcs.getExpandedName( name, type );
-      vcs.checkout( name );
+      consumer.accept( name );
       fireSourceChanged();
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -602,6 +593,18 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   /**
+   * Rollback to the selected commit, but does not make a commit
+   */
+  public void rollback() {
+    if ( anyChangedTabs() ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "One or more tabs have unsaved changes" );
+      return;
+    }
+    vcs.rollback( getFirstSelectedRevision().getName() );
+    fireSourceChanged();
+  }
+
+  /**
    * Discard changes to selected unstaged files.
    * Equivalent to <tt>git checkout -- &lt;paths&gt;</tt>
    * @throws Exception
@@ -614,19 +617,11 @@ public class GitController extends AbstractXulEventHandler {
     confirmBox.setCancelLabel( BaseMessages.getString( PKG, "Dialog.Cancel" ) );
     confirmBox.addDialogCallback( (XulDialogLambdaCallback<Object>) ( sender, returnCode, retVal ) -> {
       if ( returnCode.equals( Status.ACCEPT ) ) {
-        try {
-          List<UIFile> contents = getSelectedChangedFiles();
-          for ( UIFile content : contents ) {
-            if ( content.getIsStaged() ) {
-              showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please unstage first" );
-            } else {
-              vcs.checkout( null, content.getName() );
-            }
-          }
-          fireSourceChanged();
-        } catch ( Exception e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+        List<UIFile> contents = getSelectedChangedFiles();
+        for ( UIFile content : contents ) {
+          vcs.revertPath( content.getName() );
         }
+        fireSourceChanged();
       }
     } );
     confirmBox.open();
@@ -637,55 +632,8 @@ public class GitController extends AbstractXulEventHandler {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "One or more tabs have unsaved changes" );
       return;
     }
-    if ( !vcs.isClean() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
-      return;
-    }
-    if ( !vcs.hasRemote() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
-      return;
-    }
-    try {
-      PullResult pullResult = vcs.pull();
-      processPullResult( pullResult );
-    } catch ( TransportException e ) {
-      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
-        if ( promptUsernamePassword() ) {
-          pull();
-        }
-      } else if ( e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
-        if ( promptUsernamePassword() ) {
-          pull();
-        }
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
-    } catch ( Exception e ) {
-      if ( vcs.hasRemote() ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
-            "Please setup a remote" );
-      }
-    }
-  }
-
-  private void processPullResult( PullResult pullResult ) throws Exception {
-    FetchResult fetchResult = pullResult.getFetchResult();
-    MergeResult mergeResult = pullResult.getMergeResult();
-    if ( pullResult.isSuccessful() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+    if ( vcs.pull() ) {
       fireSourceChanged();
-    } else {
-      String msg = mergeResult.getMergeStatus().toString();
-      if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
-        vcs.resetHard();
-      } else if ( mergeResult.getFailingPaths().size() != 0 ) {
-        for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
-          msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
-        }
-      }
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
     }
   }
 
@@ -694,88 +642,7 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void push( String type ) {
-    if ( !vcs.hasRemote() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Please setup a remote" );
-      return;
-    }
-    String name = null;
-    List<String> names;
-    EnterSelectionDialog esd;
-    switch ( type ) {
-      case VCS.TYPE_BRANCH:
-        names = vcs.getLocalBranches();
-        esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Branch", "Select the branch to push..." );
-        name = esd.open();
-        if ( name == null ) {
-          return;
-        }
-        break;
-      case VCS.TYPE_TAG:
-        names = vcs.getTags();
-        esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select the tag to push..." );
-        name = esd.open();
-        if ( name == null ) {
-          return;
-        }
-        break;
-    }
-    try {
-      name = name == null ? null : vcs.getExpandedName( name, type );
-      Iterable<PushResult> resultIterable = vcs.push( name );
-      processPushResult( resultIterable );
-    } catch ( TransportException e ) {
-      if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" ) ) {
-        if ( promptUsernamePassword() ) {
-          push( type );
-        }
-      } else if ( e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
-        if ( promptUsernamePassword() ) {
-          push( type );
-        }
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
-    } catch ( Exception e ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-    }
-  }
-
-  /**
-   * Prompt the user to set username and password
-   * @return true on success
-   */
-  private boolean promptUsernamePassword() {
-    UsernamePasswordDialog dialog = new UsernamePasswordDialog( getShell() );
-    if ( dialog.open() == Window.OK ) {
-      String username = dialog.getUsername();
-      String password = dialog.getPassword();
-      vcs.setCredential( username, password );
-      return true;
-    }
-    return false;
-  }
-
-  private void processPushResult( Iterable<PushResult> resultIterable ) throws Exception {
-    resultIterable.forEach( result -> { // for each (push)url
-      StringBuilder sb = new StringBuilder();
-      result.getRemoteUpdates().stream()
-        .filter( update -> update.getStatus() != RemoteRefUpdate.Status.OK )
-        .filter( update -> update.getStatus() != RemoteRefUpdate.Status.UP_TO_DATE )
-        .forEach( update -> { // for each failed refspec
-          sb.append(
-            result.getURI().toString()
-            + "\n" + update.getSrcRef().toString()
-            + "\n" + update.getStatus().toString()
-            + ( update.getMessage() == null ? "" : "\n" + update.getMessage() )
-            + "\n\n"
-          );
-        } );
-      if ( sb.length() == 0 ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), sb.toString() );
-      }
-    } );
+    vcs.push( type );
   }
 
   public void createBranch() throws XulException {
@@ -785,12 +652,12 @@ public class GitController extends AbstractXulEventHandler {
     promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.Branch.Create.Message" ) );
     promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
       if ( status.equals( Status.ACCEPT ) ) {
-        try {
-          vcs.createBranch( value );
-          vcs.checkout( value );
-          fireSourceChanged();
-        } catch ( Exception e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+        String branch = getBranch();
+        if ( vcs.createBranch( value ) ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+          if ( !branch.equals( getBranch() ) ) { // Creating a branch involves checkingout that branch in Git
+            fireSourceChanged();
+          }
         }
       }
     } );
@@ -808,11 +675,8 @@ public class GitController extends AbstractXulEventHandler {
       if ( branch == null ) {
         return;
       }
-      try {
-        vcs.deleteBranch( branch, isForce );
+      if ( vcs.deleteBranch( branch, isForce ) ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
   }
@@ -824,11 +688,8 @@ public class GitController extends AbstractXulEventHandler {
     promptBox.setMessage( BaseMessages.getString( PKG, "Git.Dialog.Tag.Create.Message" ) );
     promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
       if ( status.equals( Status.ACCEPT ) ) {
-        try {
-          vcs.createTag( value );
+        if ( vcs.createTag( value ) ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-        } catch ( Exception e ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
         }
       }
     } );
@@ -840,11 +701,8 @@ public class GitController extends AbstractXulEventHandler {
     EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), names.toArray( new String[names.size()] ), "Select Tag", "Select a tag to delete..." );
     String name = esd.open();
     if ( name != null ) {
-      try {
-        vcs.deleteTag( name );
+      if ( vcs.deleteTag( name ) ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
   }
@@ -854,31 +712,8 @@ public class GitController extends AbstractXulEventHandler {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "One or more tabs have unsaved changes" );
       return;
     }
-    if ( !vcs.isClean() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
-      return;
-    }
-    MergeBranchDialog dialog = new MergeBranchDialog( getShell() );
-    List<String> branches = vcs.getLocalBranches();
-    branches.remove( vcs.getBranch() );
-    dialog.setBranches( branches );
-    if ( dialog.open() == Window.OK ) {
-      String branch = dialog.getSelectedBranch();
-      String mergeStrategy = dialog.getSelectedMergeStrategy();
-      try {
-        MergeResult result = vcs.mergeBranch( branch, mergeStrategy );
-        if ( result.getMergeStatus().isSuccessful() ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-          fireSourceChanged();
-        } else {
-          if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
-            vcs.resetHard();
-          }
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
-        }
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
+    if ( vcs.merge() ) {
+      fireSourceChanged();
     }
   }
 
@@ -891,21 +726,7 @@ public class GitController extends AbstractXulEventHandler {
       promptBox.setValue( vcs.getRemote() );
       promptBox.addDialogCallback( (XulDialogLambdaCallback<String>) ( component, status, value ) -> {
         if ( status.equals( Status.ACCEPT ) ) {
-          try {
-            vcs.addRemote( value );
-          } catch ( URISyntaxException e ) {
-            if ( value.equals( "" ) ) {
-              try {
-                vcs.removeRemote();
-              } catch ( Exception e1 ) {
-                e1.printStackTrace();
-              }
-            } else {
-              editRemote();
-            }
-          } catch ( Exception e ) {
-            e.printStackTrace();
-          }
+          vcs.addRemote( value );
         }
       } );
       promptBox.open();
@@ -927,8 +748,8 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   @VisibleForTesting
-  void setUIGit( VCS uiGit ) {
-    this.vcs = uiGit;
+  void setVCS( IVCS vcs ) {
+    this.vcs = vcs;
   }
 
   public boolean isOpen() {

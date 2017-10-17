@@ -1,5 +1,17 @@
 # Change Log
 
+## 0.8.0 - 2017-XX-XX
+### Added
+- Subversion support
+- "Rollback to here" command to a context menu that rollbacks the working tree (copy) to a previous commit (revision), but does not make a commit.
+
+### Changed
+- No need to unstage to discard changes
+
+### Removed
+- "Open" command from the context menu of a changed file
+- "Reset to this commit" command from the context menu of a commit
+
 ## 0.7.3 - 2017-10-17
 ### Fixed
 - The layout of CloneRepositoryDialog
