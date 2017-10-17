@@ -276,7 +276,7 @@ public class GitController extends AbstractXulEventHandler {
         vcs.add( content.getName() );
       }
     }
-    fireSourceChanged();
+    changedBinding.fireSourceChanged();
   }
 
   public void removeFromIndex() throws Exception {
@@ -284,7 +284,7 @@ public class GitController extends AbstractXulEventHandler {
     for ( UIFile content : contents ) {
       vcs.resetPath( content.getName() );
     }
-    fireSourceChanged();
+    changedBinding.fireSourceChanged();
   }
 
   /**
