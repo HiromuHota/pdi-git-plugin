@@ -972,9 +972,9 @@ public class UIGit extends VCS implements IVCS {
   @Override
   public boolean deleteTag( String name ) {
     try {
-      git.tagDelete().setTags( name ).call();
+      git.tagDelete().setTags( getExpandedName( name, IVCS.TYPE_TAG ) ).call();
       return true;
-    } catch (GitAPIException e) {
+    } catch ( GitAPIException e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       return false;
     }
