@@ -91,7 +91,7 @@ If you have changed files but WORKINGTREE is not listed, push **Refresh** to ref
 Make sure no commit other than WORKINGTREE is selected in the commit history.
 Stage changed files by checking the checkbox on the left side of each file, write a good commit message, change the author name if necessary, and finally <b>Commit</b>.
 
-## Diff
+### Diff
 
 Diff information can be obtained texually and visually.
 In order to get the right diff you want to see, it is important to understand the followings:
@@ -128,6 +128,31 @@ Each icon means as follows:
 - <img src="src/main/resources/org/pentaho/di/git/spoon/images/removed.png" width="16">: Removed
 
 Note that even just a x-y location change of step/job entry is recognized as a changed one.
+
+### Resolve conflicts
+
+Conflicts happen when merging on a Git repository or when updating on a Subversion repository, but it is difficult to resolve.
+Even a very simple conflict like below could be a problem because Spoon won't open such an ill-formed file and editing a Kettle file in a text editor might fail to conform with the Kettle file format.
+Instead of resolving conflicts line-by-line, this plugin allows you to resolve them by accepting one out of conflicted versions.
+
+```
+      <GUI>
+++<<<<<<< HEAD
+ +      <xloc>320</xloc>
+ +      <yloc>32</yloc>
+++=======
++       <xloc>416</xloc>
++       <yloc>80</yloc>
+++>>>>>>> d003036e19537739415b7a7c0e6ded6238050189
+        <draw>Y</draw>
+      </GUI>
+```
+
+When a Kettle file, say `hoge.ktr`, has conflicts, this plugin creates a file for each version.
+For a Git repository, `hoge.ktr.ours` and `hoge.ktr.theirs` are created.
+For a Subversion repository, `hoge.ktr.mine`, `hoge.ktr.rXX`, and `hoge.ktr.rYY` are created.
+To accept your desired version, **Stage** the corresponding file (e.g., `hoge.ktr.ours`), then make a commit.
+To abort, **Discard** the conflicted file (e.g., `hoge.ktr`) (and reset to HEAD by **Reset to this commit** only for a Git repository).
 
 ## Remote
 
