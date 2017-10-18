@@ -436,7 +436,7 @@ public class UIGit extends VCS implements IVCS {
    */
   @Override
   public boolean hasStagedFiles() {
-    return !getStagedFiles().isEmpty();
+    return git.getRepository().getRepositoryState().canCommit();
   }
 
   /* (non-Javadoc)
