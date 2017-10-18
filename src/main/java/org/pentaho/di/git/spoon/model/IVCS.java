@@ -32,12 +32,6 @@ public interface IVCS {
   boolean isClean();
 
   /**
-   * Get the author name as defined in the .git
-   * @return
-   */
-  String getAuthorName();
-
-  /**
    * Get the author name for a commit
    * @param commitId
    * @return

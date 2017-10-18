@@ -247,20 +247,28 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public String getAuthorName( String commitId ) {
-    UIRepositoryObjectRevisions revisions = getRevisions();
-    UIRepositoryObjectRevision revision = revisions.stream()
-        .filter( rev -> rev.getName().equals( commitId ) )
-        .findFirst().get();
-    return revision.getLogin();
+    if ( commitId.equals( IVCS.WORKINGTREE ) ) {
+      return "";
+    } else {
+      UIRepositoryObjectRevisions revisions = getRevisions();
+      UIRepositoryObjectRevision revision = revisions.stream()
+          .filter( rev -> rev.getName().equals( commitId ) )
+          .findFirst().get();
+      return revision.getLogin();
+    }
   }
 
   @Override
   public String getCommitMessage( String commitId ) {
-    UIRepositoryObjectRevisions revisions = getRevisions();
-    UIRepositoryObjectRevision revision = revisions.stream()
-        .filter( rev -> rev.getName().equals( commitId ) )
-        .findFirst().get();
-    return revision.getComment();
+    if ( commitId.equals( IVCS.WORKINGTREE ) ) {
+      return "";
+    } else {
+      UIRepositoryObjectRevisions revisions = getRevisions();
+      UIRepositoryObjectRevision revision = revisions.stream()
+          .filter( rev -> rev.getName().equals( commitId ) )
+          .findFirst().get();
+      return revision.getComment();
+    }
   }
 
   @Override

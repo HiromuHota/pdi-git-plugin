@@ -130,28 +130,24 @@ public class UIGit extends VCS implements IVCS {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#getAuthorName()
-   */
-  @Override
-  public String getAuthorName() {
-    Config config = git.getRepository().getConfig();
-    return config.get( UserConfig.KEY ).getAuthorName()
-        + " <" + config.get( UserConfig.KEY ).getAuthorEmail() + ">";
-  }
-
-  /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.VCS#getAuthorName(java.lang.String)
    */
   @Override
   public String getAuthorName( String commitId ) {
-    RevCommit commit = resolve( commitId );
-    PersonIdent author = commit.getAuthorIdent();
-    final StringBuilder r = new StringBuilder();
-    r.append( author.getName() );
-    r.append( " <" ); //$NON-NLS-1$
-    r.append( author.getEmailAddress() );
-    r.append( ">" ); //$NON-NLS-1$
-    return r.toString();
+    if ( commitId.equals( IVCS.WORKINGTREE ) ) {
+      Config config = git.getRepository().getConfig();
+      return config.get( UserConfig.KEY ).getAuthorName()
+          + " <" + config.get( UserConfig.KEY ).getAuthorEmail() + ">";
+    } else {
+      RevCommit commit = resolve( commitId );
+      PersonIdent author = commit.getAuthorIdent();
+      final StringBuilder r = new StringBuilder();
+      r.append( author.getName() );
+      r.append( " <" ); //$NON-NLS-1$
+      r.append( author.getEmailAddress() );
+      r.append( ">" ); //$NON-NLS-1$
+      return r.toString();
+    }
   }
 
   /* (non-Javadoc)

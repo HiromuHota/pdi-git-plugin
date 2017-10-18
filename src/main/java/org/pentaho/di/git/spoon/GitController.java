@@ -228,7 +228,7 @@ public class GitController extends AbstractXulEventHandler {
     }
     setActive();
     setPath( repo );
-    setAuthorName( vcs.getAuthorName() );
+    setAuthorName( vcs.getAuthorName( IVCS.WORKINGTREE ) );
     setCommitMessage( "" );
     fireSourceChanged();
   }
@@ -474,7 +474,7 @@ public class GitController extends AbstractXulEventHandler {
       commitMessageTextbox.setReadonly( false );
       commitButton.setDisabled( false );
 
-      setAuthorName( vcs.getAuthorName() );
+      setAuthorName( vcs.getAuthorName( IVCS.WORKINGTREE ) );
       setCommitMessage( vcs.getCommitMessage( IVCS.WORKINGTREE ) );
 
       changedFiles.addAll( vcs.getUnstagedFiles() );
