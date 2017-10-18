@@ -287,6 +287,39 @@ public class GitController extends AbstractXulEventHandler {
     changedBinding.fireSourceChanged();
   }
 
+  public void openFile() {
+    String baseDirectory = vcs.getDirectory();
+    getSelectedChangedFiles().stream()
+      .forEach( content -> {
+        String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
+        String commitId;
+        commitId = isOnlyWIP() ? IVCS.WORKINGTREE : getFirstSelectedRevision().getName();
+        try ( InputStream xmlStream = vcs.open( content.getName(), commitId ) ) {
+          EngineMetaInterface meta = null;
+          Consumer<EngineMetaInterface> c = null;
+          if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
+            meta = new TransMeta( xmlStream, null, true, null, null );
+            c = meta0 -> Spoon.getInstance().addTransGraph( (TransMeta) meta0 );
+          } else if ( filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
+            meta = new JobMeta( xmlStream, null, null );
+            c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
+          } else {
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
+            return;
+          }
+          meta.clearChanged();
+          meta.setFilename( filePath );
+          if ( !isOnlyWIP() ) {
+            meta.setName( String.format( "%s (%s)", meta.getName(), vcs.getShortenedName( commitId, IVCS.TYPE_COMMIT ) ) );
+          }
+          c.accept( meta );
+          Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
+        } catch ( Exception e ) {
+          e.printStackTrace();
+        }
+      } );
+  }
+
   /**
    * Compare two versions of a particular Kettle file and
    * open them in the data integration perspective
