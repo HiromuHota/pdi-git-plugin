@@ -829,9 +829,6 @@ public class UIGit extends VCS implements IVCS {
       git.checkout().setStartPoint( Constants.HEAD ).addPath( path ).call();
       org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, path + ".ours" ) );
       org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, path + ".theirs" ) );
-      if ( isClean() ) { // if no changed files, then reset --hard to get out of merging status
-        git.reset().setMode( ResetType.HARD ).call();
-      }
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }

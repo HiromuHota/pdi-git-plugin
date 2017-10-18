@@ -10,9 +10,6 @@
 - [Git] No need to unstage to discard changes
 - [Git] When Pull results in conflicts, do not reset hard (stay in a conflicted state). When conflicts occur, ours and theirs versions are created in the same directory (e.g., test.ktr -> test.ktr.ours and test.ktr.theirs)
 
-### Removed
-- [Git] "Reset to this commit" command from the context menu of a commit
-
 ## 0.7.3 - 2017-10-17
 ### Fixed
 - The layout of CloneRepositoryDialog
