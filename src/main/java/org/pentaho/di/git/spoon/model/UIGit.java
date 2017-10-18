@@ -19,6 +19,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.DiffCommand;
+import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
@@ -574,11 +575,10 @@ public class UIGit extends VCS implements IVCS {
       return false;
     }
 
-    PullCommand cmd = git.pull();
-    cmd.setCredentialsProvider( credentialsProvider );
     try {
-      PullResult pullResult = cmd.call();
-      return processPullResult( pullResult );
+      // Pull = Fetch + Merge
+      git.fetch().setCredentialsProvider( credentialsProvider ).call();
+      return mergeBranch( Constants.DEFAULT_REMOTE_NAME + "/" + getBranch(), MergeStrategy.RECURSIVE.getName() );
     } catch ( TransportException e ) {
       if ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" )
         || e.getMessage().contains( "not authorized" ) ) { // when the cached credential does not work
@@ -589,38 +589,9 @@ public class UIGit extends VCS implements IVCS {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     } catch ( Exception e ) {
-      if ( hasRemote() ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      } else {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
-            "Please setup a remote" );
-      }
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
     return false;
-  }
-
-  private boolean processPullResult( PullResult pullResult ) throws Exception {
-    FetchResult fetchResult = pullResult.getFetchResult();
-    MergeResult mergeResult = pullResult.getMergeResult();
-    if ( pullResult.isSuccessful() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-      return true;
-    } else {
-      String msg = mergeResult.getMergeStatus().toString();
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
-      if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
-        mergeResult.getConflicts().keySet().forEach( path -> {
-          checkout( path, Constants.HEAD, ".ours" );
-          checkout( path, getExpandedName( Constants.DEFAULT_REMOTE_NAME + "/" + getBranch(), IVCS.TYPE_BRANCH ), ".theirs" );
-        } );
-        return true;
-      } else if ( mergeResult.getFailingPaths().size() != 0 ) {
-        for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
-          msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
-        }
-      }
-      return false;
-    }
   }
 
   /* (non-Javadoc)
@@ -896,12 +867,30 @@ public class UIGit extends VCS implements IVCS {
     }
   }
 
-  private MergeResult mergeBranch( String value, String mergeStrategy ) throws Exception {
-    ObjectId obj = git.getRepository().resolve( value );
-    return git.merge()
+  private boolean mergeBranch( String value, String mergeStrategy ) {
+    try {
+      ObjectId obj = git.getRepository().resolve( value );
+      MergeResult result = git.merge()
         .include( obj )
         .setStrategy( MergeStrategy.get( mergeStrategy ) )
         .call();
+      if ( result.getMergeStatus().isSuccessful() ) {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
+        return true;
+      } else {
+        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
+        if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
+          result.getConflicts().keySet().forEach( path -> {
+            checkout( path, Constants.HEAD, ".ours" );
+            checkout( path, getExpandedName( value, IVCS.TYPE_BRANCH ), ".theirs" );
+          } );
+          return true;
+        }
+      }
+    } catch ( Exception e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
+    return false;
   }
 
   @Override
@@ -917,24 +906,7 @@ public class UIGit extends VCS implements IVCS {
     if ( dialog.open() == Window.OK ) {
       String branch = dialog.getSelectedBranch();
       String mergeStrategy = dialog.getSelectedMergeStrategy();
-      try {
-        MergeResult result = mergeBranch( getExpandedName( branch, IVCS.TYPE_BRANCH ), mergeStrategy );
-        if ( result.getMergeStatus().isSuccessful() ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
-          return true;
-        } else {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
-          if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
-            result.getConflicts().keySet().forEach( path -> {
-              checkout( path, Constants.HEAD, ".ours" );
-              checkout( path, getExpandedName( branch, IVCS.TYPE_BRANCH ), ".theirs" );
-            } );
-            return true;
-          }
-        }
-      } catch ( Exception e ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
-      }
+      return mergeBranch( branch, mergeStrategy );
     }
     return false;
   }
@@ -1045,7 +1017,7 @@ public class UIGit extends VCS implements IVCS {
         } catch ( Exception e ) {
           try {
             return git.getRepository().findRef( Constants.R_REMOTES + name ).getName();
-          } catch ( IOException e1 ) {
+          } catch ( Exception e1 ) {
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
           }
         }
