@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationListener;
@@ -228,7 +229,7 @@ public class GitController extends AbstractXulEventHandler {
     }
     setActive();
     setPath( repo );
-    setAuthorName( vcs.getAuthorName() );
+    setAuthorName( vcs.getAuthorName( IVCS.WORKINGTREE ) );
     setCommitMessage( "" );
     fireSourceChanged();
   }
@@ -285,6 +286,43 @@ public class GitController extends AbstractXulEventHandler {
       vcs.resetPath( content.getName() );
     }
     changedBinding.fireSourceChanged();
+  }
+
+  public void openFile() {
+    String baseDirectory = vcs.getDirectory();
+    getSelectedChangedFiles().stream()
+      .forEach( content -> {
+        String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
+        String commitId;
+        commitId = isOnlyWIP() ? IVCS.WORKINGTREE : getFirstSelectedRevision().getName();
+        try ( InputStream xmlStream = vcs.open( content.getName(), commitId ) ) {
+          EngineMetaInterface meta = null;
+          Consumer<EngineMetaInterface> c = null;
+          if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT )
+              || FilenameUtils.removeExtension( filePath ).endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
+            meta = new TransMeta( xmlStream, null, true, null, null );
+            c = meta0 -> Spoon.getInstance().addTransGraph( (TransMeta) meta0 );
+          } else if ( filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT )
+              || FilenameUtils.removeExtension( filePath ).endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
+            meta = new JobMeta( xmlStream, null, null );
+            c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
+          } else {
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
+            return;
+          }
+          meta.clearChanged();
+          meta.setFilename( filePath );
+          if ( !isOnlyWIP() ) {
+            meta.setName( String.format( "%s (%s)", meta.getName(), vcs.getShortenedName( commitId, IVCS.TYPE_COMMIT ) ) );
+          }
+          c.accept( meta );
+          Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
+        } catch ( KettleXMLException e ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+        } catch ( Exception e ) {
+          e.printStackTrace();
+        }
+      } );
   }
 
   /**
@@ -474,8 +512,8 @@ public class GitController extends AbstractXulEventHandler {
       commitMessageTextbox.setReadonly( false );
       commitButton.setDisabled( false );
 
-      setAuthorName( vcs.getAuthorName() );
-      setCommitMessage( "" );
+      setAuthorName( vcs.getAuthorName( IVCS.WORKINGTREE ) );
+      setCommitMessage( vcs.getCommitMessage( IVCS.WORKINGTREE ) );
 
       changedFiles.addAll( vcs.getUnstagedFiles() );
       changedFiles.addAll( vcs.getStagedFiles() );

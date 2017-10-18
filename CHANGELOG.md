@@ -2,15 +2,16 @@
 
 ## 0.8.0 - 2017-XX-XX
 ### Added
-- Subversion support
-- "Rollback to here" command to a context menu that rollbacks the working tree (copy) to a previous commit (revision), but does not make a commit.
+- [SVN] Subversion support
+- [Common] "Rollback to here" command to a context menu that rollbacks the working tree (copy) to a previous commit (revision), but does not make a commit.
+- [Common] Staging one of conflicted versions (e.g., mine,rXX,rYY in SVN; ours and theris in Git) accepts that version
 
 ### Changed
-- No need to unstage to discard changes
+- [Git] No need to unstage to discard changes
+- [Git] When Pull results in conflicts, do not reset hard (stay in a conflicted state). When conflicts occur, ours and theirs versions are created in the same directory (e.g., test.ktr -> test.ktr.ours and test.ktr.theirs)
 
 ### Removed
-- "Open" command from the context menu of a changed file
-- "Reset to this commit" command from the context menu of a commit
+- [Git] "Reset to this commit" command from the context menu of a commit
 
 ## 0.7.3 - 2017-10-17
 ### Fixed

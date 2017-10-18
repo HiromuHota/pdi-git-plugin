@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +21,7 @@ import org.apache.subversion.javahl.types.Depth;
 import org.apache.subversion.javahl.types.Revision;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.util.FileUtils;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.pur.PurObjectRevision;
@@ -67,8 +69,16 @@ public class SVN extends VCS implements IVCS {
   @Override
   public void add( String name ) {
     try {
-      svnClient.addFile( new File( directory, name ) );
-    } catch ( SVNClientException e ) {
+      if ( name.matches( ".*\\.mine$|.*\\.r\\d+$" ) ) { // Resolve a conflict
+        File conflicted = new File( directory + File.separator + FilenameUtils.separatorsToSystem( FilenameUtils.removeExtension( name ) ) );
+        FileUtils.rename( new File( directory, name ),
+            conflicted,
+            StandardCopyOption.REPLACE_EXISTING );
+        svnClient.resolved( conflicted );
+      } else {
+        svnClient.addFile( new File( directory, name ) );
+      }
+    } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
   }
@@ -247,20 +257,28 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public String getAuthorName( String commitId ) {
-    UIRepositoryObjectRevisions revisions = getRevisions();
-    UIRepositoryObjectRevision revision = revisions.stream()
-        .filter( rev -> rev.getName().equals( commitId ) )
-        .findFirst().get();
-    return revision.getLogin();
+    if ( commitId.equals( IVCS.WORKINGTREE ) ) {
+      return "";
+    } else {
+      UIRepositoryObjectRevisions revisions = getRevisions();
+      UIRepositoryObjectRevision revision = revisions.stream()
+          .filter( rev -> rev.getName().equals( commitId ) )
+          .findFirst().get();
+      return revision.getLogin();
+    }
   }
 
   @Override
   public String getCommitMessage( String commitId ) {
-    UIRepositoryObjectRevisions revisions = getRevisions();
-    UIRepositoryObjectRevision revision = revisions.stream()
-        .filter( rev -> rev.getName().equals( commitId ) )
-        .findFirst().get();
-    return revision.getComment();
+    if ( commitId.equals( IVCS.WORKINGTREE ) ) {
+      return "";
+    } else {
+      UIRepositoryObjectRevisions revisions = getRevisions();
+      UIRepositoryObjectRevision revision = revisions.stream()
+          .filter( rev -> rev.getName().equals( commitId ) )
+          .findFirst().get();
+      return revision.getComment();
+    }
   }
 
   @Override

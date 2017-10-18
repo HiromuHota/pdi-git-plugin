@@ -77,6 +77,7 @@
     <menuitem id="menuitem-addtoindex" label="${Git.ContextMenu.AddToIndex}" command="gitController.addToIndex()"/>
     <menuitem id="menuitem-rmfromindex" label="${Git.ContextMenu.RemoveFromIndex}" command="gitController.removeFromIndex()"/>
     <menuitem id="menuitem-discard" label="${Git.ContextMenu.Discard}" command="gitController.discard()"/>
+    <menuitem label="${Git.ContextMenu.Open}" command="gitController.openFile()"/>
     <menuitem label="${Git.ContextMenu.VisualDiff}" command="gitController.visualdiff()"/>
   </menupopup>
   <menupopup id="revisionContextMenu">

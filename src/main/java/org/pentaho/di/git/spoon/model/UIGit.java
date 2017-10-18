@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.DiffCommand;
@@ -128,28 +130,24 @@ public class UIGit extends VCS implements IVCS {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.di.git.spoon.model.VCS#getAuthorName()
-   */
-  @Override
-  public String getAuthorName() {
-    Config config = git.getRepository().getConfig();
-    return config.get( UserConfig.KEY ).getAuthorName()
-        + " <" + config.get( UserConfig.KEY ).getAuthorEmail() + ">";
-  }
-
-  /* (non-Javadoc)
    * @see org.pentaho.di.git.spoon.model.VCS#getAuthorName(java.lang.String)
    */
   @Override
   public String getAuthorName( String commitId ) {
-    RevCommit commit = resolve( commitId );
-    PersonIdent author = commit.getAuthorIdent();
-    final StringBuilder r = new StringBuilder();
-    r.append( author.getName() );
-    r.append( " <" ); //$NON-NLS-1$
-    r.append( author.getEmailAddress() );
-    r.append( ">" ); //$NON-NLS-1$
-    return r.toString();
+    if ( commitId.equals( IVCS.WORKINGTREE ) ) {
+      Config config = git.getRepository().getConfig();
+      return config.get( UserConfig.KEY ).getAuthorName()
+          + " <" + config.get( UserConfig.KEY ).getAuthorEmail() + ">";
+    } else {
+      RevCommit commit = resolve( commitId );
+      PersonIdent author = commit.getAuthorIdent();
+      final StringBuilder r = new StringBuilder();
+      r.append( author.getName() );
+      r.append( " <" ); //$NON-NLS-1$
+      r.append( author.getEmailAddress() );
+      r.append( ">" ); //$NON-NLS-1$
+      return r.toString();
+    }
   }
 
   /* (non-Javadoc)
@@ -157,8 +155,16 @@ public class UIGit extends VCS implements IVCS {
    */
   @Override
   public String getCommitMessage( String commitId ) {
-    RevCommit commit = resolve( commitId );
-    return commit.getFullMessage();
+    if ( commitId.equals( IVCS.WORKINGTREE ) ) {
+      try {
+        return git.getRepository().readMergeCommitMsg();
+      } catch ( Exception e ) {
+        return e.getMessage();
+      }
+    } else {
+      RevCommit commit = resolve( commitId );
+      return commit.getFullMessage();
+    }
   }
 
   /* (non-Javadoc)
@@ -372,6 +378,9 @@ public class UIGit extends VCS implements IVCS {
     status.getModified().forEach( name -> {
       files.add( new UIFile( name, ChangeType.MODIFY, false ) );
     } );
+    status.getConflicting().forEach( name -> {
+      files.add( new UIFile( name, ChangeType.MODIFY, false ) );
+    } );
     status.getMissing().forEach( name -> {
       files.add( new UIFile( name, ChangeType.DELETE, false ) );
     } );
@@ -431,7 +440,7 @@ public class UIGit extends VCS implements IVCS {
    */
   @Override
   public boolean hasStagedFiles() {
-    return !getStagedFiles().isEmpty();
+    return git.getRepository().getRepositoryState().canCommit();
   }
 
   /* (non-Javadoc)
@@ -467,6 +476,14 @@ public class UIGit extends VCS implements IVCS {
   @Override
   public void add( String filepattern ) {
     try {
+      if ( filepattern.endsWith( ".ours" ) || filepattern.endsWith( ".theirs" ) ) {
+        FileUtils.rename( new File( directory, filepattern ),
+            new File( directory, FilenameUtils.removeExtension( filepattern ) ),
+            StandardCopyOption.REPLACE_EXISTING );
+        filepattern = FilenameUtils.removeExtension( filepattern );
+        org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, filepattern + ".ours" ) );
+        org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, filepattern + ".theirs" ) );
+      }
       git.add().addFilepattern( filepattern ).call();
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -590,14 +607,18 @@ public class UIGit extends VCS implements IVCS {
       return true;
     } else {
       String msg = mergeResult.getMergeStatus().toString();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
       if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
-        resetHard();
+        mergeResult.getConflicts().keySet().forEach( path -> {
+          checkout( path, Constants.HEAD, ".ours" );
+          checkout( path, getExpandedName( Constants.DEFAULT_REMOTE_NAME + "/" + getBranch(), IVCS.TYPE_BRANCH ), ".theirs" );
+        } );
+        return true;
       } else if ( mergeResult.getFailingPaths().size() != 0 ) {
         for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
           msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
         }
       }
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
       return false;
     }
   }
@@ -805,12 +826,12 @@ public class UIGit extends VCS implements IVCS {
 
   @Override
   public void checkoutBranch( String name ) {
-    checkout( getExpandedName( name, IVCS.TYPE_BRANCH ) );
+    checkout( name );
   }
 
   @Override
   public void checkoutTag( String name ) {
-    checkout( getExpandedName( name, IVCS.TYPE_TAG ) );
+    checkout( name );
   }
 
   /* (non-Javadoc)
@@ -819,7 +840,25 @@ public class UIGit extends VCS implements IVCS {
   @Override
   public void revertPath( String path ) {
     try {
+      // Delete added files
+      Status status = git.status().addPath( path ).call();
+      if ( status.getUntracked().size() != 0 || status.getAdded().size() != 0 ) {
+        resetPath( path );
+        org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, path ) );
+      }
+
+      /*
+       * This is a work-around to discard changes of conflicting files
+       * Git CLI `git checkout -- conflicted.txt` discards the changes, but jgit does not
+       */
+      git.add().addFilepattern( path ).call();
+
       git.checkout().setStartPoint( Constants.HEAD ).addPath( path ).call();
+      org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, path + ".ours" ) );
+      org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, path + ".theirs" ) );
+      if ( isClean() ) { // if no changed files, then reset --hard to get out of merging status
+        git.reset().setMode( ResetType.HARD ).call();
+      }
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
@@ -832,7 +871,7 @@ public class UIGit extends VCS implements IVCS {
   public boolean createBranch( String value ) {
     try {
       git.branchCreate().setName( value ).call();
-      checkoutBranch( value );
+      checkoutBranch( getExpandedName( value, IVCS.TYPE_BRANCH ) );
       return true;
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -879,21 +918,36 @@ public class UIGit extends VCS implements IVCS {
       String branch = dialog.getSelectedBranch();
       String mergeStrategy = dialog.getSelectedMergeStrategy();
       try {
-        MergeResult result = mergeBranch( branch, mergeStrategy );
+        MergeResult result = mergeBranch( getExpandedName( branch, IVCS.TYPE_BRANCH ), mergeStrategy );
         if ( result.getMergeStatus().isSuccessful() ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           return true;
         } else {
-          if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
-            resetHard();
-          }
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
+          if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
+            result.getConflicts().keySet().forEach( path -> {
+              checkout( path, Constants.HEAD, ".ours" );
+              checkout( path, getExpandedName( branch, IVCS.TYPE_BRANCH ), ".theirs" );
+            } );
+            return true;
+          }
         }
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
     return false;
+  }
+
+  private void checkout( String path, String commitId, String postfix ) {
+    InputStream stream = open( path, commitId );
+    File file = new File( directory + Const.FILE_SEPARATOR + path + postfix );
+    try {
+      org.apache.commons.io.FileUtils.copyInputStreamToFile( stream, file );
+      stream.close();
+    } catch ( IOException e ) {
+      e.printStackTrace();
+    }
   }
 
   private DiffCommand getDiffCommand( String oldCommitId, String newCommitId ) throws Exception {

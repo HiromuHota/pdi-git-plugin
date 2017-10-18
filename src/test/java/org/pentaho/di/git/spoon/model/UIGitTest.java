@@ -216,9 +216,10 @@ public class UIGitTest extends RepositoryTestCase {
     git2.add().addFilepattern( "SomeFile.txt" ).call();
     git2.commit().setMessage( "Change B at remote" ).call();
 
-    assertFalse( uiGit.pull() );
-    verify( uiGit ).resetHard();
+    uiGit.pull();
 
+    uiGit.revertPath( "SomeFile.txt" );
+    assertTrue( uiGit.isClean() );
     git2.close();
   }
 
