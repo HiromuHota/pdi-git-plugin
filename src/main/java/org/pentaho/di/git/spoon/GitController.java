@@ -1,14 +1,17 @@
 package org.pentaho.di.git.spoon;
 
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationListener;
@@ -25,7 +28,6 @@ import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
-import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
@@ -334,19 +336,19 @@ public class GitController extends AbstractXulEventHandler {
     getSelectedChangedFiles().stream()
       .forEach( content -> {
         String filePath = baseDirectory + Const.FILE_SEPARATOR + content.getName();
-        if ( !filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) && !filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
-          return;
-        }
-        if ( content.getChangeType() == ChangeType.ADD ) {
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "New file" );
-          return;
-        }
-        EngineMetaInterface metaOld = null, metaNew = null;
-        Consumer<EngineMetaInterface> c = null;
-        try {
-          InputStream xmlStreamOld, xmlStreamNew;
-          String commitIdOld, commitIdNew;
+        /*
+         * Determine which versions and open the Kettle files
+         */
+        InputStream xmlStreamOld, xmlStreamNew;
+        String commitIdOld, commitIdNew;
+        String filePathOld, filePathNew;
+        filePathOld = filePathNew = filePath;
+        if ( ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT )
+            || filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) ) { // Kettle files
+          if ( content.getChangeType() == ChangeType.ADD ) {
+            showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "New file" );
+            return;
+          }
           if ( isOnlyWIP() ) {
             commitIdNew = IVCS.WORKINGTREE;
             commitIdOld = Constants.HEAD;
@@ -357,6 +359,33 @@ public class GitController extends AbstractXulEventHandler {
           }
           xmlStreamOld = vcs.open( content.getName(), commitIdOld );
           xmlStreamNew = vcs.open( content.getName(), commitIdNew );
+        } else if ( FilenameUtils.removeExtension( filePath ).endsWith( Const.STRING_TRANS_DEFAULT_EXT )
+            || FilenameUtils.removeExtension( filePath ).endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) { // conflicted Kettle files
+          commitIdNew = FilenameUtils.getExtension( filePath );
+          filePath = FilenameUtils.removeExtension( filePath );
+          List<String> candidates = FileUtils.listFiles( new File( FilenameUtils.getFullPath( filePath ) ),
+              new WildcardFileFilter( FilenameUtils.removeExtension( content.getName() ) + ".*" ),
+              null ).stream()
+                .map( file -> FilenameUtils.getExtension( file.getName() ) )
+                .filter( candidate -> !candidate.equals( commitIdNew ) )
+                .collect( Collectors.toList() );
+          if ( candidates.size() == 1 ) {
+            commitIdOld = candidates.iterator().next();
+          } else {
+            EnterSelectionDialog esd = new EnterSelectionDialog( getShell(), candidates.toArray( new String[candidates.size()] ), "Select version", "Select a version to compare with..." );
+            commitIdOld = esd.open();
+          }
+          xmlStreamNew = vcs.open( content.getName(), IVCS.WORKINGTREE );
+          xmlStreamOld = vcs.open( FilenameUtils.removeExtension( content.getName() ) + "." + commitIdOld, IVCS.WORKINGTREE );
+          filePathOld = filePath + "." + commitIdOld;
+        } else {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
+          return;
+        }
+
+        EngineMetaInterface metaOld = null, metaNew = null;
+        Consumer<EngineMetaInterface> c = null;
+        try {
           if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
             // Use temporary metaOld_ because metaOld will be modified before the 2nd comparison
             metaOld = new TransMeta( xmlStreamOld, null, true, null, null );
@@ -381,19 +410,17 @@ public class GitController extends AbstractXulEventHandler {
           metaOld.clearChanged();
           metaOld.setName( String.format( "%s (%s -> %s)", metaOld.getName(),
               vcs.getShortenedName( commitIdOld, IVCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdNew, IVCS.TYPE_COMMIT ) ) );
-          metaOld.setFilename( filePath );
+          metaOld.setFilename( filePathOld );
           c.accept( metaOld );
           metaNew.clearChanged();
           metaNew.setName( String.format( "%s (%s -> %s)", metaNew.getName(),
               vcs.getShortenedName( commitIdNew, IVCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdOld, IVCS.TYPE_COMMIT ) ) );
-          metaNew.setFilename( filePath );
+          metaNew.setFilename( filePathNew );
           c.accept( metaNew );
           Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
-        } catch ( IOException e ) {
-          e.printStackTrace();
         } catch ( KettleXMLException e ) {
-          e.printStackTrace();
-        } catch ( KettleMissingPluginsException e ) {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+        } catch ( Exception e ) {
           e.printStackTrace();
         }
       } );
