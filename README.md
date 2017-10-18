@@ -75,12 +75,13 @@ Right-click menu on a commit differs between Git and Subversion.
 ### Git
 
 - **Checkout**: checkout a previous commit (`git checkout <commit>`). <img src="src/main/resources/org/pentaho/di/git/spoon/images/branch.png" width="16"> **Branch > Checkout** to undo this operation.
-- **Rollback**: rollback to a previous commit (`git revert --no-commit HEAD..<commit>`). **Discard changes in working tree** to undo this operation.
+- **Rollback**: rollback to a previous commit (`git revert --no-commit HEAD..<commit>`). **Discard changes** to undo this operation.
+- **Reset**: reset HEAD to a previous commit (`git reset --mixed <commit>`).
 
 ### Subversion
 
 - **Update**: update to a previous revision (`svn update -r <revision>)`. <img src="src/main/resources/org/pentaho/di/git/spoon/images/pull.png" width="16"> **Update** to undo this operation.
-- **Rollback**: rollback to a previous commit (`svn merge -r BASE:<revision>`). **Discard changes in working tree** to undo this operation.
+- **Rollback**: rollback to a previous commit (`svn merge -r BASE:<revision>`). **Discard changes** to undo this operation.
 
 Use **Checkout/Update** to see how the contents looked like at that commit with the commit history intact.
 Use **Rollback** to rollback all the changes. A new commit can be made to persist the rollback.
@@ -152,7 +153,7 @@ When a Kettle file, say `hoge.ktr`, has conflicts, this plugin creates a file fo
 For a Git repository, `hoge.ktr.ours` and `hoge.ktr.theirs` are created.
 For a Subversion repository, `hoge.ktr.mine`, `hoge.ktr.rXX`, and `hoge.ktr.rYY` are created.
 To accept your desired version, **Stage** the corresponding file (e.g., `hoge.ktr.ours`), then make a commit.
-To abort, **Discard** the conflicted file (e.g., `hoge.ktr`) (and reset to HEAD by **Reset to this commit** only for a Git repository).
+To abort, **Discard changes** of the conflicted file (e.g., `hoge.ktr`) and (Git-only) **Reset** to the latest commit.
 
 ## Remote
 
