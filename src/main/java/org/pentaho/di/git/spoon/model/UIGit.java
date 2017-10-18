@@ -593,14 +593,18 @@ public class UIGit extends VCS implements IVCS {
       return true;
     } else {
       String msg = mergeResult.getMergeStatus().toString();
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
       if ( mergeResult.getMergeStatus() == MergeStatus.CONFLICTING ) {
-//        resetHard();
+        mergeResult.getConflicts().keySet().forEach( path -> {
+          checkout( path, Constants.HEAD, ".ours" );
+          checkout( path, getExpandedName( Constants.DEFAULT_REMOTE_NAME + "/" + getBranch(), IVCS.TYPE_BRANCH ), ".theirs" );
+        } );
+        return true;
       } else if ( mergeResult.getFailingPaths().size() != 0 ) {
         for ( Entry<String, MergeFailureReason> failingPath : mergeResult.getFailingPaths().entrySet() ) {
           msg += "\n" + String.format( "%s: %s", failingPath.getKey(), failingPath.getValue() );
         }
       }
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), msg );
       return false;
     }
   }
@@ -829,6 +833,8 @@ public class UIGit extends VCS implements IVCS {
       git.add().addFilepattern( path ).call();
 
       git.checkout().setStartPoint( Constants.HEAD ).addPath( path ).call();
+      org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, path + ".ours" ) );
+      org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, path + ".theirs" ) );
       if ( isClean() ) { // if no changed files, then reset --hard to get out of merging status
         git.reset().setMode( ResetType.HARD ).call();
       }
@@ -896,17 +902,31 @@ public class UIGit extends VCS implements IVCS {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Success" ), BaseMessages.getString( PKG, "Dialog.Success" ) );
           return true;
         } else {
+          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
           if ( result.getMergeStatus() == MergeStatus.CONFLICTING ) {
-//            resetHard();
+            result.getConflicts().keySet().forEach( path -> {
+              checkout( path, Constants.HEAD, ".ours" );
+              checkout( path, getExpandedName( branch, IVCS.TYPE_BRANCH ), ".theirs" );
+            } );
             return true;
           }
-          showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), result.getMergeStatus().toString() );
         }
       } catch ( Exception e ) {
         showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
       }
     }
     return false;
+  }
+
+  private void checkout( String path, String commitId, String postfix ) {
+    InputStream stream = open( path, commitId );
+    File file = new File( directory + Const.FILE_SEPARATOR + path + postfix );
+    try {
+      org.apache.commons.io.FileUtils.copyInputStreamToFile( stream, file );
+      stream.close();
+    } catch ( IOException e ) {
+      e.printStackTrace();
+    }
   }
 
   private DiffCommand getDiffCommand( String oldCommitId, String newCommitId ) throws Exception {
