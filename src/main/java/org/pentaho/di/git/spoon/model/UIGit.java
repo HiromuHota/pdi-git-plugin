@@ -53,6 +53,7 @@ import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.UserConfig;
 import org.eclipse.jgit.merge.MergeStrategy;
@@ -338,7 +339,7 @@ public class UIGit extends VCS implements IVCS {
   public UIRepositoryObjectRevisions getRevisions() {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     try {
-      if ( !git.status().call().isClean() ) {
+      if ( !isClean() || git.getRepository().getRepositoryState() == RepositoryState.MERGING_RESOLVED ) {
         PurObjectRevision rev = new PurObjectRevision(
             WORKINGTREE,
             "*",
