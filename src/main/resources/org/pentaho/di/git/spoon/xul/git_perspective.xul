@@ -11,16 +11,13 @@
       <toolbarbutton id="branch" label="${Git.Branch}" image="org/pentaho/di/git/spoon/images/branch.svg" disabled="true" menu="branchContextMenu"/>
       <toolbarbutton id="tag" label="${Git.Tag}" image="org/pentaho/di/git/spoon/images/tag.svg" disabled="true" menu="tagContextMenu"/>
       <toolbarseparator />
+      <toolbarbutton id="refresh" label="${Git.Refresh}" image="ui/images/refresh.svg" disabled="true" onclick="gitController.fireSourceChanged()"/>
     </toolbar>
     <label value="${Git.Repository}: "/>
     <label id="path"/>
     <label value="/"/>
     <label value="${Git.Branch}: "/>
     <label id="branchLabel"/>
-    <toolbar id="git-toolbar-right" mode="full">
-      <toolbarseparator />
-      <toolbarbutton id="refresh" label="${Git.Refresh}" image="ui/images/refresh.svg" disabled="true" onclick="gitController.fireSourceChanged()"/>
-    </toolbar>
     </hbox>
   <splitter flex="1" orient="HORIZONTAL">
     <vbox flex="2">
