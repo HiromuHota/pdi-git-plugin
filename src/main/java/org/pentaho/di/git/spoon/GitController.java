@@ -475,7 +475,7 @@ public class GitController extends AbstractXulEventHandler {
       commitButton.setDisabled( false );
 
       setAuthorName( vcs.getAuthorName() );
-      setCommitMessage( "" );
+      setCommitMessage( vcs.getCommitMessage( IVCS.WORKINGTREE ) );
 
       changedFiles.addAll( vcs.getUnstagedFiles() );
       changedFiles.addAll( vcs.getStagedFiles() );

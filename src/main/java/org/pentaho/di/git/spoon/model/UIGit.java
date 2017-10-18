@@ -159,8 +159,16 @@ public class UIGit extends VCS implements IVCS {
    */
   @Override
   public String getCommitMessage( String commitId ) {
-    RevCommit commit = resolve( commitId );
-    return commit.getFullMessage();
+    if ( commitId.equals( IVCS.WORKINGTREE ) ) {
+      try {
+        return git.getRepository().readMergeCommitMsg();
+      } catch ( Exception e ) {
+        return e.getMessage();
+      }
+    } else {
+      RevCommit commit = resolve( commitId );
+      return commit.getFullMessage();
+    }
   }
 
   /* (non-Javadoc)
