@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.DiffCommand;
@@ -470,6 +472,14 @@ public class UIGit extends VCS implements IVCS {
   @Override
   public void add( String filepattern ) {
     try {
+      if ( filepattern.endsWith( ".ours" ) || filepattern.endsWith( ".theirs" ) ) {
+        FileUtils.rename( new File( directory, filepattern ),
+            new File( directory, FilenameUtils.removeExtension( filepattern ) ),
+            StandardCopyOption.REPLACE_EXISTING );
+        filepattern = FilenameUtils.removeExtension( filepattern );
+        org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, filepattern + ".ours" ) );
+        org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, filepattern + ".theirs" ) );
+      }
       git.add().addFilepattern( filepattern ).call();
     } catch ( Exception e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
