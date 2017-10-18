@@ -158,7 +158,8 @@ public class UIGit extends VCS implements IVCS {
   public String getCommitMessage( String commitId ) {
     if ( commitId.equals( IVCS.WORKINGTREE ) ) {
       try {
-        return git.getRepository().readMergeCommitMsg();
+        String merge_msg = git.getRepository().readMergeCommitMsg();
+        return merge_msg == null ? "" : merge_msg;
       } catch ( Exception e ) {
         return e.getMessage();
       }
