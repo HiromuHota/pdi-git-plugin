@@ -826,6 +826,13 @@ public class UIGit extends VCS implements IVCS {
   @Override
   public void revertPath( String path ) {
     try {
+      // Delete added files
+      Status status = git.status().addPath( path ).call();
+      if ( status.getUntracked().size() != 0 || status.getAdded().size() != 0 ) {
+        resetPath( path );
+        org.apache.commons.io.FileUtils.deleteQuietly( new File( directory, path ) );
+      }
+
       /*
        * This is a work-around to discard changes of conflicting files
        * Git CLI `git checkout -- conflicted.txt` discards the changes, but jgit does not
