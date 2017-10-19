@@ -436,8 +436,10 @@ public class UIGitTest extends RepositoryTestCase {
     assertFalse( success );
 
     // WhenURLNotFound
-    success = uiGit.cloneRepo( createTempFile().getPath(), "fakeURL" );
+    File file = createTempFile();
+    success = uiGit.cloneRepo( file.getPath(), "fakeURL" );
     assertFalse( success );
+    assertFalse( file.exists() );
   }
 
   private RevCommit initialCommit() throws Exception {

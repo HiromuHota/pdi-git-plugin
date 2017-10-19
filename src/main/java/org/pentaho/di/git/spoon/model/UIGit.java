@@ -767,11 +767,6 @@ public class UIGit extends VCS implements IVCS {
       git.close();
       return true;
     } catch ( Exception e ) {
-      try {
-        FileUtils.delete( new File( directory ), FileUtils.RECURSIVE );
-      } catch ( IOException e1 ) {
-        showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e1.getMessage() );
-      }
       if ( ( e instanceof TransportException )
           && ( ( e.getMessage().contains( "Authentication is required but no CredentialsProvider has been registered" )
             || e.getMessage().contains( "not authorized" ) ) ) ) {
