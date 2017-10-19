@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.git.spoon.model.GitRepository;
-import org.pentaho.di.git.spoon.model.VCS;
+import org.pentaho.di.git.spoon.model.IVCS;
 
 public class EditRepositoryDialog extends Dialog {
 
@@ -79,8 +79,14 @@ public class EditRepositoryDialog extends Dialog {
     typeLabel.setText( "Type: " );
     typeLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
     typeCombo = new Combo( comp, SWT.READ_ONLY );
-    typeCombo.setItems( VCS.GIT );
-    typeCombo.select( 0 );
+    typeCombo.setItems( IVCS.GIT, IVCS.SVN );
+    if ( repo.getType() != null ) {
+      if ( repo.getType().equals( IVCS.GIT ) ) {
+        typeCombo.select( 0 );
+      } else {
+        typeCombo.select( 1 );
+      }
+    }
     typeCombo.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
     return comp;
   }

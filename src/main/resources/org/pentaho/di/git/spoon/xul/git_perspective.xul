@@ -11,16 +11,11 @@
       <toolbarbutton id="branch" label="${Git.Branch}" image="org/pentaho/di/git/spoon/images/branch.svg" disabled="true" menu="branchContextMenu"/>
       <toolbarbutton id="tag" label="${Git.Tag}" image="org/pentaho/di/git/spoon/images/tag.svg" disabled="true" menu="tagContextMenu"/>
       <toolbarseparator />
-    </toolbar>
-    <label value="${Git.Repository}: "/>
-    <label id="path"/>
-    <label value="/"/>
-    <label value="${Git.Branch}: "/>
-    <label id="branchLabel"/>
-    <toolbar id="git-toolbar-right" mode="full">
-      <toolbarseparator />
       <toolbarbutton id="refresh" label="${Git.Refresh}" image="ui/images/refresh.svg" disabled="true" onclick="gitController.fireSourceChanged()"/>
     </toolbar>
+    <label id="path"/>
+    <label value="/"/>
+    <label id="branchLabel"/>
     </hbox>
   <splitter flex="1" orient="HORIZONTAL">
     <vbox flex="2">
@@ -61,17 +56,17 @@
             <menuitem id="menu-git-remote-setting" label="Setting" command="gitController.editRemote()" disabled="true"/>
           </menupopup>
   <menupopup id="branchContextMenu">
-    <menuitem label="${Git.Checkout}" command="gitController.checkout('branch')"/>
+    <menuitem id="branch-checkout" label="${Git.Checkout}" command="gitController.checkout('branch')"/>
     <menuitem label="${Git.Create}" command="gitController.createBranch()"/>
-    <menuitem label="${Git.Merge}" command="gitController.merge()"/>
+    <menuitem id="branch-merge" label="${Git.Merge}" command="gitController.merge()"/>
     <menuitem label="${Git.Delete}" command="gitController.deleteBranch()"/>
-    <menuitem label="${Git.Push}" command="gitController.push('branch')"/>
+    <menuitem id="branch-push" label="${Git.Push}" command="gitController.push('branch')"/>
   </menupopup>
   <menupopup id="tagContextMenu">
-    <menuitem label="${Git.Checkout}" command="gitController.checkout('tag')"/>
+    <menuitem id="tag-checkout" label="${Git.Checkout}" command="gitController.checkout('tag')"/>
     <menuitem label="${Git.Create}" command="gitController.createTag()"/>
     <menuitem label="${Git.Delete}" command="gitController.deleteTag()"/>
-    <menuitem label="${Git.Push}" command="gitController.push('tag')"/>
+    <menuitem id="tag-push" label="${Git.Push}" command="gitController.push('tag')"/>
   </menupopup>
   <menupopup id="changedContextMenu">
     <menuitem id="menuitem-addtoindex" label="${Git.ContextMenu.AddToIndex}" command="gitController.addToIndex()"/>
@@ -81,8 +76,9 @@
     <menuitem label="${Git.ContextMenu.VisualDiff}" command="gitController.visualdiff()"/>
   </menupopup>
   <menupopup id="revisionContextMenu">
-    <menuitem label="${Git.ContextMenu.Checkout}" command="gitController.checkout()"/>
-    <menuitem label="${Git.ContextMenu.Reset}" command="gitController.reset()"/>
+    <menuitem id="menuitem-checkout" label="${Git.ContextMenu.Checkout}" command="gitController.checkout()"/>
+    <menuitem id="menuitem-rollback" label="${Git.ContextMenu.Rollback}" command="gitController.rollback()"/>
+    <menuitem id="menuitem-reset" label="${Git.ContextMenu.Reset}" command="gitController.reset()"/>
   </menupopup>
 
 </window>

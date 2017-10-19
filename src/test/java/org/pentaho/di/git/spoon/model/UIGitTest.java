@@ -1,6 +1,7 @@
 package org.pentaho.di.git.spoon.model;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -10,27 +11,23 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.junit.RepositoryTestCase;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
 public class UIGitTest extends RepositoryTestCase {
@@ -42,7 +39,8 @@ public class UIGitTest extends RepositoryTestCase {
   public void setUp() throws Exception {
     super.setUp();
     git = new Git( db );
-    uiGit = new UIGit();
+    uiGit = spy( new UIGit() );
+    doNothing().when( uiGit ).showMessageBox( anyString(), anyString() );
     uiGit.setGit( git );
     uiGit.setDirectory( git.getRepository().getDirectory().getParent() );
 
@@ -178,12 +176,7 @@ public class UIGitTest extends RepositoryTestCase {
     git2.commit().setMessage( "Some change in remote" ).call();
     git2.close();
 
-    pullResult = uiGit.pull();
-
-    assertFalse( pullResult.getFetchResult().getTrackingRefUpdates().isEmpty() );
-    assertEquals( pullResult.getMergeResult().getMergeStatus(),
-                    MergeStatus.FAST_FORWARD );
-    assertEquals( RepositoryState.SAFE, db.getRepositoryState() );
+    assertTrue( uiGit.pull() );
   }
 
   @Test
@@ -197,37 +190,45 @@ public class UIGitTest extends RepositoryTestCase {
     FileUtils.writeStringToFile( sourceFile, "Hello world" );
     git2.add().addFilepattern( "SomeFile.txt" ).call();
     git2.commit().setMessage( "Initial commit for source" ).call();
-    PullResult pullResult = git.pull().call();
+    git.pull().call();
 
     // change the source file
     FileUtils.writeStringToFile( sourceFile, "Another change" );
     git2.add().addFilepattern( "SomeFile.txt" ).call();
-    RevCommit sourceCommit = git2.commit().setMessage( "Some change in remote" ).call();
-    git2.close();
+    git2.commit().setMessage( "Some change in remote" ).call();
 
     File targetFile = new File( db.getWorkTree(), "OtherFile.txt" );
     FileUtils.writeStringToFile( targetFile, "Unconflicting change" );
     git.add().addFilepattern( "OtherFile.txt" ).call();
-    RevCommit targetCommit = git.commit().setMessage( "Unconflicting change in local" ).call();
+    git.commit().setMessage( "Unconflicting change in local" ).call();
 
-    pullResult = uiGit.pull();
+    assertTrue( uiGit.pull() );
 
-    MergeResult mergeResult = pullResult.getMergeResult();
-    ObjectId[] mergedCommits = mergeResult.getMergedCommits();
-    assertEquals( targetCommit.getId(), mergedCommits[0] );
-    assertEquals( sourceCommit.getId(), mergedCommits[1] );
-    try ( RevWalk rw = new RevWalk( db ) ) {
-      RevCommit mergeCommit = rw.parseCommit( mergeResult.getNewHead() );
-      URIish uri = new URIish(
-          db2.getDirectory().toURI().toURL() );
-      String message = "Merge branch 'master' of " + uri;
-      assertEquals( message, mergeCommit.getShortMessage() );
-    }
+    // shouldResetHardWhenMergeConflict
+    //  Change at local
+    targetFile = new File( db.getWorkTree(), "SomeFile.txt" );
+    FileUtils.writeStringToFile( targetFile, "Another change\nChange A" );
+    git.add().addFilepattern( "SomeFile.txt" ).call();
+    git.commit().setMessage( "Change A at local" ).call();
+
+    //  Change the source file in a way that conflicts with the change at local
+    FileUtils.writeStringToFile( sourceFile, "Another change\nChange B" );
+    git2.add().addFilepattern( "SomeFile.txt" ).call();
+    git2.commit().setMessage( "Change B at remote" ).call();
+
+    uiGit.pull();
+
+    uiGit.revertPath( "SomeFile.txt" );
+    assertTrue( uiGit.isClean() );
+    git2.close();
   }
 
   @Test
   public void testPush() throws Exception {
     // Set remote
+    Git git2 = new Git( db2 );
+    UIGit uiGit2 = new UIGit();
+    uiGit2.setGit( git2 );
     URIish uri = new URIish(
       db2.getDirectory().toURI().toURL() );
     RemoteAddCommand cmd = git.remoteAdd();
@@ -248,14 +249,30 @@ public class UIGitTest extends RepositoryTestCase {
       // we should get here
     }
 
-    uiGit.push();
-    uiGit.checkout( uiGit.getExpandedName( Constants.DEFAULT_REMOTE_NAME + "/" + Constants.MASTER, VCS.TYPE_REMOTE ) );
-    assertTrue( uiGit.getBranch().contains( Constants.HEAD ) );
-
+    boolean success = uiGit.push();
+    assertTrue( success );
     assertEquals( commit.getId(),
         db2.resolve( commit.getId().getName() + "^{commit}" ) );
     assertEquals( tagRef.getObjectId(),
         db2.resolve( tagRef.getObjectId().getName() ) );
+
+    // Push a tag
+    EnterSelectionDialog esd = mock( EnterSelectionDialog.class );
+    doReturn( "tag" ).when( esd ).open();
+    doReturn( esd ).when( uiGit ).getEnterSelectionDialog( any(), anyString(), anyString() );
+    uiGit.push( IVCS.TYPE_TAG );
+    assertTrue( success );
+    assertTrue( uiGit2.getTags().contains( "tag" ) );
+
+    // Another commit and push a branch again
+    writeTrashFile( "Test2.txt", "Hello world" );
+    git.add().addFilepattern( "Test2.txt" ).call();
+    commit = git.commit().setMessage( "second commit" ).call();
+    doReturn( Constants.MASTER ).when( esd ).open();
+    uiGit.push( IVCS.TYPE_BRANCH );
+    assertTrue( success );
+    assertEquals( commit.getId(),
+        db2.resolve( commit.getId().getName() + "^{commit}" ) );
 
     assertEquals( "refs/remotes/origin/master", uiGit.getExpandedName( "origin/master", "branch" ) );
   }
@@ -305,7 +322,7 @@ public class UIGitTest extends RepositoryTestCase {
   public void testDiff() throws Exception {
     File file = writeTrashFile( "Test.txt", "Hello world" );
 
-    String diff = uiGit.diff( VCS.INDEX, uiGit.getShortenedName( VCS.WORKINGTREE, VCS.TYPE_COMMIT ), "Test.txt" );
+    String diff = uiGit.diff( IVCS.INDEX, uiGit.getShortenedName( IVCS.WORKINGTREE, IVCS.TYPE_COMMIT ), "Test.txt" );
     assertTrue( diff.contains( "+Hello world" ) );
 
     git.add().addFilepattern( "Test.txt" ).call();
@@ -316,7 +333,7 @@ public class UIGitTest extends RepositoryTestCase {
     assertTrue( diff.contains( "+Hello world" ) );
 
     // abbreviated commit id should work
-    String diff2 = uiGit.diff( null, uiGit.getShortenedName( commit1.getName(), VCS.TYPE_COMMIT ), "Test.txt" );
+    String diff2 = uiGit.diff( null, uiGit.getShortenedName( commit1.getName(), IVCS.TYPE_COMMIT ), "Test.txt" );
     assertEquals( diff, diff2 );
 
     // Add another line
@@ -324,7 +341,7 @@ public class UIGitTest extends RepositoryTestCase {
     git.add().addFilepattern( "Test.txt" ).call();
     RevCommit commit2 = git.commit().setMessage( "second commit" ).call();
 
-    diff = uiGit.diff( commit1.getName(), VCS.WORKINGTREE );
+    diff = uiGit.diff( commit1.getName(), IVCS.WORKINGTREE );
     assertTrue( diff.contains( "-Hello world" ) );
     assertTrue( diff.contains( "+second commit" ) );
     diff = uiGit.diff( commit1.getName(), commit2.getName() );
@@ -332,26 +349,8 @@ public class UIGitTest extends RepositoryTestCase {
 
     // Should detect renames
     file.renameTo( new File( git.getRepository().getWorkTree(), "Test2.txt" ) );
-    diff = uiGit.diff( Constants.HEAD, VCS.WORKINGTREE, "Test2.txt" );
+    diff = uiGit.diff( Constants.HEAD, IVCS.WORKINGTREE, "Test2.txt" );
     assertTrue( diff.contains( "rename" ) );
-  }
-
-  @Test
-  public void testShow() throws Exception {
-    RevCommit commit = initialCommit();
-
-    String diff = uiGit.show( commit.getId().name() );
-    assertTrue( diff.contains( "Hello world" ) );
-
-    // Make the second commit
-    writeTrashFile( "Test2.txt", "Second commit" );
-    diff = uiGit.show( VCS.WORKINGTREE );
-    assertTrue( diff.contains( "+Second commit" ) );
-    git.add().addFilepattern( "Test2.txt" ).call();
-    commit = git.commit().setMessage( "initial commit" ).call();
-
-    diff = uiGit.show( commit.getId().name() );
-    assertTrue( diff.contains( "Second commit" ) );
   }
 
   @Test
@@ -363,7 +362,7 @@ public class UIGitTest extends RepositoryTestCase {
     IOUtils.copy( inputStream, writer, "UTF-8" );
     assertEquals( "Hello world", writer.toString() );
 
-    inputStream = uiGit.open( "Test.txt", VCS.WORKINGTREE );
+    inputStream = uiGit.open( "Test.txt", IVCS.WORKINGTREE );
     writer = new StringWriter();
     IOUtils.copy( inputStream, writer, "UTF-8" );
     assertEquals( "Hello world", writer.toString() );
@@ -374,14 +373,14 @@ public class UIGitTest extends RepositoryTestCase {
     initialCommit();
 
     git.branchCreate().setName( "develop" ).call();
-    uiGit.checkout( uiGit.getExpandedName( "master", VCS.TYPE_BRANCH ) );
+    uiGit.checkout( uiGit.getExpandedName( "master", IVCS.TYPE_BRANCH ) );
     assertEquals( "master", uiGit.getBranch() );
-    uiGit.checkout( uiGit.getExpandedName( "develop", VCS.TYPE_BRANCH ) );
+    uiGit.checkout( uiGit.getExpandedName( "develop", IVCS.TYPE_BRANCH ) );
     assertEquals( "develop", uiGit.getBranch() );
   }
 
   @Test
-  public void testCheckoutPath() throws Exception {
+  public void testRevertPath() throws Exception {
     // commit something
     File file = writeTrashFile( "Test.txt", "Hello world" );
     git.add().addFilepattern( "Test.txt" ).call();
@@ -391,13 +390,7 @@ public class UIGitTest extends RepositoryTestCase {
     FileUtils.writeStringToFile( file, "Change" );
     assertEquals( "Change", FileUtils.readFileToString( file ) );
 
-    uiGit.checkout( null, file.getName() );
-    assertEquals( "Hello world", FileUtils.readFileToString( file ) );
-
-    uiGit.checkout( Constants.HEAD, file.getName() );
-    assertEquals( "Hello world", FileUtils.readFileToString( file ) );
-
-    uiGit.checkout( commit.getName(), file.getName() );
+    uiGit.revertPath( file.getName() );
     assertEquals( "Hello world", FileUtils.readFileToString( file ) );
   }
 
@@ -405,15 +398,19 @@ public class UIGitTest extends RepositoryTestCase {
   public void testCreateDeleteBranchTag() throws Exception {
     initialCommit();
 
-    // create a branch
-    uiGit.createBranch( "test" );
-    List<String> branches = uiGit.getLocalBranches();
-    assertTrue( branches.contains( "test" ) );
-
     // create a tag
     uiGit.createTag( "test" );
     List<String> tags = uiGit.getTags();
     assertTrue( tags.contains( "test" ) );
+
+    // create a branch (and checkout that branch)
+    uiGit.createBranch( "test" );
+    List<String> branches = uiGit.getLocalBranches();
+    assertTrue( branches.contains( "test" ) );
+    assertEquals( "test", uiGit.getBranch() );
+
+    // Checkout master
+    uiGit.checkout( Constants.MASTER );
 
     // delete the branch
     uiGit.deleteBranch( "test", true );
@@ -421,7 +418,7 @@ public class UIGitTest extends RepositoryTestCase {
     assertEquals( 1, branches.size() );
     assertFalse( branches.contains( "test" ) );
 
-    uiGit.checkout( uiGit.getExpandedName( "test", VCS.TYPE_TAG ) );
+    uiGit.checkout( uiGit.getExpandedName( "test", IVCS.TYPE_TAG ) );
     assertTrue( uiGit.getBranch().contains( Constants.HEAD ) );
 
     // delete the tag
@@ -429,6 +426,20 @@ public class UIGitTest extends RepositoryTestCase {
     tags = uiGit.getTags();
     assertEquals( 0, tags.size() );
     assertFalse( tags.contains( "test" ) );
+  }
+
+
+  @Test
+  public void testCloneShouldFail() throws Exception {
+    // WhenDirAlreadyExists
+    boolean success = uiGit.cloneRepo( db.getDirectory().getPath(), db.getDirectory().getPath() );
+    assertFalse( success );
+
+    // WhenURLNotFound
+    File file = createTempFile();
+    success = uiGit.cloneRepo( file.getPath(), "fakeURL" );
+    assertFalse( success );
+    assertFalse( file.exists() );
   }
 
   private RevCommit initialCommit() throws Exception {

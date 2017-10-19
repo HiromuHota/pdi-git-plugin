@@ -3,21 +3,18 @@ package org.pentaho.di.git.spoon;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
-import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.URIish;
-import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.git.spoon.model.IVCS;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
@@ -51,7 +48,7 @@ public class GitControllerTest {
     controller.setAuthorName( "test <test@example.com>" );
     controller.setCommitMessage( "test" );
     uiGit = mock( UIGit.class );
-    controller.setUIGit( uiGit );
+    controller.setVCS( uiGit );
     doNothing().when( controller ).fireSourceChanged();
     doReturn( false ).when( controller ).anyChangedTabs();
 
@@ -126,35 +123,13 @@ public class GitControllerTest {
 
   @Test
   public void shouldFireSourceChangedWhenSuccessful() throws Exception {
-    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
     doReturn( true ).when( uiGit ).hasRemote();
     doReturn( true ).when( uiGit ).isClean();
-    PullResult pullResult = mock( PullResult.class );
-    when( pullResult.isSuccessful() ).thenReturn( true );
-    doReturn( pullResult ).when( uiGit ).pull();
+    doReturn( true ).when( uiGit ).pull();
 
     controller.pull();
 
     verify( controller ).fireSourceChanged();
-  }
-
-  @Test
-  public void shouldResetHardWhenMergeConflict() throws Exception {
-    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
-    doReturn( true ).when( uiGit ).hasRemote();
-    PullResult pullResult = mock( PullResult.class );
-    when( pullResult.isSuccessful() ).thenReturn( false );
-    doReturn( pullResult ).when( uiGit ).pull();
-    doReturn( true ).when( uiGit ).isClean();
-    MergeResult mergeResult = mock( MergeResult.class );
-    when( mergeResult.getMergeStatus() ).thenReturn( MergeStatus.CONFLICTING );
-    when( pullResult.getMergeResult() ).thenReturn( mergeResult );
-
-    controller.pull();
-
-    verify( uiGit ).resetHard();
   }
 
   @Test
@@ -167,12 +142,12 @@ public class GitControllerTest {
     RemoteRefUpdate update = mock( RemoteRefUpdate.class );
     when( update.getStatus() ).thenReturn( Status.OK );
     when( result.getRemoteUpdates() ).thenReturn( Arrays.asList( update ) );
-    when( uiGit.push( anyString() ) ).thenReturn( Collections.singletonList( result ) );
 
     controller.push();
+    controller.push( IVCS.TYPE_BRANCH );
 
-    verify( uiGit ).push( anyString() );
-    verify( message ).setTitle( BaseMessages.getString( PKG, "Dialog.Success" ) );
+    verify( uiGit ).push( "default" );
+    verify( uiGit ).push( IVCS.TYPE_BRANCH );
   }
 
   @Test
@@ -183,19 +158,6 @@ public class GitControllerTest {
     controller.editRemote();
 
     verify( uiGit, never() ).addRemote( anyString() );
-  }
-
-  @Test
-  public void shouldDeleteRemoteWhenEmptyString() throws Exception {
-    XulPromptBox prompt = new XulPromptBoxMock( XulDialogCallback.Status.ACCEPT );
-    when( document.createElement( PROMPTBOX ) ).thenReturn( prompt );
-    doThrow( URISyntaxException.class ).when( uiGit ).addRemote( anyString() );
-    doReturn( "" ).when( uiGit ).getRemote();
-
-    controller.editRemote();
-
-    verify( uiGit ).addRemote( anyString() );
-    verify( uiGit ).removeRemote();
   }
 
   @Test
