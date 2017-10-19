@@ -13,10 +13,8 @@
       <toolbarseparator />
       <toolbarbutton id="refresh" label="${Git.Refresh}" image="ui/images/refresh.svg" disabled="true" onclick="gitController.fireSourceChanged()"/>
     </toolbar>
-    <label value="${Git.Repository}: "/>
     <label id="path"/>
     <label value="/"/>
-    <label value="${Git.Branch}: "/>
     <label id="branchLabel"/>
     </hbox>
   <splitter flex="1" orient="HORIZONTAL">
