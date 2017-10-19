@@ -45,6 +45,7 @@ export LIBPATH
 
 Important: For example in Ubuntu 14.04, the version of libsvn-java will be 1.8.8 by default, but it should be 1.9.X.
 Ubuntu 16.04 (Xenial) gives you 1.9.3 by default.
+See [here](https://tecadmin.net/install-subversion-1-9-on-ubuntu/) how to install 1.9.X to Ubuntu 14.04.
 
 # How to use
 
@@ -250,5 +251,12 @@ Please create a branch called *develop*, then you will be out of the HEAD detach
 # How to compile
 
 ```
+mvn clean package
+```
+
+You may need to include the directory that has the native SVN libraries like below.
+
+```
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/jni
 mvn clean package
 ```
