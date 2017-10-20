@@ -56,7 +56,7 @@ public class GitControllerTest {
     controller.setVCS( uiGit );
     doNothing().when( controller ).fireSourceChanged();
     doReturn( false ).when( controller ).anyChangedTabs();
-    doNothing().when( controller ).addGraph( any( EngineMetaInterface.class ), anyString(), anyString() );
+    doNothing().when( controller ).addGraph( any( EngineMetaInterface.class ), anyString() );
     doNothing().when( controller ).loadMainPerspective();
 
     DocumentFactory.registerElementClass( ElementDom4J.class );
@@ -176,6 +176,23 @@ public class GitControllerTest {
 
     controller.checkout();
     verify( uiGit ).checkout( "000000" );
+  }
+
+  @Test
+  public void testOpenFile() throws Exception {
+    UIFile file = new UIFile( "test.ktr", ChangeType.MODIFY, true );
+    doReturn( Collections.singletonList( file ) ).when( controller ).getSelectedChangedFiles();
+    doReturn( new FileInputStream( new File( "src/test/resources/r1.ktr" ) ) ).when( uiGit ).open( "test.ktr", IVCS.WORKINGTREE );
+    controller.openFile();
+    verify( controller ).loadMainPerspective();
+
+    file = new UIFile( "test.kjb", ChangeType.MODIFY, true );
+    doReturn( false ).when( controller ).isOnlyWIP();
+    doReturn( new UIRepositoryObjectRevision( new PurObjectRevision( "XXX", "", null, "" ) ) ).when( controller ).getFirstSelectedRevision();
+    doReturn( Collections.singletonList( file ) ).when( controller ).getSelectedChangedFiles();
+    doReturn( new FileInputStream( new File( "src/test/resources/r1.ktr" ) ) ).when( uiGit ).open( "test.kjb", "XXX" );
+    controller.openFile();
+    verify( controller, times( 2 ) ).loadMainPerspective();
   }
 
   @Test

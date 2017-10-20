@@ -299,26 +299,21 @@ public class GitController extends AbstractXulEventHandler {
         commitId = isOnlyWIP() ? IVCS.WORKINGTREE : getFirstSelectedRevision().getName();
         try ( InputStream xmlStream = vcs.open( content.getName(), commitId ) ) {
           EngineMetaInterface meta = null;
-          Consumer<EngineMetaInterface> c = null;
           if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT )
               || FilenameUtils.removeExtension( filePath ).endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
             meta = new TransMeta( xmlStream, null, true, null, null );
-            c = meta0 -> Spoon.getInstance().addTransGraph( (TransMeta) meta0 );
           } else if ( filePath.endsWith( Const.STRING_JOB_DEFAULT_EXT )
               || FilenameUtils.removeExtension( filePath ).endsWith( Const.STRING_JOB_DEFAULT_EXT ) ) {
             meta = new JobMeta( xmlStream, null, null );
-            c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
           } else {
             showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Select a Kettle file" );
             return;
           }
-          meta.clearChanged();
-          meta.setFilename( filePath );
           if ( !isOnlyWIP() ) {
             meta.setName( String.format( "%s (%s)", meta.getName(), vcs.getShortenedName( commitId, IVCS.TYPE_COMMIT ) ) );
           }
-          c.accept( meta );
-          Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
+          addGraph( meta, filePath );
+          loadMainPerspective();
         } catch ( KettleXMLException e ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
         } catch ( Exception e ) {
@@ -391,11 +386,15 @@ public class GitController extends AbstractXulEventHandler {
             metaNew = new TransMeta( xmlStreamNew, null, true, null, null );
             metaOld = PdiDiff.compareSteps( (TransMeta) metaOld, (TransMeta) metaNew, true );
             metaNew = PdiDiff.compareSteps( (TransMeta) metaNew, (TransMeta) metaOld, false );
+            ( (TransMeta) metaOld ).setTransversion( "git: " + commitIdOld );
+            ( (TransMeta) metaNew ).setTransversion( "git: " + commitIdNew );
           } else {
             metaOld = new JobMeta( xmlStreamOld, null, null );
             metaNew = new JobMeta( xmlStreamNew, null, null );
             metaOld = PdiDiff.compareJobEntries( (JobMeta) metaOld, (JobMeta) metaNew, true );
             metaNew = PdiDiff.compareJobEntries( (JobMeta) metaNew, (JobMeta) metaOld, false );
+            ( (JobMeta) metaOld ).setJobversion( "git: " + commitIdOld );
+            ( (JobMeta) metaNew ).setJobversion( "git: " + commitIdNew );
           }
           xmlStreamOld.close();
           xmlStreamNew.close();
@@ -405,8 +404,8 @@ public class GitController extends AbstractXulEventHandler {
           metaNew.setName( String.format( "%s (%s -> %s)", metaNew.getName(),
               vcs.getShortenedName( commitIdNew, IVCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdOld, IVCS.TYPE_COMMIT ) ) );
 
-          addGraph( metaOld, commitIdOld, filePathOld );
-          addGraph( metaNew, commitIdNew, filePathNew );
+          addGraph( metaOld, filePathOld );
+          addGraph( metaNew, filePathNew );
           loadMainPerspective();
         } catch ( KettleXMLException e ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -417,14 +416,12 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   @VisibleForTesting
-  void addGraph( EngineMetaInterface meta, String commitId, String filePath ) {
+  void addGraph( EngineMetaInterface meta, String filePath ) {
     meta.clearChanged();
     meta.setFilename( filePath );
     if ( meta instanceof TransMeta ) {
-      ( (TransMeta) meta ).setTransversion( "git: " + commitId );
       Spoon.getInstance().addTransGraph( (TransMeta) meta );
     } else {
-      ( (JobMeta) meta ).setJobversion( "git: " + commitId );
       Spoon.getInstance().addJobGraph( (JobMeta) meta );
     }
   }
@@ -466,7 +463,8 @@ public class GitController extends AbstractXulEventHandler {
    * Return true if none is selected
    * @return
    */
-  private Boolean isOnlyWIP() {
+  @VisibleForTesting
+  Boolean isOnlyWIP() {
     return CollectionUtils.isEmpty( getSelectedRevisions() )
         || ( getFirstSelectedRevision().getName().equals( IVCS.WORKINGTREE ) && getSelectedRevisions().size() == 1 );
   }
