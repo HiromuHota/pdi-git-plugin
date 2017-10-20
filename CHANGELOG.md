@@ -5,6 +5,7 @@
 - [SVN] Subversion support
 - [Common] "Rollback to here" command to a context menu that rollbacks the working tree (copy) to a previous commit (revision), but does not make a commit.
 - [Common] Staging one of conflicted versions (e.g., mine,rXX,rYY in SVN; ours and theris in Git) accepts that version
+- [Common] Visual diff between conflicted versions
 
 ### Changed
 - [Git] No need to unstage to discard changes
