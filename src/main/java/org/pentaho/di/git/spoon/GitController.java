@@ -384,7 +384,6 @@ public class GitController extends AbstractXulEventHandler {
         }
 
         EngineMetaInterface metaOld = null, metaNew = null;
-        Consumer<EngineMetaInterface> c = null;
         try {
           if ( filePath.endsWith( Const.STRING_TRANS_DEFAULT_EXT ) ) {
             // Use temporary metaOld_ because metaOld will be modified before the 2nd comparison
@@ -392,38 +391,47 @@ public class GitController extends AbstractXulEventHandler {
             metaNew = new TransMeta( xmlStreamNew, null, true, null, null );
             metaOld = PdiDiff.compareSteps( (TransMeta) metaOld, (TransMeta) metaNew, true );
             metaNew = PdiDiff.compareSteps( (TransMeta) metaNew, (TransMeta) metaOld, false );
-            ( (TransMeta) metaOld ).setTransversion( "git: " + commitIdOld );
-            ( (TransMeta) metaNew ).setTransversion( "git: " + commitIdNew );
-            c = meta -> Spoon.getInstance().addTransGraph( (TransMeta) meta );
           } else {
             metaOld = new JobMeta( xmlStreamOld, null, null );
             metaNew = new JobMeta( xmlStreamNew, null, null );
             metaOld = PdiDiff.compareJobEntries( (JobMeta) metaOld, (JobMeta) metaNew, true );
             metaNew = PdiDiff.compareJobEntries( (JobMeta) metaNew, (JobMeta) metaOld, false );
-            ( (JobMeta) metaOld ).setJobversion( "git: " + commitIdOld );
-            ( (JobMeta) metaNew ).setJobversion( "git: " + commitIdNew );
-            c = meta0 -> Spoon.getInstance().addJobGraph( (JobMeta) meta0 );
           }
           xmlStreamOld.close();
           xmlStreamNew.close();
 
-          metaOld.clearChanged();
           metaOld.setName( String.format( "%s (%s -> %s)", metaOld.getName(),
               vcs.getShortenedName( commitIdOld, IVCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdNew, IVCS.TYPE_COMMIT ) ) );
-          metaOld.setFilename( filePathOld );
-          c.accept( metaOld );
-          metaNew.clearChanged();
           metaNew.setName( String.format( "%s (%s -> %s)", metaNew.getName(),
               vcs.getShortenedName( commitIdNew, IVCS.TYPE_COMMIT ), vcs.getShortenedName( commitIdOld, IVCS.TYPE_COMMIT ) ) );
-          metaNew.setFilename( filePathNew );
-          c.accept( metaNew );
-          Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
+
+          addGraph( metaOld, commitIdOld, filePathOld );
+          addGraph( metaNew, commitIdNew, filePathNew );
+          loadMainPerspective();
         } catch ( KettleXMLException e ) {
           showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
         } catch ( Exception e ) {
           e.printStackTrace();
         }
       } );
+  }
+
+  @VisibleForTesting
+  void addGraph( EngineMetaInterface meta, String commitId, String filePath ) {
+    meta.clearChanged();
+    meta.setFilename( filePath );
+    if ( meta instanceof TransMeta ) {
+      ( (TransMeta) meta ).setTransversion( "git: " + commitId );
+      Spoon.getInstance().addTransGraph( (TransMeta) meta );
+    } else {
+      ( (JobMeta) meta ).setJobversion( "git: " + commitId );
+      Spoon.getInstance().addJobGraph( (JobMeta) meta );
+    }
+  }
+
+  @VisibleForTesting
+  void loadMainPerspective() {
+    Spoon.getInstance().loadPerspective( MainSpoonPerspective.ID );
   }
 
   public List<UIRepositoryObjectRevision> getSelectedRevisions() {

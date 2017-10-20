@@ -3,6 +3,8 @@ package org.pentaho.di.git.spoon;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -11,9 +13,12 @@ import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.URIish;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.lib.Constants;
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.git.spoon.model.IVCS;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
@@ -51,6 +56,8 @@ public class GitControllerTest {
     controller.setVCS( uiGit );
     doNothing().when( controller ).fireSourceChanged();
     doReturn( false ).when( controller ).anyChangedTabs();
+    doNothing().when( controller ).addGraph( any( EngineMetaInterface.class ), anyString(), anyString() );
+    doNothing().when( controller ).loadMainPerspective();
 
     DocumentFactory.registerElementClass( ElementDom4J.class );
     document = mock( Document.class );
@@ -179,6 +186,35 @@ public class GitControllerTest {
     doReturn( Collections.singletonList( file ) ).when( controller ).getSelectedChangedFiles();
     controller.visualdiff();
     verify( message ).setTitle( BaseMessages.getString( PKG, "Dialog.Error" ) );
+
+    // .ktr
+    file = new UIFile( "test.ktr", ChangeType.MODIFY, true );
+    doReturn( Collections.singletonList( file ) ).when( controller ).getSelectedChangedFiles();
+    doReturn( new FileInputStream( new File( "src/test/resources/r1.ktr" ) ) ).when( uiGit ).open( "test.ktr", Constants.HEAD );
+    doReturn( new FileInputStream( new File( "src/test/resources/r2.ktr" ) ) ).when( uiGit ).open( "test.ktr", IVCS.WORKINGTREE );
+    controller.visualdiff();
+    verify( uiGit ).open( "test.ktr", Constants.HEAD );
+    verify( uiGit ).open( "test.ktr", IVCS.WORKINGTREE );
+    verify( controller ).loadMainPerspective();
+
+    // conflicted ktr
+    file = new UIFile( "test.kjb.ours", ChangeType.ADD, false );
+    File dir = File.createTempFile( "git_test_", "_controller" );
+    dir.delete();
+    dir.mkdir();
+    File ours = new File( dir.getPath(), "test.kjb.ours" );
+    File theirs = new File( dir.getPath(), "test.kjb.theirs" );
+    FileUtils.copyFile( new File( "src/test/resources/r1.kjb" ), ours );
+    FileUtils.copyFile( new File( "src/test/resources/r2.kjb" ), theirs );
+    doReturn( dir.getPath() ).when( uiGit ).getDirectory();
+    doReturn( Collections.singletonList( file ) ).when( controller ).getSelectedChangedFiles();
+    doReturn( new FileInputStream( ours ) ).when( uiGit ).open( "test.kjb.ours", IVCS.WORKINGTREE );
+    doReturn( new FileInputStream( theirs ) ).when( uiGit ).open( "test.kjb.theirs", IVCS.WORKINGTREE );
+    controller.visualdiff();
+    FileUtils.deleteDirectory( dir );
+    verify( uiGit ).open( "test.kjb.ours", IVCS.WORKINGTREE );
+    verify( uiGit ).open( "test.kjb.theirs", IVCS.WORKINGTREE );
+    verify( controller, times( 2 ) ).loadMainPerspective();
   }
 
   private static class XulConfirmBoxMock extends MessageDialogBase implements XulConfirmBox {
