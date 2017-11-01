@@ -146,7 +146,11 @@ public class GitController extends AbstractXulEventHandler {
           if ( file.getIsStaged() ) {
             vcs.resetPath( file.getName() );
           } else {
-            vcs.add( file.getName() );
+            if ( file.getChangeType() == ChangeType.DELETE ) {
+              vcs.rm( file.getName() );
+            } else {
+              vcs.add( file.getName() );
+            }
           }
         } catch ( Exception e ) {
           e.printStackTrace();

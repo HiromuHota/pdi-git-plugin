@@ -144,7 +144,7 @@ public class SVNTest {
 
     // Test if delete files are listed in the list of staged files
     file.delete();
-    files = vcs.getStagedFiles();
+    files = vcs.getUnstagedFiles();
     assertTrue( files.stream().anyMatch( f -> f.getName().equals( "test.txt" ) && f.getChangeType() == ChangeType.DELETE ) );
   }
 }

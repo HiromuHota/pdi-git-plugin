@@ -100,6 +100,15 @@ public class SVN extends VCS implements IVCS {
   }
 
   @Override
+  public void rm( String name ) {
+    try {
+      svnClient.remove( new File[]{ new File( directory, name ) }, false );
+    } catch ( SVNClientException e ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
+    }
+  }
+
+  @Override
   public void addRemote( String value ) {
     try {
       svnClient.relocate( getRemote(), value, directory, true );
@@ -430,7 +439,8 @@ public class SVN extends VCS implements IVCS {
     try {
       svnClient.getStatus( root, true, false, false,
         false, false, ( String path, ISVNStatus status ) -> {
-          if ( status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
+          if ( status.getTextStatus().equals( SVNStatusKind.UNVERSIONED )
+              || status.getTextStatus().equals( SVNStatusKind.MISSING ) ) {
             files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ) + "/", "" ), convertTypeToGit( status.getTextStatus().toString() ), false ) );
           }
         } );
@@ -446,7 +456,8 @@ public class SVN extends VCS implements IVCS {
     try {
       svnClient.getStatus( root, true, false, false,
         false, false, ( String path, ISVNStatus status ) -> {
-          if ( !status.getTextStatus().equals( SVNStatusKind.UNVERSIONED ) ) {
+          if ( !status.getTextStatus().equals( SVNStatusKind.UNVERSIONED )
+              && !status.getTextStatus().equals( SVNStatusKind.MISSING ) ) {
             files.add( new UIFile( path.replaceFirst( directory.replace( "\\", "/" ) + "/", "" ), convertTypeToGit( status.getTextStatus().toString() ), true ) );
           }
         } );
