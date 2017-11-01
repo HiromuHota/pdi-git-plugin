@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.8.0 - 2017-XX-XX
+## 1.0.0 - 2017-11-XX
 ### Added
 - [SVN] Subversion support
 - [Common] "Rollback to here" command to a context menu that rollbacks the working tree (copy) to a previous commit (revision), but does not make a commit.
