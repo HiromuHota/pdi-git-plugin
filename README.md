@@ -52,18 +52,16 @@ See [here](https://tecadmin.net/install-subversion-1-9-on-ubuntu/) how to instal
 The Git plugin is provided as a <i>perspective</i> (See [Using Perspectives](https://help.pentaho.com/Documentation/7.1/0L0/0Y0/020)).
 **View > Perspectives > Git** takes you to the Git perspective.
 
-## Git Repository
+## Project
 
-When you switch to the Git perspective, you will be asked to choose a Git repository out of a list to open.
-To add a Git repository to the list, go to
+When you switch to the Git perspective, you will be asked to choose a Project out of a list to open.
+To add a Project to the list, go to
 <img src="src/main/resources/org/pentaho/di/git/spoon/images/repository.png" width="16">
-**Git Repository > Add**.
-
-The information of repositories will be stored in `$HOME/.pentaho/metastore/pentaho/Git Repository/`.
+**Project > Add**.
 
 ### Config
 
-<img src="https://github.com/pentaho/pentaho-kettle/raw/7.1.0.0-R/ui/package-res/ui/images/context_menu.png" width="16"> **Config** allows you to configure the opened Git repository.
+<img src="https://github.com/pentaho/pentaho-kettle/raw/7.1.0.0-R/ui/package-res/ui/images/context_menu.png" width="16"> **Config** allows you to configure the opened Project.
 Currently, a remote repository named "origin" can be set.
 
 ## Commit history
