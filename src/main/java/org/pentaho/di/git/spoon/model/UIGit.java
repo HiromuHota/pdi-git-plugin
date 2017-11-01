@@ -722,7 +722,7 @@ public class UIGit extends VCS implements IVCS {
       } else {
         formatter.format(
             diffs.stream()
-            .filter( diff -> diff.getNewPath().equals( file ) )
+            .filter( diff -> diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath().equals( file ) : diff.getNewPath().equals( file ) )
             .collect( Collectors.toList() ) );
       }
       formatter.close();
