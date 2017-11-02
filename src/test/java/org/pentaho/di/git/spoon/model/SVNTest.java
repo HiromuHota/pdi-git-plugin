@@ -88,7 +88,8 @@ public class SVNTest {
     vcs.pull();
     assertEquals( revisions.size(), vcs.getRevisions().size() );
     revisions = vcs.getRevisions();
-    assertEquals( "1", revisions.get( revisions.size() - 1 ).getName() );
+    assertEquals( "1", revisions.get( 0 ).getName() );
+    assertEquals( "message", vcs.getCommitMessage( "1" ) );
 
     List<UIFile> files = vcs.getStagedFiles( "0", "1" );
     assertEquals( "test.txt", files.get( 0 ).getName() );
@@ -110,6 +111,30 @@ public class SVNTest {
 
     diff = vcs.diff( "0", "1", "test.txt" );
     assertTrue( diff.contains( "+Hello World" ) );
+
+    // Test Update to a past commit
+    File file2 = new File( rootClient.getPath(), "test2.txt" );
+    FileUtils.write( file2, "Hello World" );
+    vcs.add( "test2.txt" );
+    vcs.commit( "user", "message2" );
+    vcs.pull();
+    assertEquals( "2", vcs.getRevisions().get( 0 ).getName() );
+    vcs.checkout( "1" );
+    assertEquals( "1", vcs.getRevisions().get( 0 ).getName() );
+
+    // Test rm
+    vcs.pull();
+    file.delete();
+    vcs.rm( "test.txt" );
+    vcs.commit( "user", "Removed test.txt" );
+    files = vcs.getStagedFiles( "2", "3" );
+    assertEquals( "test.txt", files.get( 0 ).getName() );
+
+    // Test revert
+    file2.delete();
+    assertFalse( file2.exists() );
+    vcs.revertPath( file2.getName() );
+    assertTrue( file2.exists() );
   }
 
   @Test
@@ -146,5 +171,34 @@ public class SVNTest {
     file.delete();
     files = vcs.getUnstagedFiles();
     assertTrue( files.stream().anyMatch( f -> f.getName().equals( "test.txt" ) && f.getChangeType() == ChangeType.DELETE ) );
+  }
+
+  @Test
+  public void testCreateDeleteBranchTag() throws Exception {
+    vcs.createBranch( "trunk" );
+    vcs.checkoutBranch( "trunk" );
+    assertEquals( "trunk", vcs.getBranch() );
+
+    vcs.createBranch( "branches/branch1" );
+    assertTrue( vcs.getBranches().contains( "branches/branch1" ) );
+
+    vcs.deleteBranch( "branches/branch1", false );
+    assertFalse( vcs.getBranches().contains( "branches/branch1" ) );
+
+    vcs.createTag( "tags/tag1" );
+    assertTrue( vcs.getTags().contains( "tags/tag1" ) );
+
+    vcs.deleteTag( "tags/tag1" );
+    assertFalse( vcs.getTags().contains( "tags/tag1" ) );
+
+    // Create a new file
+    File file = new File( rootClient.getPath(), "test.txt" );
+    FileUtils.write( file, "Hello World" );
+    vcs.add( "test.txt" );
+    vcs.createBranch( "branches/branch2" );
+    vcs.createTag( "tags/tag2" );
+    verify( vcs, times( 2 ) ).showMessageBox( anyString(), anyString() );
+    assertFalse( vcs.getBranches().contains( "branches/branch2" ) );
+    assertFalse( vcs.getTags().contains( "tags/tag2" ) );
   }
 }
