@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.0.0 - 2017-11-XX
+## 1.0.0 - 2017-11-11
 ### Added
 - [SVN] Subversion support
 - [Common] "Rollback to here" command to a context menu that rollbacks the working tree (copy) to a previous commit (revision), but does not make a commit.
@@ -10,6 +10,10 @@
 ### Changed
 - [Git] No need to unstage to discard changes
 - [Git] When Pull results in conflicts, do not reset hard (stay in a conflicted state). When conflicts occur, ours and theirs versions are created in the same directory (e.g., test.ktr -> test.ktr.ours and test.ktr.theirs)
+- [Common] Rename "Git Project" to "Project" b/c it now supports SVN
+
+### Fixed
+- Fix a bug that deleted files cannot be staged for a commit
 
 ## 0.7.3 - 2017-10-17
 ### Fixed
