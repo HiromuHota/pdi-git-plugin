@@ -98,6 +98,8 @@ public class UIGitTest extends RepositoryTestCase {
 
   @Test
   public void testCommit() throws Exception {
+    assertFalse( uiGit.hasStagedFiles() );
+
     writeTrashFile( "Test.txt", "Hello world" );
     uiGit.add( "Test.txt" );
     PersonIdent author = new PersonIdent( "author", "author@example.com" );
@@ -220,7 +222,6 @@ public class UIGitTest extends RepositoryTestCase {
 
     assertTrue( uiGit.pull() );
 
-    // shouldResetHardWhenMergeConflict
     //  Change at local
     targetFile = new File( db.getWorkTree(), "SomeFile.txt" );
     FileUtils.writeStringToFile( targetFile, "Another change\nChange A" );
@@ -234,8 +235,13 @@ public class UIGitTest extends RepositoryTestCase {
 
     uiGit.pull();
 
-    uiGit.revertPath( "SomeFile.txt" );
-    assertTrue( uiGit.isClean() );
+    // Cannot commit b/c of unresolved conflicts
+    assertFalse( uiGit.hasStagedFiles() );
+
+    // Accept ours
+    uiGit.add( "SomeFile.txt.ours" );
+    assertTrue( uiGit.hasStagedFiles() );
+    git.commit().setMessage( "Merged" ).call();
     git2.close();
   }
 

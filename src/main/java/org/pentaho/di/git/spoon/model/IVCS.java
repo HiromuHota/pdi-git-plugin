@@ -136,6 +136,7 @@ public interface IVCS {
    */
   List<UIFile> getStagedFiles( String oldCommitId, String newCommitId );
 
+  // TODO should be renamed as canCommit()
   boolean hasStagedFiles();
 
   void initRepo( String baseDirectory ) throws Exception;
