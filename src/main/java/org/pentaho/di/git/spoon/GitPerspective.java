@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
 import org.eclipse.jface.action.ActionContributionItem;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
@@ -101,10 +100,9 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
     int keyCode = mask;
     XulMenupopup menuPopup = (XulMenupopup) Spoon.getInstance().getXulDomContainer().getDocumentRoot().getElementById( "view-perspectives-popup" );
     MenuManager menuMgr = (MenuManager) menuPopup.getManagedObject();
-    // No guarantee that "Data Integration" gets "menuitem-0" as its ID, but looks ok so far
     Stream.of( menuMgr.getItems() )
-      .filter( menu -> menu.getId().equals( "menuitem-0" ) ).findFirst().ifPresent( menu -> {
-        IAction action = ( (ActionContributionItem) menu ).getAction();
+      .map( menu -> ( (ActionContributionItem) menu ).getAction() )
+      .filter( action -> action.getText().equals( "Data Integration" ) ).findFirst().ifPresent( action -> {
         action.setAccelerator( keyCode );
       } );
   }
