@@ -27,6 +27,7 @@ import org.pentaho.di.core.gui.Point;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.JobPainter;
+import org.pentaho.di.ui.core.ConstUI;
 import org.pentaho.di.ui.core.PropsUI;
 
 @ExtensionPoint(
@@ -40,7 +41,6 @@ public class DrawDiffOnJobEntryExtensionPoint implements ExtensionPointInterface
     if ( !( object instanceof JobPainter ) ) {
       return;
     }
-    int iconsize = PropsUI.getInstance().getIconSize();
     JobPainter painter = (JobPainter) object;
     Point offset = painter.getOffset();
     GCInterface gc = painter.getGc();
@@ -59,6 +59,12 @@ public class DrawDiffOnJobEntryExtensionPoint implements ExtensionPointInterface
             location += "added.svg";
           } else { // Unchanged
             return;
+          }
+          int iconsize = ConstUI.ICON_SIZE;
+          try {
+            iconsize = PropsUI.getInstance().getIconSize();
+          } catch ( Exception e ) {
+            // Exception when accessed from Carte
           }
           gc.drawImage( location, getClass().getClassLoader(), ( n.x + iconsize + offset.x ) - ( BasePainter.MINI_ICON_SIZE / 2 ), n.y + offset.y - ( BasePainter.MINI_ICON_SIZE / 2 ) );
         } else {
