@@ -72,6 +72,7 @@ public class SVN extends VCS implements IVCS {
 
   private ISVNClientAdapter svnClient;
   private File root;
+  private boolean repositoryChecked = false;
 
   public SVN() {
     svnClient = SVNClientAdapterFactory.createSVNClient( JhlClientAdapterFactory.JAVAHL_CLIENT );
@@ -319,7 +320,12 @@ public class SVN extends VCS implements IVCS {
   @Override
   public String getBranch() {
     try {
-      String branch = svnClient.getInfoFromWorkingCopy( root ).getUrlString().replaceFirst( getRemoteRoot(), "" );
+      String url = svnClient.getInfoFromWorkingCopy( root ).getUrlString();
+      if( url == null ) {
+        checkValidRepository();
+        return "";
+      }
+      String branch = url.replaceFirst( getRemoteRoot(), "" );
       return branch.replaceAll( "^/", "" );
     } catch ( SVNClientException e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
@@ -363,9 +369,33 @@ public class SVN extends VCS implements IVCS {
     return null;
   }
 
+  // We have a number of places where this needs to be checked.  Reset the flag on open.
+  private void checkValidRepository() {
+    if (! repositoryChecked) {
+      try {
+        SVNUrl repository = svnClient.getInfoFromWorkingCopy(root).getRepository();
+        if (repository == null) {
+          String title = BaseMessages.getString(PKG, "Dialog.Error");
+          String error = BaseMessages.getString(PKG, "SVN.InvalidRepository");
+          showMessageBox(title, error);
+        }
+      } catch (SVNClientException e) {
+        showMessageBox(BaseMessages.getString(PKG, "Dialog.Error"), e.getMessage());
+      }
+    }
+    repositoryChecked = true;
+  }
+
   private String getRemoteRoot() {
     try {
-      return svnClient.getInfoFromWorkingCopy( root ).getRepository().toString();
+      SVNUrl repository = svnClient.getInfoFromWorkingCopy( root ).getRepository();
+      if(repository != null) {
+        return repository.toString();
+      }
+      else {
+        checkValidRepository();
+        return svnClient.getInfoFromWorkingCopy( root ).getFile().toString();
+      }
     } catch ( SVNClientException e ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), e.getMessage() );
     }
@@ -400,8 +430,11 @@ public class SVN extends VCS implements IVCS {
     UIRepositoryObjectRevisions revisions = new UIRepositoryObjectRevisions();
     ISVNLogMessage[] messages = null;
     try {
+      SVNRevision.Number revision = svnClient.getInfoFromWorkingCopy( root ).getRevision();
+      if ( revision != null ) {
       messages = svnClient.getLogMessages( root, new SVNRevision.Number( 0 ),
-          svnClient.getInfoFromWorkingCopy( root ).getRevision(), false, false, 0 );
+                revision, false, false, 0);
+      }
     } catch ( SVNClientException e ) {
       if ( e.getMessage().contains( "Authorization" ) && promptUsernamePassword() ) {
         return getRevisions();
@@ -515,6 +548,7 @@ public class SVN extends VCS implements IVCS {
 
   @Override
   public void openRepo( String baseDirectory ) throws Exception {
+    repositoryChecked = false;
     directory = baseDirectory;
     root = new File( directory );
   }

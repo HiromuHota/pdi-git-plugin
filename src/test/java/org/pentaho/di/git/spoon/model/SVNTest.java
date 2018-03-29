@@ -33,6 +33,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
 public class SVNTest {
@@ -200,5 +201,17 @@ public class SVNTest {
     verify( vcs, times( 2 ) ).showMessageBox( anyString(), anyString() );
     assertFalse( vcs.getBranches().contains( "branches/branch2" ) );
     assertFalse( vcs.getTags().contains( "tags/tag2" ) );
+  }
+
+  @Test
+  public void testInvalidRepoShouldInvokeError() throws Exception {
+    vcs.getBranch();
+    verify( vcs, never() ).showMessageBox( BaseMessages.getString( vcs.PKG, "Dialog.Error"),
+        BaseMessages.getString( vcs.PKG, "SVN.InvalidRepository" ) );
+
+    FileUtils.deleteDirectory( rootClient );
+    vcs.getBranch();
+    verify( vcs ).showMessageBox( BaseMessages.getString( vcs.PKG, "Dialog.Error"),
+        BaseMessages.getString( vcs.PKG, "SVN.InvalidRepository" ) );
   }
 }
