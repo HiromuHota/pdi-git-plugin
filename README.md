@@ -113,14 +113,17 @@ You can also see the diff of a specific changed file by selecting one of them, b
 - If only WORKINGTREE is selected AND the selected file is staged: (6)
 - If another commit is also selected: the diff will be between WORKINGTREE and that another commit
 
-![diff](images/diff.png)
+<img src="images/diff.png" width="50%">
 
 A texual diff will be displayed in the bottom left corner.
 Visual diff can be displayed by right-clicking on a changed file, then choose **Visual diff**.
 This opens up two tabs in the Data Integration perspective:
 one tab shows the difference you see when looking from one commit to another commit, and the other tab shows the other way around.
 
-The difference is represented by the small icon superimposed on the top-right corner on the steps/job entries.
+The difference is represented by the small icon superimposed on the top-right corner on the steps/job entries like the image below:
+
+<img src="images/visualdiff.png" width="50%">
+
 Each icon means as follows:
 
 - <img src="src/main/resources/org/pentaho/di/git/spoon/images/added.png" width="16">: Added
