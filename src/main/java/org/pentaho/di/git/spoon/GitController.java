@@ -603,6 +603,11 @@ public class GitController extends AbstractXulEventHandler {
           "There are no staged files" );
       return;
     }
+    if ( getCommitMessage().equals( "" ) ) {
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+          "Aborting commit due to empty commit message" );
+      return;
+    }
 
     try {
       if ( vcs.commit( getAuthorName(), getCommitMessage() ) ) {

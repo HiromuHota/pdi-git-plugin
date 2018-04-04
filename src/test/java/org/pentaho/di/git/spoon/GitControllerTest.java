@@ -134,6 +134,18 @@ public class GitControllerTest {
   }
 
   @Test
+  public void shouldNotCommitWhenEmptyCommitMessage() throws Exception {
+    XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
+    when( document.createElement( MESSAGEBOX ) ).thenReturn( message );
+    doReturn( true ).when( uiGit ).hasStagedFiles();
+    controller.setCommitMessage( "" );
+
+    controller.commit();
+
+    verify( uiGit, never() ).commit( any(), anyString() );
+  }
+
+  @Test
   public void shouldCommit() throws Exception {
     XulMessageBox message = new XulMessageBoxMock( XulDialogCallback.Status.ACCEPT );
     when( document.getElementById( MESSAGEBOX ) ).thenReturn( message );
