@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.1 - 2018-04-04
+### Fixed
+- [Git] Prevent from making a commit with no files
+- [SVN] Fix null pointer exception when invalid SVN repository selected
+- [Common][#18] Abort commit when empty commit message
+
 ## 1.0.0 - 2017-11-11
 ### Added
 - [SVN] Subversion support
