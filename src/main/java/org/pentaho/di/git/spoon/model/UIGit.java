@@ -94,6 +94,7 @@ import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.FileUtils;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
@@ -713,32 +714,16 @@ public class UIGit extends VCS implements IVCS {
    */
   @Override
   public String diff( String oldCommitId, String newCommitId, String file ) {
-    // DiffFormatter does not detect renames with path filters on
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    DiffFormatter formatter = new DiffFormatter( out );
-    formatter.setRepository( git.getRepository() );
-    formatter.setDetectRenames( true );
-    List<DiffEntry> diffs;
     try {
-      diffs = formatter.scan( getTreeIterator( oldCommitId ), getTreeIterator( newCommitId ) );
-      if ( file == null ) {
-        formatter.format( diffs );
-      } else {
-        formatter.format(
-            diffs.stream()
-            .filter( diff -> diff.getChangeType() == ChangeType.DELETE ? diff.getOldPath().equals( file ) : diff.getNewPath().equals( file ) )
-            .collect( Collectors.toList() ) );
-      }
-      formatter.close();
+      getDiffCommand( oldCommitId, newCommitId )
+        .setOutputStream( out )
+        .setPathFilter( file == null ? TreeFilter.ALL : PathFilter.create( file ) )
+        .call();
       return out.toString( "UTF-8" );
-    } catch ( IOException e ) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
     } catch ( Exception e ) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      return e.getMessage();
     }
-    return "";
   }
 
   /* (non-Javadoc)

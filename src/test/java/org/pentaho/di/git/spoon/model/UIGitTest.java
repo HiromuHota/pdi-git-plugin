@@ -368,11 +368,6 @@ public class UIGitTest extends RepositoryTestCase {
     assertTrue( diff.contains( "+second commit" ) );
     diff = uiGit.diff( commit1.getName(), commit2.getName() );
     assertTrue( diff.contains( "+second commit" ) );
-
-    // Should detect renames
-    file.renameTo( new File( git.getRepository().getWorkTree(), "Test2.txt" ) );
-    diff = uiGit.diff( Constants.HEAD, IVCS.WORKINGTREE, "Test2.txt" );
-    assertTrue( diff.contains( "rename" ) );
   }
 
   @Test
