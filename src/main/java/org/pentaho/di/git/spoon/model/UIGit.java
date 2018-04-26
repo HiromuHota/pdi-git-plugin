@@ -59,6 +59,7 @@ import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ConfigConstants;
@@ -558,7 +559,7 @@ public class UIGit extends VCS implements IVCS {
 
   @Override
   public boolean rollback( String name ) {
-    if ( !isClean() ) {
+    if ( hasUncommittedChanges() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
       return false;
     }
@@ -589,7 +590,7 @@ public class UIGit extends VCS implements IVCS {
    */
   @Override
   public boolean pull() {
-    if ( !isClean() ) {
+    if ( hasUncommittedChanges() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
       return false;
     }
@@ -894,7 +895,7 @@ public class UIGit extends VCS implements IVCS {
 
   @Override
   public boolean merge() {
-    if ( !isClean() ) {
+    if ( hasUncommittedChanges() ) {
       showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
       return false;
     }
@@ -908,6 +909,15 @@ public class UIGit extends VCS implements IVCS {
       return mergeBranch( branch, mergeStrategy );
     }
     return false;
+  }
+
+  private boolean hasUncommittedChanges() {
+    try {
+      return git.status().call().hasUncommittedChanges();
+    } catch ( NoWorkTreeException | GitAPIException e ) {
+      e.printStackTrace();
+      return false;
+    }
   }
 
   private void checkout( String path, String commitId, String postfix ) {
