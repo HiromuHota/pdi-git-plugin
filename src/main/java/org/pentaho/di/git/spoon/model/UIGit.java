@@ -560,7 +560,8 @@ public class UIGit extends VCS implements IVCS {
   @Override
   public boolean rollback( String name ) {
     if ( hasUncommittedChanges() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+        BaseMessages.getString( PKG, "Git.Dialog.UncommittedChanges.Message" ) );
       return false;
     }
     String commit = resolve( Constants.HEAD ).getName();
@@ -591,7 +592,8 @@ public class UIGit extends VCS implements IVCS {
   @Override
   public boolean pull() {
     if ( hasUncommittedChanges() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+        BaseMessages.getString( PKG, "Git.Dialog.UncommittedChanges.Message" ) );
       return false;
     }
     if ( !hasRemote() ) {
@@ -896,7 +898,8 @@ public class UIGit extends VCS implements IVCS {
   @Override
   public boolean merge() {
     if ( hasUncommittedChanges() ) {
-      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ), "Dirty working-tree" );
+      showMessageBox( BaseMessages.getString( PKG, "Dialog.Error" ),
+          BaseMessages.getString( PKG, "Git.Dialog.UncommittedChanges.Message" ) );
       return false;
     }
     MergeBranchDialog dialog = new MergeBranchDialog( shell );
