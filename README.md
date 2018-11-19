@@ -5,7 +5,7 @@ In addition to Git, Subversion is also supported.
 
 # How to install
 
-## PDI Plugin
+## 1. PDI Plugin
 
 ```
 $ cd data-integration/plugins
@@ -14,7 +14,7 @@ $ unzip pdi-git-plugin-X.X.X-jar-with-dependencies.zip
 
 To uninstall, just remove the `pdi-git-plugin` folder.
 
-## Native SVN libraries (skip if Subversion is not used)
+## 2. Native SVN libraries (skip if Subversion is not used)
 
 ### Windows
 
