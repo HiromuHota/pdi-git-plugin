@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
 
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -41,24 +43,43 @@ public class CloneRepositoryDialog extends EditRepositoryDialog {
     super( parentShell, repo );
   }
 
-  @Override
-  protected Control createDialogArea( Composite parent ) {
-    Composite comp = (Composite) super.createDialogArea( parent );
+  public int open() {
+    createShell("Clone Repository");
+    Control lastControl = addRepositoryControls(shell, centerPct, margin);
 
-    GridLayout layout = (GridLayout) comp.getLayout();
-    layout.numColumns = 3;
-
-    Label urlLabel = new Label( comp, SWT.RIGHT );
+    // URL
+    //
+    Label urlLabel = new Label( shell, SWT.RIGHT );
     urlLabel.setText( "Source URL: " );
-    urlLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
-    urlText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    urlText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
+    FormData fdUrlLabel = new FormData();
+    fdUrlLabel.left = new FormAttachment( 0, 0 );
+    fdUrlLabel.right = new FormAttachment( centerPct, 0 );
+    fdUrlLabel.top = new FormAttachment( lastControl, margin );
+    urlLabel.setLayoutData( fdUrlLabel );
 
-    Label cloneAsLabel = new Label( comp, SWT.RIGHT );
+    urlText = new Text( shell, SWT.SINGLE | SWT.BORDER );
+    FormData fdUrlText = new FormData();
+    fdUrlText.left = new FormAttachment( centerPct, margin );
+    fdUrlText.right = new FormAttachment( 100, 0 );
+    fdUrlText.top = new FormAttachment( urlLabel, 0, SWT.CENTER);
+    urlText.setLayoutData( fdUrlText );
+
+    // Clone As...
+    //
+    Label cloneAsLabel = new Label( shell, SWT.RIGHT );
     cloneAsLabel.setText( "Clone As: " );
-    cloneAsLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
-    cloneAsText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    cloneAsText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
+    FormData fdCloneAsLabel = new FormData();
+    fdCloneAsLabel.left = new FormAttachment( 0, 0 );
+    fdCloneAsLabel.right = new FormAttachment( centerPct, 0 );
+    fdCloneAsLabel.top = new FormAttachment( lastControl, margin );
+    cloneAsLabel.setLayoutData( fdCloneAsLabel );
+
+    cloneAsText = new Text( shell, SWT.SINGLE | SWT.BORDER );
+    FormData fdCloneAsText = new FormData();
+    fdCloneAsText.left = new FormAttachment( centerPct, margin );
+    fdCloneAsText.right = new FormAttachment( 100, 0 );
+    fdCloneAsText.top = new FormAttachment( cloneAsLabel, 0, SWT.CENTER);
+    cloneAsText.setLayoutData( fdCloneAsText );
 
     urlText.addModifyListener( event -> {
       String url = ( (Text) event.widget ).getText();
@@ -67,26 +88,24 @@ public class CloneRepositoryDialog extends EditRepositoryDialog {
         uri = new URIish( url );
         cloneAsText.setText( uri.getHumanishName() );
       } catch ( URISyntaxException e ) {
-//        e.printStackTrace();
+        //        e.printStackTrace();
       }
     } );
-
-    return comp;
+    lastControl = cloneAsText;
+    
+    addButtonsManageShell(lastControl);
+    return returnValue;
   }
 
   @Override
-  protected void okPressed() {
+  public void ok() {
+    super.ok();
     url = urlText.getText();
     cloneAs = cloneAsText.getText();
-    super.okPressed();
-    repo.setDirectory( getDirectory() + File.separator + cloneAs );
+    repo.setDirectory( directory + File.separator + cloneAs );
   }
 
   public String getURL() {
     return url;
-  }
-
-  public String getCloneAs() {
-    return cloneAs;
   }
 }

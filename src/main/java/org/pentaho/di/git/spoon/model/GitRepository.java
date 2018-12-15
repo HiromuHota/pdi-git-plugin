@@ -16,6 +16,8 @@
 
 package org.pentaho.di.git.spoon.model;
 
+import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.variables.Variables;
 import org.pentaho.metastore.persist.MetaStoreAttribute;
 import org.pentaho.metastore.persist.MetaStoreElementType;
 
@@ -67,4 +69,12 @@ public class GitRepository {
   public void setType( String type ) {
     this.type = type;
   }
+
+
+  public String getActualDirectory() {
+    VariableSpace space = new Variables();
+    space.initializeVariablesFrom( null );
+    return space.environmentSubstitute( directory );
+  }
+
 }

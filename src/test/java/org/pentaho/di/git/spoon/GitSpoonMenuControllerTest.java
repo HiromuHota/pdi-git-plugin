@@ -69,15 +69,12 @@ public class GitSpoonMenuControllerTest extends RepositoryTestCase {
     when( cloneRepositoryDialog.open() ).thenReturn( Window.CANCEL );
 
     controller.cloneRepo();
-
-    verify( cloneRepositoryDialog, never() ).getDirectory();
   }
 
   @Test
   public void testCloneShouldSucceed() throws Exception {
     when( cloneRepositoryDialog.open() ).thenReturn( Window.OK );
     when( cloneRepositoryDialog.getURL() ).thenReturn( db.getDirectory().getPath() );
-    when( cloneRepositoryDialog.getDirectory() ).thenReturn( dstFolder.getRoot().getPath() );
     doReturn( true ).when( git ).cloneRepo( anyString(), anyString() );
 
     controller.cloneRepo();

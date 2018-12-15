@@ -17,84 +17,191 @@
 package org.pentaho.di.git.spoon.dialog;
 
 
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.IVCS;
+import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.ui.core.PropsUI;
+import org.pentaho.di.ui.core.gui.WindowProperty;
+import org.pentaho.di.ui.core.widget.TextVar;
+import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
-public class EditRepositoryDialog extends Dialog {
+public class EditRepositoryDialog {
+  private static Class<?> PKG = EditRepositoryDialog.class; // package locator
 
-  private Text nameText;
-  private Text descText;
-  private Text directoryText;
-  private String directory;
-  private Combo typeCombo;
+  protected Display display;
+  protected final Shell parent;
+  protected Shell shell;
+  protected PropsUI props;
+
+  protected Text nameText;
+  protected Text descText;
+  protected TextVar directoryText;
+  protected String directory;
+  protected Combo typeCombo;
 
   protected GitRepository repo;
 
+  protected VariableSpace space;
+  protected int centerPct;
+  protected int margin;
+
+  protected int returnValue;
+
   public EditRepositoryDialog( Shell parentShell, GitRepository repo ) {
-    super( parentShell );
+    this.parent = parentShell;
     this.repo = repo;
+    props = PropsUI.getInstance();
+
+    space = new Variables();
+    space.initializeVariablesFrom( null ); // system vars only
+    returnValue = Window.CANCEL;
   }
 
-  @Override
-  protected Control createDialogArea( Composite parent ) {
-    Composite comp = (Composite) super.createDialogArea( parent );
+  protected void createShell(String shellName) {
+    display = parent.getDisplay();
+    shell = new Shell( parent, SWT.DIALOG_TRIM | SWT.RESIZE );
+    shell.setText( shellName );
 
-    GridLayout layout = (GridLayout) comp.getLayout();
-    layout.numColumns = 3;
+    FormLayout shellLayout = new FormLayout();
+    shellLayout.marginWidth = Const.FORM_MARGIN;
+    shellLayout.marginHeight = Const.FORM_MARGIN;
+    shell.setLayout( shellLayout );
 
-    Label nameLabel = new Label( comp, SWT.RIGHT );
+    centerPct = props.getMiddlePct();
+    margin = Const.MARGIN + 5;
+  }
+
+  public int open() {
+    createShell("Repository settings");
+    Control lastControl = addRepositoryControls(shell, centerPct, margin);
+    addButtonsManageShell(lastControl);
+    return returnValue;
+  }
+
+  protected void addButtonsManageShell(Control lastControl) {
+    Button wOK = new Button( shell, SWT.PUSH );
+    wOK.setText( BaseMessages.getString( PKG, "System.Button.OK" ) );
+    wOK.addListener( SWT.Selection, e -> {
+      ok();
+      dispose();
+    } );
+    Button wCancel = new Button( shell, SWT.PUSH );
+    wCancel.setText( BaseMessages.getString( PKG, "System.Button.Cancel" ) );
+    wCancel.addListener( SWT.Selection, e -> dispose() );
+
+    BaseStepDialog.positionBottomRightButtons( shell, new Button[] { wOK, wCancel }, margin, lastControl );
+
+    BaseStepDialog.setSize( shell );
+
+    shell.open();
+    while ( !shell.isDisposed() ) {
+      if ( !display.readAndDispatch() ) {
+        display.sleep();
+      }
+    }
+  }
+
+  protected Control addRepositoryControls( Shell shell, int centerPct, int margin ) {
+    // The name line (label/text)
+    //
+    Label nameLabel = new Label( shell, SWT.RIGHT );
     nameLabel.setText( "Name: " );
-    nameLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
-    nameText = new Text( comp, SWT.SINGLE | SWT.BORDER );
+    FormData fdNameLabel = new FormData();
+    fdNameLabel.top = new FormAttachment( 0, 0 );
+    fdNameLabel.left = new FormAttachment( 0, 0 );
+    fdNameLabel.right = new FormAttachment( centerPct, 0 );
+    nameLabel.setLayoutData( fdNameLabel );
+    nameText = new Text( shell, SWT.SINGLE | SWT.BORDER );
     nameText.setText( Const.NVL( repo.getName(), "" ) );
-    nameText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
+    FormData fdNameText = new FormData();
+    fdNameText.top = new FormAttachment( nameLabel, 0, SWT.CENTER );
+    fdNameText.left = new FormAttachment( centerPct, margin );
+    fdNameText.right = new FormAttachment( 100, 0 );
+    nameText.setLayoutData( fdNameText );
+    Control lastControl = nameText;
 
-    Label descLabel = new Label( comp, SWT.RIGHT );
+    // The name line (label/text)
+    //
+    Label descLabel = new Label( shell, SWT.RIGHT );
     descLabel.setText( "Description: " );
-    descLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
-    descText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    descText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
+    FormData fdDescLabel = new FormData();
+    fdDescLabel.top = new FormAttachment( lastControl, margin );
+    fdDescLabel.left = new FormAttachment( 0, 0 );
+    fdDescLabel.right = new FormAttachment( centerPct, 0 );
+    descLabel.setLayoutData( fdDescLabel );
+    descText = new Text( shell, SWT.SINGLE | SWT.BORDER );
     descText.setText( Const.NVL( repo.getDescription(), "" ) );
+    FormData fdDescText = new FormData();
+    fdDescText.top = new FormAttachment( descLabel, 0, SWT.CENTER );
+    fdDescText.left = new FormAttachment( centerPct, margin );
+    fdDescText.right = new FormAttachment( 100, 0 );
+    descText.setLayoutData( fdDescText );
+    lastControl = descText;
 
-    Label directoryLabel = new Label( comp, SWT.RIGHT );
+    // The directory line (label/text)
+    //
+    // Label
+    Label directoryLabel = new Label( shell, SWT.RIGHT );
     directoryLabel.setText( "Directory: " );
-    directoryLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
-    directoryText = new Text( comp, SWT.SINGLE | SWT.BORDER );
-    directoryText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false ) );
-    directoryText.setText( Const.NVL( repo.getDirectory(), "" ) );
-
-    Button directoryButton = new Button( comp, SWT.PUSH );
+    FormData fdDirectoryLabel = new FormData();
+    fdDirectoryLabel.top = new FormAttachment( lastControl, margin );
+    fdDirectoryLabel.left = new FormAttachment( 0, 0 );
+    fdDirectoryLabel.right = new FormAttachment( centerPct, 0 );
+    directoryLabel.setLayoutData( fdDirectoryLabel );
+    // Button
+    Button directoryButton = new Button( shell, SWT.PUSH );
     directoryButton.setText( "Browse" );
     directoryButton.addSelectionListener( new SelectionAdapter() {
       @Override
       public void widgetSelected( SelectionEvent e ) {
-        DirectoryDialog dialog = new DirectoryDialog( getShell(), SWT.OPEN );
+        DirectoryDialog dialog = new DirectoryDialog( shell, SWT.OPEN );
         if ( dialog.open() != null ) {
           directoryText.setText( dialog.getFilterPath() );
         }
       }
     } );
+    FormData fdDirectoryButton = new FormData();
+    fdDirectoryButton.top = new FormAttachment( directoryLabel, 0, SWT.CENTER );
+    fdDirectoryButton.right = new FormAttachment( 100, 0 );
+    directoryButton.setLayoutData( fdDirectoryButton );
+    // Text
+    directoryText = new TextVar( space, shell, SWT.SINGLE | SWT.BORDER );
+    directoryText.setText( Const.NVL( repo.getDirectory(), "" ) );
+    FormData fdDirectoryText = new FormData();
+    fdDirectoryText.top = new FormAttachment( directoryLabel, 0, SWT.CENTER );
+    fdDirectoryText.left = new FormAttachment( centerPct, margin );
+    fdDirectoryText.right = new FormAttachment( directoryButton, -margin );
+    directoryText.setLayoutData( fdDirectoryText );
+    lastControl = directoryButton;
 
-    Label typeLabel = new Label( comp, SWT.RIGHT );
+    // The type combo (label/combo)
+    //
+    Label typeLabel = new Label( shell, SWT.RIGHT );
     typeLabel.setText( "Type: " );
-    typeLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
-    typeCombo = new Combo( comp, SWT.READ_ONLY );
+    FormData fdTypeLabel = new FormData();
+    fdTypeLabel.top = new FormAttachment( lastControl, margin );
+    fdTypeLabel.left = new FormAttachment( 0, 0 );
+    fdTypeLabel.right = new FormAttachment( centerPct, 0 );
+    typeLabel.setLayoutData( fdTypeLabel );
+    typeCombo = new Combo( shell, SWT.READ_ONLY );
     typeCombo.setItems( IVCS.GIT, IVCS.SVN );
     if ( repo.getType() != null ) {
       if ( repo.getType().equals( IVCS.GIT ) ) {
@@ -103,27 +210,27 @@ public class EditRepositoryDialog extends Dialog {
         typeCombo.select( 1 );
       }
     }
-    typeCombo.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false, 2, 1 ) );
-    return comp;
+    FormData fdTypeCombo = new FormData();
+    fdTypeCombo.top = new FormAttachment( typeLabel, 0, SWT.CENTER );
+    fdTypeCombo.left = new FormAttachment( centerPct, margin );
+    fdTypeCombo.right = new FormAttachment( 100, 0 );
+    typeCombo.setLayoutData( fdTypeCombo );
+    lastControl = typeCombo;
+
+    return lastControl;
   }
 
-  @Override
-  protected void okPressed() {
+  public void ok() {
     repo.setName( nameText.getText() );
     repo.setDescription( descText.getText() );
     repo.setDirectory( directoryText.getText() );
     repo.setType( typeCombo.getText() );
     directory = directoryText.getText();
-    super.okPressed();
+    returnValue = Window.OK;
   }
 
-  @Override
-  public Point getInitialSize() {
-    Point point = super.getInitialSize();
-    return new Point( 500, point.y );
-  }
-
-  public String getDirectory() {
-    return directory;
+  public void dispose() {
+    props.setScreen( new WindowProperty( shell ) );
+    shell.dispose();
   }
 }

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import javassist.compiler.ast.Variable;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -45,6 +46,8 @@ import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.EngineMetaInterface;
 import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.SVN;
@@ -231,7 +234,11 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void openGit( GitRepository repo ) {
-    String baseDirectory = repo.getDirectory();
+    VariableSpace space = new Variables(  );
+    space.initializeVariablesFrom( null );
+
+    String baseDirectory = space.environmentSubstitute( repo.getDirectory() );
+
     try {
       if ( repo.getType() == null || repo.getType().equals( IVCS.GIT ) ) {
         vcs = new UIGit();
