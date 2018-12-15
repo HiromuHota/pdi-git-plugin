@@ -151,7 +151,7 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
         return;
       }
       String url = dialog.getURL();
-      String directory = repo.getDirectory();
+      String directory = repo.getActualDirectory();
       IVCS vcs = getVCS( repo );
       vcs.setShell( getShell() );
       if ( vcs.cloneRepo( directory, url ) ) {
