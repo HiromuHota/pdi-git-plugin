@@ -16,15 +16,7 @@
 
 package org.pentaho.di.git.spoon;
 
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import javassist.compiler.ast.Variable;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -50,10 +42,10 @@ import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.git.spoon.dialog.DeleteBranchDialog;
 import org.pentaho.di.git.spoon.model.GitRepository;
+import org.pentaho.di.git.spoon.model.IVCS;
 import org.pentaho.di.git.spoon.model.SVN;
 import org.pentaho.di.git.spoon.model.UIFile;
 import org.pentaho.di.git.spoon.model.UIGit;
-import org.pentaho.di.git.spoon.model.IVCS;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
@@ -84,7 +76,13 @@ import org.pentaho.ui.xul.swt.tags.SwtTreeItem;
 import org.pentaho.ui.xul.util.XulDialogCallback.Status;
 import org.pentaho.ui.xul.util.XulDialogLambdaCallback;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class GitController extends AbstractXulEventHandler {
 

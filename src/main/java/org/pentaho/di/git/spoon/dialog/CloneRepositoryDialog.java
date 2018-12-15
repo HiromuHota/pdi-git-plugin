@@ -16,21 +16,18 @@
 
 package org.pentaho.di.git.spoon.dialog;
 
-import java.io.File;
-import java.net.URISyntaxException;
-
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.git.spoon.model.GitRepository;
+
+import java.io.File;
+import java.net.URISyntaxException;
 
 public class CloneRepositoryDialog extends EditRepositoryDialog {
 

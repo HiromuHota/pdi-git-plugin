@@ -16,32 +16,15 @@
 
 package org.pentaho.di.git.spoon.model;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.DiffCommand;
-import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.MergeResult.MergeStatus;
-import org.eclipse.jgit.api.PullCommand;
-import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
@@ -50,9 +33,8 @@ import org.eclipse.jgit.api.RevertCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.RenameDetector;
 import org.eclipse.jgit.dircache.DirCacheIterator;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
@@ -74,13 +56,11 @@ import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.UserConfig;
 import org.eclipse.jgit.merge.MergeStrategy;
-import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.HttpTransport;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
@@ -108,7 +88,19 @@ import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevision;
 import org.pentaho.di.ui.repository.pur.repositoryexplorer.model.UIRepositoryObjectRevisions;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UIGit extends VCS implements IVCS {
 
