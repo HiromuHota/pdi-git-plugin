@@ -212,4 +212,14 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
   public void openRepository( String repositoryName ) throws MetaStoreException {
     gitSpoonMenuController.openRepo( repositoryName );
   }
+
+  /**
+   * This method is made as convenience for other plugins so that they see which GitSpoon repositories are defined.
+   *
+   * @return The list of git repository names
+   * @throws MetaStoreException
+   */
+  public List<String> getRepoNames() throws MetaStoreException {
+    return gitSpoonMenuController.getRepoNames();
+  }
 }
