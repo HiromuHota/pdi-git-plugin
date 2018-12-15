@@ -34,6 +34,7 @@ import org.pentaho.di.ui.spoon.SpoonPerspectiveImageProvider;
 import org.pentaho.di.ui.spoon.SpoonPerspectiveListener;
 import org.pentaho.di.ui.spoon.XulSpoonResourceBundle;
 import org.pentaho.di.ui.xul.KettleXulLoader;
+import org.pentaho.metastore.api.exceptions.MetaStoreException;
 import org.pentaho.ui.xul.XulDomContainer;
 import org.pentaho.ui.xul.XulException;
 import org.pentaho.ui.xul.XulOverlay;
@@ -200,5 +201,15 @@ public class GitPerspective implements SpoonPerspectiveImageProvider {
 
   public GitController getController() {
     return this.controller;
+  }
+
+  /**
+   * This method is made as convenience for other plugins so that they can directly open a repository
+   * by simply getting a hold of the main plugin class.
+   *
+   * @param repositoryName
+   */
+  public void openRepository(String repositoryName) throws MetaStoreException {
+    gitSpoonMenuController.openRepo( repositoryName );
   }
 }

@@ -31,6 +31,7 @@ import org.pentaho.di.git.spoon.model.SVN;
 import org.pentaho.di.git.spoon.model.UIGit;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
+import org.pentaho.di.ui.core.dialog.ErrorDialog;
 import org.pentaho.di.ui.spoon.ISpoonMenuController;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.metastore.api.IMetaStore;
@@ -58,8 +59,8 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   public void openRepo() {
-    MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
 
+    MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
     try {
       List<String> names = repoFactory.getElementNames();
       Collections.sort( names );
@@ -69,11 +70,28 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
       if ( name == null ) {
         return;
       }
-      GitRepository repo = repoFactory.loadElement( name );
-      gitController.openGit( repo );
+
+      openRepo( repoFactory, name );
     } catch ( Exception e ) {
-      e.printStackTrace();
+      new ErrorDialog( Spoon.getInstance().getShell(), "Error", "Error opening Git Reposisory", e );
     }
+  }
+
+  private void openRepo( MetaStoreFactory<GitRepository> repoFactory, String repositoryName ) throws MetaStoreException {
+    GitRepository repo = repoFactory.loadElement( repositoryName );
+    gitController.openGit( repo );
+  }
+
+  /**
+   * Open a repository with a given name.
+   * Convenience method so we can call this method from other places/plugins.
+   *
+   * @param repositoryName The name of the repository to open
+   * @throws MetaStoreException
+   */
+  public void openRepo( String repositoryName ) throws MetaStoreException {
+    MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
+    openRepo(repoFactory, repositoryName);
   }
 
   public Boolean isRepoEmpty() throws MetaStoreException {
