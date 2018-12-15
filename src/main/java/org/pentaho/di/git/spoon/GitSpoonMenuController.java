@@ -94,6 +94,16 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
     openRepo(repoFactory, repositoryName);
   }
 
+  /**
+   * Allow other plugins to see which Git repositories are defined.
+   * @return A list of Git Reposisoty names
+   * @throws MetaStoreException
+   */
+  public List<String> getRepoNames() throws MetaStoreException {
+    MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
+    return repoFactory.getElementNames();
+  }
+
   public Boolean isRepoEmpty() throws MetaStoreException {
     return getRepoFactory().getElementNames().isEmpty();
   }
