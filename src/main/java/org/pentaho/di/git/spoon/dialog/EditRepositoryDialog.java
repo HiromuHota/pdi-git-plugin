@@ -35,6 +35,8 @@ import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.IVCS;
+import org.pentaho.di.ui.core.PropsUI;
+import org.pentaho.di.ui.core.gui.WindowProperty;
 
 public class EditRepositoryDialog extends Dialog {
 
@@ -44,11 +46,31 @@ public class EditRepositoryDialog extends Dialog {
   private String directory;
   private Combo typeCombo;
 
+  protected PropsUI props;
   protected GitRepository repo;
+  protected static String APPLICATION_NAME;
 
   public EditRepositoryDialog( Shell parentShell, GitRepository repo ) {
     super( parentShell );
     this.repo = repo;
+    props = PropsUI.getInstance();
+    APPLICATION_NAME = "Repository settings";
+  }
+
+  @Override
+  public int open() {
+    // Create shell and contents
+    setShellStyle( SWT.DIALOG_TRIM | SWT.RESIZE );
+    create();
+
+    // Post-configure shell like the title and size
+    Shell shell = getShell();
+    shell.setText( APPLICATION_NAME );
+    WindowProperty winprop = props.getScreen( shell.getText() );
+    if ( winprop != null ) {
+      winprop.setShell( shell );
+    }
+    return super.open();
   }
 
   @Override
@@ -125,5 +147,11 @@ public class EditRepositoryDialog extends Dialog {
 
   public String getDirectory() {
     return directory;
+  }
+
+  @Override
+  public boolean close() {
+    props.setScreen( new WindowProperty( getShell() ) );
+    return super.close();
   }
 }
