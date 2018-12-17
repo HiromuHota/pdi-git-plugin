@@ -39,6 +39,7 @@ public class CloneRepositoryDialog extends EditRepositoryDialog {
 
   public CloneRepositoryDialog( Shell parentShell, GitRepository repo ) {
     super( parentShell, repo );
+    APPLICATION_NAME = "Clone Repository";
   }
 
   @Override
