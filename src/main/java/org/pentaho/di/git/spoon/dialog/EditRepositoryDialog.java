@@ -54,7 +54,7 @@ public class EditRepositoryDialog extends Dialog {
     super( parentShell );
     this.repo = repo;
     props = PropsUI.getInstance();
-    APPLICATION_NAME = "Repository settings";
+    APPLICATION_NAME = "Edit Repository";
   }
 
   @Override
