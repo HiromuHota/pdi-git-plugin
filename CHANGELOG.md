@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.0.2 - 2018-12-19
+### Changed
+- [Git] Allow pull,merge,rollback even when untracked files exist but no uncommited change
+
+### Fixed
+- [Git][#20] Use DiffFormatter, which does not detect renames.
+- [Common] Rephrase "Dirty working-tree" message and internationalized it
+- [Common][#24] Make the repository settings dialog resizable and remember the last position/size (thanks @mattcasters)
+
 ## 1.0.1 - 2018-04-04
 ### Fixed
 - [Git] Prevent from making a commit with no files
