@@ -33,21 +33,25 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.git.spoon.model.GitRepository;
 import org.pentaho.di.git.spoon.model.IVCS;
 import org.pentaho.di.ui.core.PropsUI;
 import org.pentaho.di.ui.core.gui.WindowProperty;
+import org.pentaho.di.ui.core.widget.TextVar;
 
 public class EditRepositoryDialog extends Dialog {
 
   private Text nameText;
   private Text descText;
-  private Text directoryText;
+  private TextVar directoryText;
   private String directory;
   private Combo typeCombo;
 
   protected PropsUI props;
   protected GitRepository repo;
+  protected VariableSpace space;
   protected static String APPLICATION_NAME;
 
   public EditRepositoryDialog( Shell parentShell, GitRepository repo ) {
@@ -55,6 +59,9 @@ public class EditRepositoryDialog extends Dialog {
     this.repo = repo;
     props = PropsUI.getInstance();
     APPLICATION_NAME = "Edit Repository";
+
+    space = new Variables();
+    space.initializeVariablesFrom( null ); // system vars only
   }
 
   @Override
@@ -97,7 +104,7 @@ public class EditRepositoryDialog extends Dialog {
     Label directoryLabel = new Label( comp, SWT.RIGHT );
     directoryLabel.setText( "Directory: " );
     directoryLabel.setLayoutData( new GridData( GridData.END, GridData.CENTER, false, false ) );
-    directoryText = new Text( comp, SWT.SINGLE | SWT.BORDER );
+    directoryText = new TextVar( space, comp, SWT.SINGLE | SWT.BORDER );
     directoryText.setLayoutData( new GridData( GridData.FILL, GridData.CENTER, true, false ) );
     directoryText.setText( Const.NVL( repo.getDirectory(), "" ) );
 

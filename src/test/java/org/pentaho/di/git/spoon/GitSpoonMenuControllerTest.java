@@ -77,7 +77,8 @@ public class GitSpoonMenuControllerTest extends RepositoryTestCase {
   public void testCloneShouldSucceed() throws Exception {
     when( cloneRepositoryDialog.open() ).thenReturn( Window.OK );
     when( cloneRepositoryDialog.getURL() ).thenReturn( db.getDirectory().getPath() );
-    when( cloneRepositoryDialog.getDirectory() ).thenReturn( dstFolder.getRoot().getPath() );
+    when( controller.getGitRepository() ).thenReturn( repo );
+    when( repo.getPhysicalDirectory() ).thenReturn( dstFolder.getRoot().getPath() );
     doReturn( true ).when( git ).cloneRepo( anyString(), anyString() );
 
     controller.cloneRepo();

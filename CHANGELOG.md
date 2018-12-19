@@ -1,5 +1,11 @@
 # Change Log
 
+## Unreleased
+### Added
+- [Common][#26] Allow other plugins to open a repository by name
+- [Common][#27] Allow other plugins to get a list of defined git repositories
+- [Common][#23] Allow variables in directory (currently system properties only)
+
 ## 1.0.2 - 2018-12-19
 ### Changed
 - [Git] Allow pull,merge,rollback even when untracked files exist but no uncommited change

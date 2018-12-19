@@ -167,16 +167,15 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
   }
 
   public void cloneRepo() {
-    GitRepository repo = new GitRepository();
+    GitRepository repo = getGitRepository();
     CloneRepositoryDialog dialog = getCloneRepositoryDialog( repo );
     if ( dialog.open() == Window.OK ) {
-      if ( !new File( dialog.getDirectory() ).exists() ) {
-        showMessageBox( "Error", dialog.getDirectory() + " does not exist" );
+      if ( !new File( repo.getPhysicalDirectory() ).exists() ) {
+        showMessageBox( "Error", repo.getPhysicalDirectory() + " does not exist" );
         return;
       }
       String url = dialog.getURL();
-      String directory = null;
-      directory = dialog.getDirectory() + File.separator + dialog.getCloneAs();
+      String directory = repo.getPhysicalDirectory() + File.separator + dialog.getCloneAs();
       IVCS vcs = getVCS( repo );
       vcs.setShell( getShell() );
       if ( vcs.cloneRepo( directory, url ) ) {
@@ -235,5 +234,10 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
     } else {
       return new SVN();
     }
+  }
+
+  @VisibleForTesting
+  GitRepository getGitRepository() {
+    return new GitRepository();
   }
 }

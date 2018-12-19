@@ -231,7 +231,8 @@ public class GitController extends AbstractXulEventHandler {
   }
 
   public void openGit( GitRepository repo ) {
-    String baseDirectory = repo.getDirectory();
+    String baseDirectory = repo.getPhysicalDirectory();
+
     try {
       if ( repo.getType() == null || repo.getType().equals( IVCS.GIT ) ) {
         vcs = new UIGit();
@@ -499,7 +500,7 @@ public class GitController extends AbstractXulEventHandler {
 
   public void setPath( GitRepository repo ) {
     this.path = repo.getName();
-    ( (Control) document.getElementById( "path" ).getManagedObject() ).setToolTipText( repo.getDirectory() );
+    ( (Control) document.getElementById( "path" ).getManagedObject() ).setToolTipText( repo.getPhysicalDirectory() );
     firePropertyChange( "path", null, path );
     ( (SwtElement) document.getElementById( "path" ).getParent() ).layout();
   }

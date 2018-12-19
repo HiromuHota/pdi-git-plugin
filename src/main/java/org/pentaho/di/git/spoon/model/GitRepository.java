@@ -16,6 +16,9 @@
 
 package org.pentaho.di.git.spoon.model;
 
+import com.google.common.annotations.VisibleForTesting;
+import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.variables.Variables;
 import org.pentaho.metastore.persist.MetaStoreAttribute;
 import org.pentaho.metastore.persist.MetaStoreElementType;
 
@@ -49,6 +52,10 @@ public class GitRepository {
   @MetaStoreAttribute( key = "directory" )
   private String directory;
 
+  /**
+   * Get a directory path that can contain variables.
+   * @return directory path
+   */
   public String getDirectory() {
     return directory;
   }
@@ -66,5 +73,22 @@ public class GitRepository {
 
   public void setType( String type ) {
     this.type = type;
+  }
+
+  /**
+   * Get a directory path in the current environment.
+   * Unlike {@link #getDirectory()}, all variables are resolved.
+   * @return directory path
+   */
+  public String getPhysicalDirectory() {
+    VariableSpace space = getVariables();
+    return space.environmentSubstitute( directory );
+  }
+
+  @VisibleForTesting
+  VariableSpace getVariables() {
+    VariableSpace space = new Variables();
+    space.initializeVariablesFrom( null );
+    return space;
   }
 }

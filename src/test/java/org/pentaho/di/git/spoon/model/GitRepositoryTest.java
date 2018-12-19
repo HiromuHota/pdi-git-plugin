@@ -16,17 +16,24 @@
 
 package org.pentaho.di.git.spoon.model;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.variables.Variables;
 import org.pentaho.metastore.api.IMetaStore;
 import org.pentaho.metastore.api.exceptions.MetaStoreException;
 import org.pentaho.metastore.persist.MetaStoreFactory;
 import org.pentaho.metastore.stores.memory.MemoryMetaStore;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
+@RunWith( MockitoJUnitRunner.class )
 public class GitRepositoryTest {
 
   public static final String NAMESPACE = "testnamespace";
@@ -35,6 +42,8 @@ public class GitRepositoryTest {
   public static final String DIRECTORY = "/tmp/test";
 
   protected IMetaStore metaStore;
+
+  @Spy
   protected GitRepository repo;
 
   @Before
@@ -42,7 +51,6 @@ public class GitRepositoryTest {
     KettleClientEnvironment.init();
     metaStore = new MemoryMetaStore();
 
-    repo = new GitRepository();
     repo.setName( NAME );
     repo.setDescription( DESCRIPTION );
     repo.setDirectory( DIRECTORY );
@@ -57,5 +65,16 @@ public class GitRepositoryTest {
     assertEquals( NAME, verify.getName() );
     assertEquals( DESCRIPTION, verify.getDescription() );
     assertEquals( DIRECTORY, verify.getDirectory() );
+  }
+
+  @Test
+  public void testVariableSubstitution() {
+    VariableSpace space = new Variables();
+    space.initializeVariablesFrom( null );
+    space.setVariable( "KETTLE_HOME", DIRECTORY );
+    when( repo.getVariables() ).thenReturn( space );
+    repo.setDirectory( "${KETTLE_HOME}" );
+
+    assertEquals( DIRECTORY, repo.getPhysicalDirectory() );
   }
 }
