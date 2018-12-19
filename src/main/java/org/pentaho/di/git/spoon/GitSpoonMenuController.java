@@ -115,9 +115,9 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
 
   public void addRepo() throws MetaStoreException, XulException {
     MetaStoreFactory<GitRepository> repoFactory = getRepoFactory();
-    GitRepository repo = new GitRepository();
-    EditRepositoryDialog dialog = new EditRepositoryDialog( getShell(), repo );
+    EditRepositoryDialog dialog = new EditRepositoryDialog( getShell(), null );
     if ( dialog.open() == Window.OK ) {
+      GitRepository repo = dialog.getGitRepository();
       repoFactory.saveElement( repo );
 
       XulConfirmBox confirmBox = (XulConfirmBox) document.createElement( "confirmbox" );
@@ -162,14 +162,14 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
     GitRepository repo = repoFactory.loadElement( name );
     EditRepositoryDialog dialog = new EditRepositoryDialog( getShell(), repo );
     if ( dialog.open() == Window.OK ) {
-      repoFactory.saveElement( repo );
+      repoFactory.saveElement( dialog.getGitRepository() );
     }
   }
 
   public void cloneRepo() {
-    GitRepository repo = getGitRepository();
-    CloneRepositoryDialog dialog = getCloneRepositoryDialog( repo );
+    CloneRepositoryDialog dialog = getCloneRepositoryDialog( null );
     if ( dialog.open() == Window.OK ) {
+      GitRepository repo = dialog.getGitRepository();
       if ( !new File( repo.getPhysicalDirectory() ).exists() ) {
         showMessageBox( "Error", repo.getPhysicalDirectory() + " does not exist" );
         return;
@@ -234,10 +234,5 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
     } else {
       return new SVN();
     }
-  }
-
-  @VisibleForTesting
-  GitRepository getGitRepository() {
-    return new GitRepository();
   }
 }

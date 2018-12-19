@@ -54,9 +54,18 @@ public class EditRepositoryDialog extends Dialog {
   protected VariableSpace space;
   protected static String APPLICATION_NAME;
 
+  /**
+   * A dialog to edit repository settings.
+   * @param parentShell
+   * @param repo a repository to edit. Can be null to create a new one.
+   */
   public EditRepositoryDialog( Shell parentShell, GitRepository repo ) {
     super( parentShell );
-    this.repo = repo;
+    if ( repo != null ) {
+      this.repo = repo;
+    } else {
+      this.repo = new GitRepository();
+    }
     props = PropsUI.getInstance();
     APPLICATION_NAME = "Edit Repository";
 
@@ -155,6 +164,8 @@ public class EditRepositoryDialog extends Dialog {
   public String getDirectory() {
     return directory;
   }
+
+  public GitRepository getGitRepository() { return repo; }
 
   @Override
   public boolean close() {
