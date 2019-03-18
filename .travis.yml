@@ -6,7 +6,5 @@ cache:
   - "$HOME/.m2"
 before_install:
   - sudo apt-get install libsvn-java
-install: true
-script:
+before_script:
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/jni
-  - mvn clean install
