@@ -1,0 +1,12 @@
+language: java
+dist: xenial
+jdk: oraclejdk8
+cache:
+  directories:
+  - "$HOME/.m2"
+before_install:
+  - sudo apt-get install libsvn-java
+install: true
+script:
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/jni
+  - mvn clean install
