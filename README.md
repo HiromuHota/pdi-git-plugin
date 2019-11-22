@@ -249,6 +249,15 @@ Proxy Authentication is currently not supported.
 
 Please create a branch called *develop*, then you will be out of the HEAD detached state.
 
+### Auth fail when using publickey authentication
+
+When an error happens during clone/pull/push, please check the followings:
+
+- A private key is placed at `~/.ssh/` and the file name is either `identity`, `id_rsa`, or `id_dsa`.
+- The private key was created without a passphrase.
+- The corresponding public key is registered at the remote repository.
+- As of 0.1.54, JSch only supports DSA, RSA, and ECDSA-256. ECDSA-384 and ECDSA-521 do not work (fixed in 0.1.55) and Ed25519 is not supported.
+
 # How to compile
 
 ```
