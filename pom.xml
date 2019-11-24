@@ -107,6 +107,11 @@
       <version>1.64</version>
     </dependency>
     <dependency>
+      <groupId>net.i2p.crypto</groupId>
+      <artifactId>eddsa</artifactId>
+      <version>0.3.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.tigris.svnclientadapter</groupId>
       <artifactId>adapter-base</artifactId>
       <version>1.9.4-2</version>
