@@ -129,7 +129,7 @@ public class UIGit extends VCS implements IVCS {
     /**
      * Use Apache MINA sshd instead of JSch.
      */
-    SshdSessionFactory factory = new SshdSessionFactory(new JGitKeyCache(), new DefaultProxyDataFactory());
+    SshdSessionFactory factory = new SshdSessionFactory();
     Runtime.getRuntime().addShutdownHook(new Thread(() -> factory.close()));
     SshSessionFactory.setInstance(factory);
   }
