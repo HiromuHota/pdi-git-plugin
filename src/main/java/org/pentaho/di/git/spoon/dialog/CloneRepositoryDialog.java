@@ -80,7 +80,6 @@ public class CloneRepositoryDialog extends EditRepositoryDialog {
     url = urlText.getText();
     cloneAs = cloneAsText.getText();
     super.okPressed();
-    repo.setDirectory( getDirectory() + File.separator + cloneAs );
   }
 
   public String getURL() {

@@ -170,16 +170,20 @@ public class GitSpoonMenuController extends AbstractXulEventHandler implements I
     CloneRepositoryDialog dialog = getCloneRepositoryDialog( null );
     if ( dialog.open() == Window.OK ) {
       GitRepository repo = dialog.getGitRepository();
+      // Check if the parent directory exists
       if ( !new File( repo.getPhysicalDirectory() ).exists() ) {
         showMessageBox( "Error", repo.getPhysicalDirectory() + " does not exist" );
         return;
       }
       String url = dialog.getURL();
+      // This is the directory to clone to.
       String directory = repo.getPhysicalDirectory() + File.separator + dialog.getCloneAs();
       IVCS vcs = getVCS( repo );
       vcs.setShell( getShell() );
       if ( vcs.cloneRepo( directory, url ) ) {
         showMessageBox( "Success", "Success" );
+        // Update the repo's directory
+        repo.setDirectory( directory );
         saveRepository( repo );
         gitController.openGit( repo );
       }
