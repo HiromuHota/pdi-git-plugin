@@ -1,10 +1,14 @@
 # Change Log
 
-## Unreleased
+## 1.1.0 - 2019-11-27
 ### Added
 - [Common][#26] Allow other plugins to open a repository by name
 - [Common][#27] Allow other plugins to get a list of defined git repositories
 - [Common][#23] Allow variables in directory (currently system properties only)
+
+### Security
+- [Git] Update JGit to 4.11.9
+- [Git] Update Apache HTTPClient
 
 ## 1.0.2 - 2018-12-19
 ### Changed
