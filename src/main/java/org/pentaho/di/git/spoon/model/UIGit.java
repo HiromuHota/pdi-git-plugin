@@ -86,9 +86,13 @@ import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
+import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.http.apache.HttpClientConnectionFactory;
+import org.eclipse.jgit.transport.sshd.DefaultProxyDataFactory;
+import org.eclipse.jgit.transport.sshd.JGitKeyCache;
+import org.eclipse.jgit.transport.sshd.SshdSessionFactory;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.EmptyTreeIterator;
@@ -121,6 +125,13 @@ public class UIGit extends VCS implements IVCS {
      * See here https://bugs.eclipse.org/bugs/show_bug.cgi?id=296201 for more details.
      */
     HttpTransport.setConnectionFactory( new HttpClientConnectionFactory() );
+
+    /**
+     * Use Apache MINA sshd instead of JSch.
+     */
+    SshdSessionFactory factory = new SshdSessionFactory();
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> factory.close()));
+    SshSessionFactory.setInstance(factory);
   }
 
   private Git git;

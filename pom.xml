@@ -87,6 +87,21 @@
       <version>${dependency.jgit.revision}</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.jgit</groupId>
+      <artifactId>org.eclipse.jgit.ssh.apache</artifactId>
+      <version>${dependency.jgit.revision}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sshd</groupId>
+      <artifactId>sshd-core</artifactId>
+      <version>2.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sshd</groupId>
+      <artifactId>sshd-common</artifactId>
+      <version>2.2.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.tigris.svnclientadapter</groupId>
       <artifactId>adapter-base</artifactId>
       <version>1.9.4-2</version>
@@ -139,7 +154,7 @@
   <properties>
     <dependency.pentaho-metadata.revision>7.1.0.0-12</dependency.pentaho-metadata.revision>
     <dependency.kettle.revision>7.1.0.0-12</dependency.kettle.revision>
-    <dependency.jgit.revision>4.11.9.201909030838-r</dependency.jgit.revision>
+    <dependency.jgit.revision>5.4.3.201909031940-r</dependency.jgit.revision>
   </properties>
   <repositories>
     <repository>
