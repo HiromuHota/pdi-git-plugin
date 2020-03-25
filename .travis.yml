@@ -8,3 +8,23 @@ before_install:
   - sudo apt-get install libsvn-java
 before_script:
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/jni
+before_deploy:
+  - git config --local user.name "Hiromu Hota"
+  - git config --local user.email "hiromu.hota@hal.hitachi.com"
+  - export TRAVIS_TAG=nightly
+  - git tag $TRAVIS_TAG --force
+  - git push -f https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git $TRAVIS_TAG
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file_glob: true
+  file: target/pdi-git-plugin-*-jar-with-dependencies.zip
+  skip_cleanup: true
+  on:
+    branch: deploy
+  name: nightly
+  body: Auto-build of $TRAVIS_BRANCH ($TRAVIS_COMMIT) by Travis CI on $(date +'%F %T %Z').
+  prerelease: true
+  overwrite: true
+  tag_name: $TRAVIS_TAG
+  target_commitish: $TRAVIS_COMMIT
