@@ -139,7 +139,7 @@
   <properties>
     <dependency.pentaho-metadata.revision>7.1.0.0-12</dependency.pentaho-metadata.revision>
     <dependency.kettle.revision>7.1.0.0-12</dependency.kettle.revision>
-    <dependency.jgit.revision>4.11.9.201909030838-r</dependency.jgit.revision>
+    <dependency.jgit.revision>5.1.13.202002110435-r</dependency.jgit.revision>
   </properties>
   <repositories>
     <repository>

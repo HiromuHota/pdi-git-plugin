@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+### Security
+- [Git] Update JGit to 5.1.13
+- [Git] Update Apache HTTPClient
+
 ## 1.1.0 - 2019-11-27
 ### Added
 - [Common][#26] Allow other plugins to open a repository by name
