@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.1.1 - 2020-04-06
 ### Security
 - [Git] Update JGit to 5.1.13
 - [Git] Update Apache HTTPClient
